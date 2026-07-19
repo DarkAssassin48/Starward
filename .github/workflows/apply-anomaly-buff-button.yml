@@ -1,0 +1,163 @@
+name: Apply Anomaly Arbitration Buff Button
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/apply-anomaly-buff-button.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply-and-verify:
+    runs-on: windows-2025-vs2026
+    env:
+      Configuration: Release
+      Platform: x64
+
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v5
+        with:
+          ref: feature/auto-game-record-refresh
+          fetch-depth: 0
+          show-progress: false
+
+      - name: Update Anomaly Arbitration card directly
+        shell: pwsh
+        run: |
+          $path = 'src/Starward/Features/GameRecord/StarRail/ChallengePeakPage.xaml'
+          $content = [IO.File]::ReadAllText($path)
+
+          $heightOld = '<Grid Height="192"'
+          $heightNew = '<Grid MinHeight="150"'
+          if (($content.Split($heightOld).Count - 1) -ne 1) {
+            throw 'Expected exactly one Anomaly Arbitration card height declaration.'
+          }
+          $content = $content.Replace($heightOld, $heightNew)
+
+          $oldBuff = @'
+                    <Border Grid.RowSpan="2"
+                            Grid.Column="1"
+                            Margin="8,8,12,8"
+                            Padding="10,8"
+                            VerticalAlignment="Center"
+                            Background="Transparent"
+                            Visibility="{x:Bind CurrentChallengePeakRecord.BossRecord, Converter={StaticResource ObjectToVisibilityConverter}}">
+                        <StackPanel VerticalAlignment="Center" Spacing="6">
+                            <!--  Buff  -->
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <sc:CachedImage Width="30"
+                                                Height="30"
+                                                VerticalAlignment="Center"
+                                                Source="{x:Bind CurrentChallengePeakRecord.BossRecord.Buff.Icon}" />
+                                <TextBlock MinWidth="0"
+                                           VerticalAlignment="Center"
+                                           FontWeight="SemiBold"
+                                           MaxLines="2"
+                                           Text="{x:Bind CurrentChallengePeakRecord.BossRecord.Buff.NameMi18n}"
+                                           TextTrimming="CharacterEllipsis"
+                                           TextWrapping="WrapWholeWords" />
+                            </StackPanel>
+                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       MaxLines="4"
+                                        Text="{x:Bind CurrentChallengePeakRecord.BossRecord.Buff.DescMi18n}"
+                                       TextTrimming="CharacterEllipsis"
+                                       TextWrapping="WrapWholeWords" />
+                        </StackPanel>
+                    </Border>
+'@
+
+          $newBuff = @'
+                    <Button Grid.RowSpan="2"
+                            Grid.Column="1"
+                            Margin="8,8,12,8"
+                            Padding="10,8"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
+                            HorizontalContentAlignment="Stretch"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Visibility="{x:Bind CurrentChallengePeakRecord.BossRecord, Converter={StaticResource ObjectToVisibilityConverter}}">
+                        <Button.Flyout>
+                            <Flyout Placement="BottomEdgeAlignedRight">
+                                <ScrollViewer MaxWidth="360" MaxHeight="260">
+                                    <TextBlock MaxWidth="340"
+                                               Text="{x:Bind CurrentChallengePeakRecord.BossRecord.Buff.DescMi18n}"
+                                               TextWrapping="WrapWholeWords" />
+                                </ScrollViewer>
+                            </Flyout>
+                        </Button.Flyout>
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <sc:CachedImage Width="30"
+                                            Height="30"
+                                            VerticalAlignment="Center"
+                                            Source="{x:Bind CurrentChallengePeakRecord.BossRecord.Buff.Icon}" />
+                            <TextBlock Grid.Column="1"
+                                       MinWidth="0"
+                                       VerticalAlignment="Center"
+                                       FontWeight="SemiBold"
+                                       MaxLines="2"
+                                       Text="{x:Bind CurrentChallengePeakRecord.BossRecord.Buff.NameMi18n}"
+                                       TextTrimming="CharacterEllipsis"
+                                       TextWrapping="WrapWholeWords" />
+                        </Grid>
+                    </Button>
+'@
+
+          if (($content.Split($oldBuff).Count - 1) -ne 1) {
+            throw 'Expected exactly one existing Anomaly Arbitration buff panel.'
+          }
+          $content = $content.Replace($oldBuff, $newBuff)
+          [IO.File]::WriteAllText($path, $content, [Text.UTF8Encoding]::new($false))
+
+      - name: Install .NET from global.json
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v3
+
+      - name: Build direct source
+        shell: pwsh
+        run: |
+          $version = '0.17.4-autorefresh-anomaly-buff-button-test'
+          New-Item -Path 'build/Starward' -ItemType Directory -Force | Out-Null
+          msbuild src/Starward.Launcher "-property:Configuration=$env:Configuration;Platform=$env:Platform;OutDir=$((Resolve-Path 'build/Starward').Path)"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          dotnet publish src/Starward `
+            -c $env:Configuration `
+            -r "win-$env:Platform" `
+            -o "build/Starward/app-$version" `
+            -p:Platform=$env:Platform `
+            -p:Version=$version `
+            -p:DefineConstants=DONOT_CHECK_UPDATE `
+            -v:minimal
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          Set-Content 'build/Starward/version.ini' -Value "version=$version"
+          Remove-Item 'build/Starward/Starward.pdb' -Force -ErrorAction SilentlyContinue
+
+      - name: Commit direct source change
+        shell: pwsh
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/Starward/Features/GameRecord/StarRail/ChallengePeakPage.xaml
+          git commit -m 'Refine Anomaly Arbitration buff card interaction'
+          git push origin HEAD:feature/auto-game-record-refresh
+
+      - name: Upload portable build
+        uses: actions/upload-artifact@v7
+        with:
+          name: Starward_AutoRefresh_AnomalyBuffButton_Test_x64
+          path: build/Starward/
+          if-no-files-found: error
+          compression-level: 6
