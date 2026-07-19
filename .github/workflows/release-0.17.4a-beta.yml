@@ -6,10 +6,14 @@ on:
       - main
     paths:
       - '.github/workflows/release-0.17.4a-beta.yml'
+  issues:
+    types:
+      - opened
   workflow_dispatch:
 
 permissions:
   contents: write
+  issues: read
 
 concurrency:
   group: release-v0.17.4a-beta
@@ -17,6 +21,7 @@ concurrency:
 
 jobs:
   build-and-release:
+    if: github.event_name != 'issues' || github.event.issue.title == 'publish-v0.17.4a-beta'
     runs-on: windows-2025-vs2026
     env:
       TAG_NAME: v0.17.4a-beta
