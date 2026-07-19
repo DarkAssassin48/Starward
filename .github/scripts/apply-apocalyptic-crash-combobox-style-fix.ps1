@@ -43,17 +43,95 @@ partial void OnCurrentApocalypticShadowChanged(ApocalypticShadowInfo? value)
 $code = Replace-Once $code $callbackPattern $callbackReplacement 'Apocalyptic Shadow observable callback'
 Write-TextFile $codePath $code
 
+$xamlPath = 'src/Starward/Features/GameRecord/StarRail/ApocalypticShadowPage.xaml'
+$xaml = Read-TextFile $xamlPath
+
 # Avoid x:Load lifecycle changes for the three-team summary. Keeping the element
 # loaded and toggling Visibility prevents generated fields/bindings from becoming
 # unavailable while the selected record or page is being unloaded.
-$xamlPath = 'src/Starward/Features/GameRecord/StarRail/ApocalypticShadowPage.xaml'
-$xaml = Read-TextFile $xamlPath
 $threeTeamPattern = '<Grid x:Name="ThreeBossPanel"\s+ColumnSpacing="12"\s+x:Load="\{x:Bind CurrentApocalypticShadow\.Meta\.TierceBoss, Converter=\{StaticResource ObjectToBoolConverter\}\}">'
 $threeTeamReplacement = @'
 <Grid ColumnSpacing="12"
                               Visibility="{x:Bind CurrentApocalypticShadow.Meta.TierceBoss, Converter={StaticResource ObjectToVisibilityConverter}}">
 '@
 $xaml = Replace-Once $xaml $threeTeamPattern $threeTeamReplacement 'Apocalyptic Shadow three-team visibility layout'
+
+# The two-team layout must use the whole row. The previous three-column grid left
+# an empty third column, compressed both existing teams and allowed long boss names
+# to push the first icon outside the visible area. This replacement affects only
+# the reversed-visibility two-team panel; the separate three-team panel is untouched.
+$twoTeamPattern = '<!-- Original layout for records with two teams\. -->\s*<Grid Visibility="\{x:Bind CurrentApocalypticShadow\.Meta\.TierceBoss, Converter=\{StaticResource ObjectToVisibilityReversedConverter\}\}">.*?</Grid>\s*<!-- Wider wrapping layout for records with three teams\. -->'
+$twoTeamReplacement = @'
+<!-- Dedicated full-width layout for records with two teams. -->
+                        <Grid ColumnSpacing="28"
+                              Visibility="{x:Bind CurrentApocalypticShadow.Meta.TierceBoss, Converter={StaticResource ObjectToVisibilityReversedConverter}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid Grid.Column="0" Margin="12,0,6,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <sc:CachedImage Width="40"
+                                                Height="40"
+                                                VerticalAlignment="Center"
+                                                CornerRadius="20"
+                                                Source="{x:Bind CurrentApocalypticShadow.Meta.UpperBoss.Icon}" />
+                                <StackPanel Grid.Column="1"
+                                            MinWidth="0"
+                                            Margin="12,0,0,0"
+                                            VerticalAlignment="Center"
+                                            Spacing="2">
+                                    <TextBlock FontSize="12">
+                                        <Run Text="{x:Bind lang:Lang.ForgottenHallPage_TeamSetup}" />
+                                        <Run Text="1" />
+                                    </TextBlock>
+                                    <TextBlock FontSize="11"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               MaxLines="2"
+                                               Text="{x:Bind CurrentApocalypticShadow.Meta.UpperBoss.Name}"
+                                               TextTrimming="CharacterEllipsis"
+                                               TextWrapping="WrapWholeWords"
+                                               ToolTipService.ToolTip="{x:Bind CurrentApocalypticShadow.Meta.UpperBoss.Name}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Grid.Column="1" Margin="6,0,12,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <sc:CachedImage Width="40"
+                                                Height="40"
+                                                VerticalAlignment="Center"
+                                                CornerRadius="20"
+                                                Source="{x:Bind CurrentApocalypticShadow.Meta.LowerBoss.Icon}" />
+                                <StackPanel Grid.Column="1"
+                                            MinWidth="0"
+                                            Margin="12,0,0,0"
+                                            VerticalAlignment="Center"
+                                            Spacing="2">
+                                    <TextBlock FontSize="12">
+                                        <Run Text="{x:Bind lang:Lang.ForgottenHallPage_TeamSetup}" />
+                                        <Run Text="2" />
+                                    </TextBlock>
+                                    <TextBlock FontSize="11"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               MaxLines="2"
+                                               Text="{x:Bind CurrentApocalypticShadow.Meta.LowerBoss.Name}"
+                                               TextTrimming="CharacterEllipsis"
+                                               TextWrapping="WrapWholeWords"
+                                               ToolTipService.ToolTip="{x:Bind CurrentApocalypticShadow.Meta.LowerBoss.Name}" />
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+
+                        <!-- Wider wrapping layout for records with three teams. -->
+'@
+$xaml = Replace-Once $xaml $twoTeamPattern $twoTeamReplacement 'Apocalyptic Shadow two-team full-width layout'
 Write-TextFile $xamlPath $xaml
 
 # -----------------------------------------------------------------------------
@@ -78,4 +156,4 @@ foreach ($name in @('Genshin', 'StarRail', 'ZZZ')) {
 }
 Write-TextFile $settingsPath $settings
 
-Write-Host 'Apocalyptic Shadow crash guard and HoYoLAB ComboBox styling applied.'
+Write-Host 'Apocalyptic Shadow crash guard, separate two-team layout, and HoYoLAB ComboBox styling applied.'
