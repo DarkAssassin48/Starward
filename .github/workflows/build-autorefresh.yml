@@ -9,7 +9,7 @@ on:
       - '.github/patches/auto-game-record-refresh.patch.gz.b64'
       - '.github/patches/autorefresh-settings-page.patch.gz.b64'
       - '.github/patches/autorefresh-scheduling-monthly-ui-fixes.patch.gz.b64'
-      - '.github/patches/apocalyptic-shadow-playtime-l10n.patch.gz.b64'
+      - '.github/scripts/apply-ui-l10n-fixes.ps1'
   pull_request:
     branches:
       - main
@@ -18,7 +18,7 @@ on:
       - '.github/patches/auto-game-record-refresh.patch.gz.b64'
       - '.github/patches/autorefresh-settings-page.patch.gz.b64'
       - '.github/patches/autorefresh-scheduling-monthly-ui-fixes.patch.gz.b64'
-      - '.github/patches/apocalyptic-shadow-playtime-l10n.patch.gz.b64'
+      - '.github/scripts/apply-ui-l10n-fixes.ps1'
   workflow_dispatch:
 
 permissions:
@@ -76,22 +76,13 @@ jobs:
           Get-Content 'build/logs/patch-apply.log'
           if ($applyExit -ne 0) { exit $applyExit }
 
-      - name: Apply Apocalyptic Shadow and playtime localization patch
+      - name: Apply Apocalyptic Shadow and playtime localization fixes
         shell: pwsh
         run: |
-          $encoded = Get-Content '.github/patches/apocalyptic-shadow-playtime-l10n.patch.gz.b64' -Raw
-          [IO.File]::WriteAllBytes('apocalyptic-shadow-playtime-l10n.patch.gz', [Convert]::FromBase64String($encoded.Trim()))
-          gzip -d -f apocalyptic-shadow-playtime-l10n.patch.gz
-
-          & git apply --check --verbose apocalyptic-shadow-playtime-l10n.patch *> 'build/logs/apocalyptic-playtime-patch-check.log'
-          $checkExit = $LASTEXITCODE
-          Get-Content 'build/logs/apocalyptic-playtime-patch-check.log'
-          if ($checkExit -ne 0) { exit $checkExit }
-
-          & git apply --verbose apocalyptic-shadow-playtime-l10n.patch *> 'build/logs/apocalyptic-playtime-patch-apply.log'
-          $applyExit = $LASTEXITCODE
-          Get-Content 'build/logs/apocalyptic-playtime-patch-apply.log'
-          if ($applyExit -ne 0) { exit $applyExit }
+          & '.github/scripts/apply-ui-l10n-fixes.ps1' *> 'build/logs/ui-l10n-fixes.log'
+          $fixExit = $LASTEXITCODE
+          Get-Content 'build/logs/ui-l10n-fixes.log'
+          if ($fixExit -ne 0) { exit $fixExit }
 
       - name: Install .NET from global.json
         uses: actions/setup-dotnet@v5
