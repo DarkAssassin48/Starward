@@ -1,0 +1,163 @@
+name: Publish Starward 0.17.4a Beta Direct
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    if: github.head_ref == 'release/0.17.4a-beta-trigger'
+    runs-on: windows-2025-vs2026
+    env:
+      TAG_NAME: v0.17.4a-beta
+      RELEASE_TITLE: Starward 0.17.4a Beta
+      PACKAGE_VERSION: 0.17.4-beta.1
+      DISPLAY_VERSION: 0.17.4a-beta
+
+    steps:
+      - name: Checkout main release source
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          show-progress: false
+
+      - name: Install .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v3
+
+      - name: Build portable packages
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item build -ItemType Directory -Force | Out-Null
+          New-Item dist -ItemType Directory -Force | Out-Null
+
+          foreach ($platform in @('x64', 'arm64')) {
+              $root = Join-Path $PWD "build/Starward-$platform"
+              New-Item $root -ItemType Directory -Force | Out-Null
+              $outDir = (Resolve-Path $root).Path
+
+              msbuild src/Starward.Launcher "-property:Configuration=Release;Platform=$platform;OutDir=$outDir"
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+              dotnet publish src/Starward `
+                -c Release `
+                -r "win-$platform" `
+                -o "$root/app-$env:DISPLAY_VERSION" `
+                -p:Platform=$platform `
+                -p:Version=$env:PACKAGE_VERSION `
+                -p:InformationalVersion=$env:DISPLAY_VERSION `
+                -p:DefineConstants=DONOT_CHECK_UPDATE `
+                -v:minimal
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+              Set-Content "$root/version.ini" "version=$env:PACKAGE_VERSION" -Encoding UTF8
+              Remove-Item "$root/Starward.pdb" -Force -ErrorAction SilentlyContinue
+
+              @"
+              Starward 0.17.4a Beta
+              Internal package version: $env:PACKAGE_VERSION
+              Architecture: $platform
+              Source branch: main
+              Source commit: $(git rev-parse HEAD)
+              Built: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss K')
+              "@ | Set-Content "$root/RELEASE_INFO.txt" -Encoding UTF8
+
+              $archName = if ($platform -eq 'arm64') { 'ARM64' } else { 'x64' }
+              Compress-Archive "$root/*" "dist/Starward_0.17.4a_Beta_$archName.zip" -CompressionLevel Optimal -Force
+          }
+
+          Get-ChildItem 'dist/*.zip' | Sort-Object Name | ForEach-Object {
+              $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+              "$hash  $($_.Name)"
+          } | Set-Content 'dist/SHA256SUMS.txt' -Encoding ascii
+
+      - name: Upload Actions backup
+        uses: actions/upload-artifact@v7
+        with:
+          name: Starward_0.17.4a_Beta_Portable_Direct
+          path: dist/
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Publish GitHub pre-release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $assets = @(
+              'dist/Starward_0.17.4a_Beta_x64.zip',
+              'dist/Starward_0.17.4a_Beta_ARM64.zip',
+              'dist/SHA256SUMS.txt'
+          )
+          $target = (git rev-parse HEAD).Trim()
+
+          gh release view $env:TAG_NAME --repo $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -eq 0) {
+              gh release upload $env:TAG_NAME @assets --clobber --repo $env:GITHUB_REPOSITORY
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+              gh release edit $env:TAG_NAME --title $env:RELEASE_TITLE --notes-file RELEASE_NOTES_0.17.4A_BETA_RU.md --prerelease --repo $env:GITHUB_REPOSITORY
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          else {
+              gh release create $env:TAG_NAME @assets --target $target --title $env:RELEASE_TITLE --notes-file RELEASE_NOTES_0.17.4A_BETA_RU.md --prerelease --repo $env:GITHUB_REPOSITORY
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+
+      - name: Record release status
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $releaseJson = gh release view $env:TAG_NAME --repo $env:GITHUB_REPOSITORY --json name,tagName,url,isPrerelease,publishedAt,assets
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $checksums = Get-Content 'dist/SHA256SUMS.txt' -Raw
+          $sourceCommit = (git rev-parse HEAD).Trim()
+          $status = @"
+          # Starward 0.17.4a Beta — статус публикации
+
+          Релиз опубликован автоматической сборкой GitHub Actions.
+
+          - Тег: `$env:TAG_NAME`
+          - Название: `$env:RELEASE_TITLE`
+          - Внутренняя версия: `$env:PACKAGE_VERSION`
+          - Исходный коммит: `$sourceCommit`
+          - Страница: https://github.com/$env:GITHUB_REPOSITORY/releases/tag/$env:TAG_NAME
+
+          ## SHA-256
+
+          ```text
+          $checksums
+          ```
+
+          ## GitHub Release
+
+          ```json
+          $releaseJson
+          ```
+          "@
+
+          $path = 'RELEASE_STATUS_0.17.4A_BETA.md'
+          $apiPath = "repos/$env:GITHUB_REPOSITORY/contents/$path"
+          $encoded = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($status))
+          gh api $apiPath --jq '.sha' *> current-sha.txt
+          if ($LASTEXITCODE -eq 0) {
+              $body = @{ message = 'Update 0.17.4a beta release status'; content = $encoded; sha = (Get-Content current-sha.txt -Raw).Trim(); branch = 'main' } | ConvertTo-Json -Compress
+          } else {
+              $body = @{ message = 'Record 0.17.4a beta release status'; content = $encoded; branch = 'main' } | ConvertTo-Json -Compress
+          }
+          $body | gh api --method PUT $apiPath --input -
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
