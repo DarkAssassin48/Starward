@@ -35,6 +35,10 @@ jobs:
         with:
           show-progress: false
 
+      - name: Prepare diagnostic folder
+        shell: pwsh
+        run: New-Item -Path 'build/logs' -ItemType Directory -Force | Out-Null
+
       - name: Apply AutoRefresh core patch
         shell: pwsh
         run: |
@@ -59,8 +63,16 @@ jobs:
           $encoded = Get-Content '.github/patches/autorefresh-scheduling-monthly-ui-fixes.patch.gz.b64' -Raw
           [IO.File]::WriteAllBytes('autorefresh-scheduling-monthly-ui-fixes.patch.gz', [Convert]::FromBase64String($encoded.Trim()))
           gzip -d -f autorefresh-scheduling-monthly-ui-fixes.patch.gz
-          git apply --check --verbose autorefresh-scheduling-monthly-ui-fixes.patch
-          git apply --verbose autorefresh-scheduling-monthly-ui-fixes.patch
+
+          & git apply --check --verbose autorefresh-scheduling-monthly-ui-fixes.patch *> 'build/logs/patch-check.log'
+          $checkExit = $LASTEXITCODE
+          Get-Content 'build/logs/patch-check.log'
+          if ($checkExit -ne 0) { exit $checkExit }
+
+          & git apply --verbose autorefresh-scheduling-monthly-ui-fixes.patch *> 'build/logs/patch-apply.log'
+          $applyExit = $LASTEXITCODE
+          Get-Content 'build/logs/patch-apply.log'
+          if ($applyExit -ne 0) { exit $applyExit }
 
       - name: Install .NET from global.json
         uses: actions/setup-dotnet@v5
@@ -75,7 +87,6 @@ jobs:
         run: |
           $version = '0.17.4-autorefresh-schedule-test'
           New-Item -Path 'build/Starward' -ItemType Directory -Force | Out-Null
-          New-Item -Path 'build/logs' -ItemType Directory -Force | Out-Null
 
           & msbuild src/Starward.Launcher "-property:Configuration=$env:Configuration;Platform=$env:Platform;OutDir=$((Resolve-Path 'build/Starward').Path)" *> 'build/logs/launcher.log'
           $launcherExit = $LASTEXITCODE
