@@ -63,7 +63,6 @@ public sealed partial class ImaginariumTheaterPage : PageBase
 
 
 
-
     public bool HasData { get; set => SetProperty(ref field, value); }
 
 
@@ -99,7 +98,6 @@ public sealed partial class ImaginariumTheaterPage : PageBase
 
 
 
-
     [RelayCommand]
     private async Task RefreshDataAsync()
     {
@@ -131,7 +129,6 @@ public sealed partial class ImaginariumTheaterPage : PageBase
 
 
 
-
     private void ListView_TheaterList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         try
@@ -148,7 +145,6 @@ public sealed partial class ImaginariumTheaterPage : PageBase
             _logger.LogError(ex, "Selection changed ({gameBiz}, {uid}).", gameRole?.GameBiz, gameRole?.Uid);
         }
     }
-
 
 
 
@@ -190,23 +186,17 @@ public sealed partial class ImaginariumTheaterPage : PageBase
     }
 
 
-
     public static string PerformancesTime(int second)
     {
-        var ts = TimeSpan.FromSeconds(second);
-        var format = Lang.ResourceManager.GetString(
-            "ImaginariumTheaterPage_TotalPerformanceDurationFormat",
-            Lang.Culture) ?? "{0} m {1} s";
-        return string.Format(format, (int)ts.TotalMinutes, ts.Seconds);
+        return LocalizedTimeFormatter.FormatHoursMinutesSeconds(
+            TimeSpan.FromSeconds(Math.Max(0, second)));
     }
-
 
 
     public static Visibility FightStatisicVisibility(int value)
     {
         return value == 0 ? Visibility.Collapsed : Visibility.Visible;
     }
-
 
 
     public static BitmapImage? HeraldryImage(int heraldry)
@@ -222,7 +212,6 @@ public sealed partial class ImaginariumTheaterPage : PageBase
             _ => null,
         };
     }
-
 
 
 
@@ -265,7 +254,6 @@ public sealed partial class ImaginariumTheaterPage : PageBase
 }
 
 
-
 public partial class TheaterStarIconVisibilityConverter : IValueConverter
 {
 
@@ -279,6 +267,3 @@ public partial class TheaterStarIconVisibilityConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
-
-
-
