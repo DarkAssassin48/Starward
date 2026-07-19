@@ -4,11 +4,15 @@ using Microsoft.UI.Xaml.Controls;
 using Starward.Frameworks;
 using System;
 
+
 namespace Starward.Features.Setting;
 
 public sealed partial class SettingPage : PageBase
 {
+
+
     private readonly ILogger<SettingPage> _logger = AppConfig.GetLogger<SettingPage>();
+
 
     public SettingPage()
     {
@@ -16,6 +20,9 @@ public sealed partial class SettingPage : PageBase
         Frame_Setting.Navigate(typeof(AboutSetting));
         WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(this, (_, _) => this.Bindings.Update());
     }
+
+
+
 
     private void NavigationView_ItemInvoked(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
@@ -29,7 +36,6 @@ public sealed partial class SettingPage : PageBase
                 nameof(FileManageSetting) => typeof(FileManageSetting),
                 nameof(ScreenshotSetting) => typeof(ScreenshotSetting),
                 nameof(AdvancedSetting) => typeof(AdvancedSetting),
-                nameof(HoyolabToolboxAutoRefreshSetting) => typeof(HoyolabToolboxAutoRefreshSetting),
                 nameof(ToolboxSetting) => typeof(ToolboxSetting),
                 nameof(HotkeySetting) => typeof(HotkeySetting),
                 nameof(GamepadControlSetting) => typeof(GamepadControlSetting),
@@ -46,8 +52,14 @@ public sealed partial class SettingPage : PageBase
         }
     }
 
+
+
+
     protected override void OnUnloaded()
     {
         WeakReferenceMessenger.Default.UnregisterAll(this);
     }
+
+
+
 }
