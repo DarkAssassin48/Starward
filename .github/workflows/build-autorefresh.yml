@@ -1,3 +1,4 @@
+# Builds the maintained AutoRefresh fork directly from committed source files.
 name: Build Starward AutoRefresh Fork
 
 on:
