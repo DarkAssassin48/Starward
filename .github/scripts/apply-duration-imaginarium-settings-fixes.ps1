@@ -24,13 +24,8 @@ function Replace-Once(
     return $regex.Replace($Content, $Replacement, 1)
 }
 
-function Upsert-ResxValue(
-    [string]$Content,
-    [string]$Name,
-    [string]$Value
-) {
-    $escapedName = [regex]::Escape($Name)
-    $pattern = '<data name="' + $escapedName + '" xml:space="preserve">\s*<value>.*?</value>\s*</data>'
+function Upsert-ResxValue([string]$Content, [string]$Name, [string]$Value) {
+    $pattern = '<data name="' + [regex]::Escape($Name) + '" xml:space="preserve">\s*<value>.*?</value>\s*</data>'
     $replacement = "  <data name=\"$Name\" xml:space=\"preserve\">`r`n    <value>$Value</value>`r`n  </data>"
     $regex = [regex]::new($pattern, [System.Text.RegularExpressions.RegexOptions]::Singleline)
     $matches = $regex.Matches($Content)
@@ -43,17 +38,9 @@ function Upsert-ResxValue(
     return Replace-Once $Content '</root>' ($replacement + "`r`n</root>") "insert resource $Name"
 }
 
-function Remove-ResxValue(
-    [string]$Content,
-    [string]$Name
-) {
-    $escapedName = [regex]::Escape($Name)
-    $pattern = '\s*<data name="' + $escapedName + '" xml:space="preserve">\s*<value>.*?</value>\s*</data>'
-    return [regex]::Replace(
-        $Content,
-        $pattern,
-        '',
-        [System.Text.RegularExpressions.RegexOptions]::Singleline)
+function Remove-ResxValue([string]$Content, [string]$Name) {
+    $pattern = '\s*<data name="' + [regex]::Escape($Name) + '" xml:space="preserve">\s*<value>.*?</value>\s*</data>'
+    return [regex]::Replace($Content, $pattern, '', [System.Text.RegularExpressions.RegexOptions]::Singleline)
 }
 
 function Get-SecondsFormat([string]$Culture) {
@@ -93,42 +80,36 @@ function Get-MinutesSecondsFormat([string]$Culture) {
     }
 }
 
-# -----------------------------------------------------------------------------
-# Shared localized duration resources for every existing language file.
-# -----------------------------------------------------------------------------
-$languageFiles = Get-ChildItem 'src/Starward.Language' -Filter 'Lang*.resx' -File
+# Shared duration resources for all current language files.
+$languageFiles = @(Get-ChildItem 'src/Starward.Language' -Filter 'Lang*.resx' -File)
 if ($languageFiles.Count -eq 0) {
     throw 'No Starward language resource files were found.'
 }
-
 foreach ($file in $languageFiles) {
     $culture = if ($file.BaseName -eq 'Lang') { '' } else { $file.BaseName.Substring(5) }
     $content = Read-TextFile $file.FullName
-
-    # Remove the temporary page-specific seconds key from the previous build.
     $content = Remove-ResxValue $content 'StygianOnslaughtPage_SecondsFormat'
     $content = Upsert-ResxValue $content 'Common_SecondsFormat' (Get-SecondsFormat $culture)
     $content = Upsert-ResxValue $content 'ImaginariumTheaterPage_TotalPerformanceDurationFormat' (Get-MinutesSecondsFormat $culture)
-
     Write-TextFile $file.FullName $content
     Write-Host "Duration resources updated: $($file.Name)"
 }
 
-# -----------------------------------------------------------------------------
-# Stygian Onslaught: use the shared seconds resource and keep a visible space.
-# -----------------------------------------------------------------------------
+# Stygian Onslaught uses the shared seconds resource.
 $stygianCodePath = 'src/Starward/Features/GameRecord/Genshin/StygianOnslaughtPage.xaml.cs'
 $stygianCode = Read-TextFile $stygianCodePath
+$stygianReplacement = @'
+"Common_SecondsFormat",
+            Lang.Culture) ?? "{0} s"
+'@
 $stygianCode = Replace-Once `
     $stygianCode `
     '"StygianOnslaughtPage_SecondsFormat",\s*Lang\.Culture\) \?\? "\{0\}s"' `
-    '"Common_SecondsFormat",`r`n            Lang.Culture) ?? "{0} s"' `
+    $stygianReplacement `
     'Stygian shared seconds resource'
 Write-TextFile $stygianCodePath $stygianCode
 
-# -----------------------------------------------------------------------------
-# Imaginarium Theater: localized performance duration.
-# -----------------------------------------------------------------------------
+# Imaginarium Theater uses a localized minutes-and-seconds format.
 $theaterCodePath = 'src/Starward/Features/GameRecord/Genshin/ImaginariumTheaterPage.xaml.cs'
 $theaterCode = Read-TextFile $theaterCodePath
 $performanceMethodPattern = 'public static string PerformancesTime\(int second\)\s*\{\s*var ts = TimeSpan\.FromSeconds\(second\);\s*return \$"\{ts\.Minutes\}m \{ts\.Seconds\}s";\s*\}'
@@ -145,10 +126,9 @@ public static string PerformancesTime(int second)
 $theaterCode = Replace-Once $theaterCode $performanceMethodPattern $performanceMethodReplacement 'Imaginarium localized performance duration'
 Write-TextFile $theaterCodePath $theaterCode
 
-# Keep damage values, icons, and localized labels on one row.
+# Keep damage labels, icons and values on one line in every language.
 $theaterXamlPath = 'src/Starward/Features/GameRecord/Genshin/ImaginariumTheaterPage.xaml'
 $theaterXaml = Read-TextFile $theaterXamlPath
-
 $fightGridPattern = '(<Grid Margin="0,8,0,0"\s+Padding="24,0,24,0"\s+Background="\{ThemeResource CustomOverlayAcrylicBrush\}"\s+CornerRadius="8"\s+Shadow="\{ThemeResource ThemeShadow\}"\s+Translation="0,0,16"\s+Visibility="\{x:Bind local:ImaginariumTheaterPage\.FightStatisicVisibility\(CurrentTheater\.Detail\.FightStatisic\.TotalUseTime\)\}">\s*)<Grid\.RowDefinitions>\s*<RowDefinition MinHeight="32" />\s*<RowDefinition MinHeight="32" />\s*<RowDefinition MinHeight="32" />\s*<RowDefinition MinHeight="32" />\s*<RowDefinition MinHeight="32" />\s*</Grid\.RowDefinitions>\s*<Grid\.ColumnDefinitions>\s*<ColumnDefinition Width="4\*" />\s*<ColumnDefinition Width="3\*" />\s*</Grid\.ColumnDefinitions>'
 $fightGridReplacement = @'
 $1<Grid.RowDefinitions>
@@ -171,10 +151,23 @@ $labelBindings = @(
     'lang:Lang.SpiralAbyssPage_MostDamageTaken'
 )
 foreach ($binding in $labelBindings) {
-    $escapedBinding = [regex]::Escape($binding)
-    $labelPattern = '<TextBlock Grid.Row="([123])"\s+VerticalAlignment="Center"\s+Text="\{x:Bind ' + $escapedBinding + '\}" />'
-    $labelReplacement = '<TextBlock Grid.Row="$1"`r`n                                MinWidth="0"`r`n                                Margin="0,0,16,0"`r`n                                VerticalAlignment="Center"`r`n                                MaxLines="1"`r`n                                Text="{x:Bind ' + $binding + '}"`r`n                                TextTrimming="CharacterEllipsis"`r`n                                TextWrapping="NoWrap" />'
-    $theaterXaml = Replace-Once $theaterXaml $labelPattern $labelReplacement "Imaginarium one-line label $binding"
+    $labelPattern = '<TextBlock Grid.Row="([123])"\s+VerticalAlignment="Center"\s+Text="\{x:Bind ' + [regex]::Escape($binding) + '\}" />'
+    $labelTemplate = @'
+<TextBlock Grid.Row="__ROW__"
+                                MinWidth="0"
+                                Margin="0,0,16,0"
+                                VerticalAlignment="Center"
+                                MaxLines="1"
+                                Text="{x:Bind __BINDING__}"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="NoWrap" />
+'@
+    $match = [regex]::Match($theaterXaml, $labelPattern, [System.Text.RegularExpressions.RegexOptions]::Singleline)
+    if (-not $match.Success) {
+        throw "Imaginarium one-line label $binding was not found."
+    }
+    $replacement = $labelTemplate.Replace('__ROW__', $match.Groups[1].Value).Replace('__BINDING__', $binding)
+    $theaterXaml = Replace-Once $theaterXaml $labelPattern $replacement "Imaginarium one-line label $binding"
 }
 
 $valueRows = @(
@@ -186,18 +179,35 @@ foreach ($item in $valueRows) {
     $row = $item.Row
     $avatar = $item.Avatar
     $valuePattern = '<StackPanel Grid.Row="' + $row + '"\s+Grid.Column="1"\s+Orientation="Horizontal">\s*<sc:CachedImage Width="44"\s+Height="36"\s+Margin="-12,-4,0,4"\s+Source="\{x:Bind CurrentTheater\.Detail\.FightStatisic\.' + $avatar + '\.AvatarIcon\}" />\s*<TextBlock VerticalAlignment="Center" Text="\{x:Bind CurrentTheater\.Detail\.FightStatisic\.' + $avatar + '\.Value\}" />\s*</StackPanel>'
-    $valueReplacement = '<Grid Grid.Row="' + $row + '"`r`n                          Grid.Column="1"`r`n                          Margin="8,0,0,0"`r`n                          VerticalAlignment="Center"`r`n                          ColumnSpacing="8">`r`n                        <Grid.ColumnDefinitions>`r`n                            <ColumnDefinition Width="36" />`r`n                            <ColumnDefinition Width="Auto" />`r`n                        </Grid.ColumnDefinitions>`r`n                        <sc:CachedImage Width="36"`r`n                                        Height="36"`r`n                                        VerticalAlignment="Center"`r`n                                        Source="{x:Bind CurrentTheater.Detail.FightStatisic.' + $avatar + '.AvatarIcon}" />`r`n                        <TextBlock Grid.Column="1"`r`n                                   VerticalAlignment="Center"`r`n                                   Text="{x:Bind CurrentTheater.Detail.FightStatisic.' + $avatar + '.Value}"`r`n                                   TextWrapping="NoWrap" />`r`n                    </Grid>'
-    $theaterXaml = Replace-Once $theaterXaml $valuePattern $valueReplacement "Imaginarium one-line value $avatar"
+    $valueTemplate = @'
+<Grid Grid.Row="__ROW__"
+                          Grid.Column="1"
+                          Margin="8,0,0,0"
+                          VerticalAlignment="Center"
+                          ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="36" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <sc:CachedImage Width="36"
+                                        Height="36"
+                                        VerticalAlignment="Center"
+                                        Source="{x:Bind CurrentTheater.Detail.FightStatisic.__AVATAR__.AvatarIcon}" />
+                        <TextBlock Grid.Column="1"
+                                   VerticalAlignment="Center"
+                                   Text="{x:Bind CurrentTheater.Detail.FightStatisic.__AVATAR__.Value}"
+                                   TextWrapping="NoWrap" />
+                    </Grid>
+'@
+    $replacement = $valueTemplate.Replace('__ROW__', $row).Replace('__AVATAR__', $avatar)
+    $theaterXaml = Replace-Once $theaterXaml $valuePattern $replacement "Imaginarium one-line value $avatar"
 }
 Write-TextFile $theaterXamlPath $theaterXaml
 
-# -----------------------------------------------------------------------------
-# Settings: restore the original pane width and wrap only the long custom item.
-# -----------------------------------------------------------------------------
+# Restore the original settings pane width and wrap only the long custom item.
 $settingXamlPath = 'src/Starward/Features/Setting/SettingPage.xaml'
 $settingXaml = Read-TextFile $settingXamlPath
 $settingXaml = Replace-Once $settingXaml 'OpenPaneLength="\d+"' 'OpenPaneLength="260"' 'original settings pane width'
-
 $navPattern = '<NavigationViewItem Content="\{x:Bind HoyolabToolboxAutoRefreshTitle\}"\s+Tag="HoyolabToolboxAutoRefreshSetting"\s+ToolTipService\.ToolTip="\{x:Bind HoyolabToolboxAutoRefreshTitle\}">\s*<NavigationViewItem\.Icon>\s*<FontIcon Glyph="&#xE895;" />\s*</NavigationViewItem\.Icon>\s*</NavigationViewItem>'
 $navReplacement = @'
 <NavigationViewItem MinHeight="40"
@@ -220,20 +230,31 @@ Write-TextFile $settingXamlPath $settingXaml
 
 $settingCodePath = 'src/Starward/Features/Setting/SettingPage.xaml.cs'
 $settingCode = Read-TextFile $settingCodePath
+$settingTitleReplacement = @'
+public string HoyolabToolboxAutoRefreshTitle => Localized(
+        "Автообновление HoYoLAB Toolbox",
+        "HoYoLAB Toolbox Auto Refresh");
+'@
 $settingCode = Replace-Once `
     $settingCode `
     'public string HoyolabToolboxAutoRefreshTitle => Localized\(\s*"Автообновление HoYoLAB",\s*"HoYoLAB Auto Refresh"\);' `
-    'public string HoyolabToolboxAutoRefreshTitle => Localized(`r`n        "Автообновление HoYoLAB Toolbox",`r`n        "HoYoLAB Toolbox Auto Refresh");' `
+    $settingTitleReplacement `
     'HoYoLAB Toolbox Auto Refresh navigation title'
 Write-TextFile $settingCodePath $settingCode
 
-# -----------------------------------------------------------------------------
-# Anomaly Arbitration: restore the original fixed card height.
-# -----------------------------------------------------------------------------
+# Restore the original fixed Anomaly Arbitration card height.
 $challengePath = 'src/Starward/Features/GameRecord/StarRail/ChallengePeakPage.xaml'
 $challenge = Read-TextFile $challengePath
 $challenge = Replace-Once $challenge '<Grid MinHeight="192"' '<Grid Height="192"' 'Anomaly Arbitration original card height'
-$challenge = Replace-Once $challenge 'MaxLines="5"\s+Text="\{x:Bind CurrentChallengePeakRecord\.BossRecord\.Buff\.DescMi18n\}"' 'MaxLines="4"`r`n                                        Text="{x:Bind CurrentChallengePeakRecord.BossRecord.Buff.DescMi18n}"' 'Anomaly Arbitration compact buff description'
+$challengeDescriptionReplacement = @'
+MaxLines="4"
+                                        Text="{x:Bind CurrentChallengePeakRecord.BossRecord.Buff.DescMi18n}"
+'@
+$challenge = Replace-Once `
+    $challenge `
+    'MaxLines="5"\s+Text="\{x:Bind CurrentChallengePeakRecord\.BossRecord\.Buff\.DescMi18n\}"' `
+    $challengeDescriptionReplacement `
+    'Anomaly Arbitration compact buff description'
 Write-TextFile $challengePath $challenge
 
 Write-Host 'Duration localization, Imaginarium layout, settings width, and Anomaly height fixes applied.'
