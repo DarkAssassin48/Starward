@@ -331,7 +331,6 @@
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="40" />
                                                     <ColumnDefinition />
-                                                    <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
                                                 <sc:CachedImage Width="40"
                                                                 Height="40"
@@ -341,11 +340,12 @@
                                                            Margin="8,0"
                                                            VerticalAlignment="Center"
                                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                           Text="{x:Bind local:StygianOnslaughtPage.BestTypeToString(Type)}"
-                                                           TextTrimming="CharacterEllipsis" />
-                                                <TextBlock Grid.Column="2"
-                                                           VerticalAlignment="Center"
-                                                           Text="{x:Bind DPS}" />
+                                                           TextTrimming="CharacterEllipsis"
+                                                           TextWrapping="NoWrap">
+                                                    <Run Text="{x:Bind local:StygianOnslaughtPage.BestTypeToString(Type)}" />
+                                                    <Run Text=" " />
+                                                    <Run Foreground="{ThemeResource TextFillColorPrimaryBrush}" Text="{x:Bind DPS}" />
+                                                </TextBlock>
                                             </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
