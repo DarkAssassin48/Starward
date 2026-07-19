@@ -13,12 +13,18 @@ permissions:
   contents: write
 
 jobs:
-  release:
+  build:
     if: github.head_ref == 'release/0.17.4a-beta-trigger'
     runs-on: windows-2025-vs2026
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: x64
+            archive_arch: x64
+          - platform: arm64
+            archive_arch: ARM64
     env:
-      TAG_NAME: v0.17.4a-beta
-      RELEASE_TITLE: Starward 0.17.4a Beta
       PACKAGE_VERSION: 0.17.4-beta.1
       DISPLAY_VERSION: 0.17.4a-beta
 
@@ -37,67 +43,93 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v3
 
-      - name: Build portable packages
+      - name: Build launcher ${{ matrix.platform }}
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
-          New-Item build -ItemType Directory -Force | Out-Null
-          New-Item dist -ItemType Directory -Force | Out-Null
+          New-Item -Path 'build/Starward' -ItemType Directory -Force | Out-Null
+          $outDir = (Resolve-Path 'build/Starward').Path
+          msbuild src/Starward.Launcher "-property:Configuration=Release;Platform=${{ matrix.platform }};OutDir=$outDir"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-          foreach ($platform in @('x64', 'arm64')) {
-              $root = Join-Path $PWD "build/Starward-$platform"
-              New-Item $root -ItemType Directory -Force | Out-Null
-              $outDir = (Resolve-Path $root).Path
+      - name: Publish app ${{ matrix.platform }}
+        shell: pwsh
+        run: |
+          dotnet publish src/Starward `
+            -c Release `
+            -r "win-${{ matrix.platform }}" `
+            -o "build/Starward/app-$env:DISPLAY_VERSION" `
+            -p:Platform=${{ matrix.platform }} `
+            -p:Version=$env:PACKAGE_VERSION `
+            -p:DefineConstants=DONOT_CHECK_UPDATE `
+            -v:minimal
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-              msbuild src/Starward.Launcher "-property:Configuration=Release;Platform=$platform;OutDir=$outDir"
-              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Package ${{ matrix.platform }}
+        shell: pwsh
+        run: |
+          Set-Content 'build/Starward/version.ini' -Value "version=$env:PACKAGE_VERSION" -Encoding UTF8
+          Remove-Item 'build/Starward/Starward.pdb' -Force -ErrorAction SilentlyContinue
+          @"
+          Starward 0.17.4a Beta
+          Internal package version: $env:PACKAGE_VERSION
+          Architecture: ${{ matrix.platform }}
+          Source branch: main
+          Source commit: $(git rev-parse HEAD)
+          Built: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss K')
+          "@ | Set-Content 'build/Starward/RELEASE_INFO.txt' -Encoding UTF8
 
-              dotnet publish src/Starward `
-                -c Release `
-                -r "win-$platform" `
-                -o "$root/app-$env:DISPLAY_VERSION" `
-                -p:Platform=$platform `
-                -p:Version=$env:PACKAGE_VERSION `
-                -p:InformationalVersion=$env:DISPLAY_VERSION `
-                -p:DefineConstants=DONOT_CHECK_UPDATE `
-                -v:minimal
-              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          New-Item -Path 'dist' -ItemType Directory -Force | Out-Null
+          Compress-Archive `
+            -Path 'build/Starward/*' `
+            -DestinationPath 'dist/Starward_0.17.4a_Beta_${{ matrix.archive_arch }}.zip' `
+            -CompressionLevel Optimal `
+            -Force
 
-              Set-Content "$root/version.ini" "version=$env:PACKAGE_VERSION" -Encoding UTF8
-              Remove-Item "$root/Starward.pdb" -Force -ErrorAction SilentlyContinue
+      - name: Upload ${{ matrix.platform }} package
+        uses: actions/upload-artifact@v7
+        with:
+          name: Starward_0.17.4a_Beta_${{ matrix.archive_arch }}
+          path: dist/Starward_0.17.4a_Beta_${{ matrix.archive_arch }}.zip
+          if-no-files-found: error
+          compression-level: 0
 
-              @"
-              Starward 0.17.4a Beta
-              Internal package version: $env:PACKAGE_VERSION
-              Architecture: $platform
-              Source branch: main
-              Source commit: $(git rev-parse HEAD)
-              Built: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss K')
-              "@ | Set-Content "$root/RELEASE_INFO.txt" -Encoding UTF8
+  release:
+    if: github.head_ref == 'release/0.17.4a-beta-trigger'
+    needs: build
+    runs-on: windows-2025-vs2026
+    env:
+      TAG_NAME: v0.17.4a-beta
+      RELEASE_TITLE: Starward 0.17.4a Beta
+      PACKAGE_VERSION: 0.17.4-beta.1
 
-              $archName = if ($platform -eq 'arm64') { 'ARM64' } else { 'x64' }
-              Compress-Archive "$root/*" "dist/Starward_0.17.4a_Beta_$archName.zip" -CompressionLevel Optimal -Force
-          }
+    steps:
+      - name: Checkout main release source
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          show-progress: false
 
+      - name: Download built packages
+        uses: actions/download-artifact@v6
+        with:
+          pattern: Starward_0.17.4a_Beta_*
+          path: dist
+          merge-multiple: true
+
+      - name: Generate SHA-256 checksums
+        shell: pwsh
+        run: |
           Get-ChildItem 'dist/*.zip' | Sort-Object Name | ForEach-Object {
               $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
               "$hash  $($_.Name)"
           } | Set-Content 'dist/SHA256SUMS.txt' -Encoding ascii
-
-      - name: Upload Actions backup
-        uses: actions/upload-artifact@v7
-        with:
-          name: Starward_0.17.4a_Beta_Portable_Direct
-          path: dist/
-          if-no-files-found: error
-          compression-level: 0
+          Get-Content 'dist/SHA256SUMS.txt'
 
       - name: Publish GitHub pre-release
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $ErrorActionPreference = 'Stop'
           $assets = @(
               'dist/Starward_0.17.4a_Beta_x64.zip',
               'dist/Starward_0.17.4a_Beta_ARM64.zip',
@@ -156,7 +188,8 @@ jobs:
           gh api $apiPath --jq '.sha' *> current-sha.txt
           if ($LASTEXITCODE -eq 0) {
               $body = @{ message = 'Update 0.17.4a beta release status'; content = $encoded; sha = (Get-Content current-sha.txt -Raw).Trim(); branch = 'main' } | ConvertTo-Json -Compress
-          } else {
+          }
+          else {
               $body = @{ message = 'Record 0.17.4a beta release status'; content = $encoded; branch = 'main' } | ConvertTo-Json -Compress
           }
           $body | gh api --method PUT $apiPath --input -
