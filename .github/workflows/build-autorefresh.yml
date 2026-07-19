@@ -14,6 +14,7 @@ on:
       - '.github/scripts/apply-stage-title-buff-layout-fixes.ps1'
       - '.github/scripts/apply-final-record-ui-l10n-fixes.ps1'
       - '.github/scripts/fix-stygian-seconds-resource-access.ps1'
+      - '.github/scripts/apply-duration-imaginarium-settings-fixes.ps1'
   pull_request:
     branches:
       - main
@@ -27,6 +28,7 @@ on:
       - '.github/scripts/apply-stage-title-buff-layout-fixes.ps1'
       - '.github/scripts/apply-final-record-ui-l10n-fixes.ps1'
       - '.github/scripts/fix-stygian-seconds-resource-access.ps1'
+      - '.github/scripts/apply-duration-imaginarium-settings-fixes.ps1'
   workflow_dispatch:
 
 permissions:
@@ -124,6 +126,14 @@ jobs:
           Get-Content 'build/logs/stygian-seconds-resource.log'
           if ($fixExit -ne 0) { exit $fixExit }
 
+      - name: Apply duration, Imaginarium, settings, and Anomaly fixes
+        shell: pwsh
+        run: |
+          & '.github/scripts/apply-duration-imaginarium-settings-fixes.ps1' *> 'build/logs/duration-imaginarium-settings.log'
+          $fixExit = $LASTEXITCODE
+          Get-Content 'build/logs/duration-imaginarium-settings.log'
+          if ($fixExit -ne 0) { exit $fixExit }
+
       - name: Install .NET from global.json
         uses: actions/setup-dotnet@v5
         with:
@@ -135,7 +145,7 @@ jobs:
       - name: Build launcher and app
         shell: pwsh
         run: |
-          $version = '0.17.4-autorefresh-record-ui-l10n-test'
+          $version = '0.17.4-autorefresh-duration-layout-test'
           New-Item -Path 'build/Starward' -ItemType Directory -Force | Out-Null
 
           & msbuild src/Starward.Launcher "-property:Configuration=$env:Configuration;Platform=$env:Platform;OutDir=$((Resolve-Path 'build/Starward').Path)" *> 'build/logs/launcher.log'
@@ -179,22 +189,23 @@ jobs:
         shell: pwsh
         run: |
           @"
-          Starward AutoRefresh record UI and localization test
+          Starward AutoRefresh duration and layout test
           Base version: 0.17.4
           Architecture: x64
           Commit: $env:GITHUB_SHA
           Built: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss K')
-          Anomaly Arbitration uses a compact transparent buff area and wrapped boss title.
-          Forgotten Hall stage titles separate and wrap Starward Mode like the other endgame pages.
-          Stage-title hover tooltips are removed from Forgotten Hall, Apocalyptic Shadow, Pure Fiction, and Stygian Onslaught.
-          Stygian Onslaught timing and result rows are aligned and seconds are localized through resx.
+          Seconds and performance duration formats are stored in every language resx file.
+          Stygian Onslaught uses spaced localized seconds.
+          Imaginarium Theater duration and damage rows are language-safe and remain on one line.
+          Settings pane width is restored to the original value and the HoYoLAB Toolbox item wraps.
+          Anomaly Arbitration card height is restored to the original fixed height.
           Official update check is disabled for this test build.
           "@ | Set-Content 'build/Starward/AUTOREFRESH_TEST_BUILD.txt' -Encoding UTF8
 
       - name: Upload portable build
         uses: actions/upload-artifact@v7
         with:
-          name: Starward_AutoRefresh_RecordUI_L10n_Test_x64
+          name: Starward_AutoRefresh_DurationLayout_Test_x64
           path: build/Starward/
           if-no-files-found: error
           compression-level: 6
