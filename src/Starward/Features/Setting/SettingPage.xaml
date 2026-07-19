@@ -15,6 +15,7 @@
     </Page.Resources>
 
     <Grid>
+
         <NavigationView IsBackButtonVisible="Collapsed"
                         IsPaneToggleButtonVisible="False"
                         IsSettingsVisible="False"
@@ -30,29 +31,78 @@
             </NavigationView.Resources>
 
             <NavigationView.PaneHeader>
-                <TextBlock Margin="16,12,0,8" FontSize="20" FontWeight="Bold" Text="{x:Bind lang:Lang.SettingPage_AppSettings}" />
+                <TextBlock Margin="16,12,0,8"
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Text="{x:Bind lang:Lang.SettingPage_AppSettings}" />
             </NavigationView.PaneHeader>
 
             <NavigationView.MenuItems>
-                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_About}" IsSelected="True" Tag="AboutSetting"><NavigationViewItem.Icon><FontIcon Glyph="&#xE946;" /></NavigationViewItem.Icon></NavigationViewItem>
-                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_General}" Tag="GeneralSetting"><NavigationViewItem.Icon><FontIcon Glyph="&#xE81E;" /></NavigationViewItem.Icon></NavigationViewItem>
-                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_Download}" Tag="DownloadSetting"><NavigationViewItem.Icon><FontIcon Glyph="&#xEBD3;" /></NavigationViewItem.Icon></NavigationViewItem>
-                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_FileManagement}" Tag="FileManageSetting"><NavigationViewItem.Icon><FontIcon Glyph="&#xE8F1;" /></NavigationViewItem.Icon></NavigationViewItem>
-                <NavigationViewItem Content="{x:Bind lang:Lang.MainPage_GameScreenshot}" Tag="ScreenshotSetting"><NavigationViewItem.Icon><FontIcon Glyph="&#xE91B;" /></NavigationViewItem.Icon></NavigationViewItem>
-                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_KeyboardShortcuts}" Tag="HotkeySetting"><NavigationViewItem.Icon><FontIcon Glyph="&#xEDA7;" /></NavigationViewItem.Icon></NavigationViewItem>
-                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_ControllerEnhancement}" Tag="GamepadControlSetting"><NavigationViewItem.Icon><FontIcon FontFamily="{ThemeResource XboxFluent2}" Glyph="&#xE9CD;" /></NavigationViewItem.Icon></NavigationViewItem>
-                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_Advanced}" Tag="AdvancedSetting"><NavigationViewItem.Icon><FontIcon Glyph="&#xEA86;" /></NavigationViewItem.Icon></NavigationViewItem>
+                <!--  关于  -->
+                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_About}"
+                                    IsSelected="True"
+                                    Tag="AboutSetting">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE946;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <!--  通用  -->
+                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_General}" Tag="GeneralSetting">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE81E;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <!--  下载  -->
+                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_Download}" Tag="DownloadSetting">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xEBD3;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <!--  文件管理  -->
+                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_FileManagement}" Tag="FileManageSetting">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE8F1;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <!--  截图  -->
+                <NavigationViewItem Content="{x:Bind lang:Lang.MainPage_GameScreenshot}" Tag="ScreenshotSetting">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE91B;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <!--  快捷键  -->
+                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_KeyboardShortcuts}" Tag="HotkeySetting">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xEDA7;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <!--  手柄增强  -->
+                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_ControllerEnhancement}" Tag="GamepadControlSetting">
+                    <NavigationViewItem.Icon>
+                        <FontIcon FontFamily="{ThemeResource XboxFluent2}" Glyph="&#xE9CD;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <!--  高级  -->
+                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_Advanced}" Tag="AdvancedSetting">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xEA86;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
 
                 <NavigationViewItemSeparator />
 
-                <NavigationViewItem Content="Настройки автообновления HoYoLAB Toolbox" Tag="HoyolabToolboxAutoRefreshSetting">
-                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE895;" /></NavigationViewItem.Icon>
+                <!--  工具箱  -->
+                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_Toolbox}" Tag="ToolboxSetting">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xEC7A;" />
+                    </NavigationViewItem.Icon>
                 </NavigationViewItem>
-
-                <NavigationViewItem Content="{x:Bind lang:Lang.SettingPage_Toolbox}" Tag="ToolboxSetting"><NavigationViewItem.Icon><FontIcon Glyph="&#xEC7A;" /></NavigationViewItem.Icon></NavigationViewItem>
             </NavigationView.MenuItems>
 
             <Frame Name="Frame_Setting" Margin="24,24,0,0" />
+
         </NavigationView>
+
     </Grid>
+
 </sf:PageBase>
