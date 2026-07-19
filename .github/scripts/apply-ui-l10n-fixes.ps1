@@ -108,4 +108,20 @@ function Add-ResxEntry([string]$Path, [string]$Name, [string]$Value) {
 Add-ResxEntry 'src/Starward.Language/Lang.resx' 'PlayTimeButton_DurationFormat' '{0}h {1}m'
 Add-ResxEntry 'src/Starward.Language/Lang.ru-RU.resx' 'PlayTimeButton_DurationFormat' '{0} ч {1} м'
 
+# Temporary diagnostics: capture the actual source files created by the preceding
+# patches so their layout can be adjusted against the built branch precisely.
+$diagnosticDir = 'build/logs/patched-ui-sources'
+New-Item -Path $diagnosticDir -ItemType Directory -Force | Out-Null
+$matches = Get-ChildItem 'src' -Recurse -File -Include *.xaml,*.cs,*.resx |
+    Select-String -Pattern 'GameRecordAutoRefresh|HoYoLAB Toolbox automatic refresh|Настройки автообновления HoYoLAB Toolbox' -List
+$index = New-Object System.Collections.Generic.List[string]
+foreach ($match in $matches) {
+    $sourcePath = $match.Path
+    $relative = [IO.Path]::GetRelativePath((Resolve-Path '.').Path, $sourcePath)
+    $safeName = ($relative -replace '[\\/:*?"<>|]', '_')
+    Copy-Item $sourcePath (Join-Path $diagnosticDir $safeName) -Force
+    $index.Add($relative)
+}
+$index | Set-Content 'build/logs/patched-ui-source-index.txt' -Encoding UTF8
+
 Write-Host 'Apocalyptic Shadow layout and localized playtime format fixes applied.'
