@@ -6,6 +6,11 @@ on:
       - feature/auto-game-record-refresh
     paths:
       - '.github/workflows/materialize-direct-source.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/materialize-direct-source.yml'
   workflow_dispatch:
 
 permissions:
