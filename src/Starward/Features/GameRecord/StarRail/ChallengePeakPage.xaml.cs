@@ -37,6 +37,7 @@ public sealed partial class ChallengePeakPage : PageBase
     private GameRecordRole gameRole;
 
 
+
     protected override void OnNavigatedTo(NavigationEventArgs e)
     {
         if (e.Parameter is GameRecordRole role)
@@ -66,8 +67,10 @@ public sealed partial class ChallengePeakPage : PageBase
     private List<ChallengePeakData> ChallengePeakDataList { get; set => SetProperty(ref field, value); }
 
 
+
     private ChallengePeakData? CurrentChallengePeakData { get; set => SetProperty(ref field, value); }
 
+    // The boss card presents its buff as a compact clickable summary in XAML.
     private ChallengePeakRecord? CurrentChallengePeakRecord { get; set => SetProperty(ref field, value); }
 
 
@@ -125,6 +128,7 @@ public sealed partial class ChallengePeakPage : PageBase
             InAppToast.MainWindow?.Error(ex);
         }
     }
+
 
 
 
