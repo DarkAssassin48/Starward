@@ -6,14 +6,17 @@ on:
       - main
     paths:
       - '.github/workflows/release-0.17.4a-beta.yml'
-  issues:
+  pull_request:
     types:
       - opened
+      - reopened
+      - synchronize
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
   contents: write
-  issues: read
 
 concurrency:
   group: release-v0.17.4a-beta
@@ -21,7 +24,7 @@ concurrency:
 
 jobs:
   build-and-release:
-    if: github.event_name != 'issues' || github.event.issue.title == 'publish-v0.17.4a-beta'
+    if: github.event_name != 'pull_request' || github.head_ref == 'release/0.17.4a-beta-trigger'
     runs-on: windows-2025-vs2026
     env:
       TAG_NAME: v0.17.4a-beta
