@@ -84,6 +84,14 @@ jobs:
           Get-Content 'build/logs/ui-l10n-fixes.log'
           if ($fixExit -ne 0) { exit $fixExit }
 
+      - name: Upload patched UI source diagnostics
+        uses: actions/upload-artifact@v7
+        with:
+          name: Starward_Patched_UI_Sources
+          path: build/logs/patched-ui-sources/
+          if-no-files-found: error
+          compression-level: 6
+
       - name: Install .NET from global.json
         uses: actions/setup-dotnet@v5
         with:
