@@ -2737,4 +2737,10 @@
   <data name="FileManageSetting_CleanUpLauncherBackgroundFiles" xml:space="preserve">
     <value>ランチャー背景ファイルをクリーンアップ</value>
   </data>
+  <data name="Common_SecondsFormat" xml:space="preserve">
+    <value>{0} 秒</value>
+  </data>
+  <data name="ImaginariumTheaterPage_TotalPerformanceDurationFormat" xml:space="preserve">
+    <value>{0} 分 {1} 秒</value>
+  </data>
 </root>

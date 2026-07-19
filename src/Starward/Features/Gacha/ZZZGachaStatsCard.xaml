@@ -98,57 +98,82 @@
                    Text="{x:Bind WarpTypeStats.Pity_5}" />-->
 
         <!--  5★ 平均  -->
-        <TextBlock Grid.Row="3" Foreground="{ThemeResource Rarity2ForegroundBrush}">
-            <Run Text="S" />
-            <Run Text="{x:Bind lang:Lang.GachaStatsCard_Average}" />
-            <Run Text="{x:Bind WarpTypeStats.Avarage_5_Desc_Text}" />
-        </TextBlock>
-        <TextBlock Grid.Row="3"
-                   HorizontalAlignment="Right"
-                   Foreground="{ThemeResource Rarity2ForegroundBrush}">
-            <Run Text="{x:Bind WarpTypeStats.Average_5.ToString('F2', x:Null)}" /><Run Text="{x:Bind WarpTypeStats.Avarage_5_Up_Text}" />
-        </TextBlock>
+        <Grid Grid.Row="3" ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Foreground="{ThemeResource Rarity2ForegroundBrush}"
+                       TextWrapping="Wrap">
+                <Run Text="S" />
+                <Run Text="{x:Bind lang:Lang.GachaStatsCard_Average}" />
+                <Run Text="{x:Bind WarpTypeStats.Avarage_5_Desc_Text}" />
+            </TextBlock>
+            <TextBlock Grid.Column="1"
+                       HorizontalAlignment="Right"
+                       Foreground="{ThemeResource Rarity2ForegroundBrush}">
+                <Run Text="{x:Bind WarpTypeStats.Average_5.ToString('F2', x:Null)}" /><Run Text="{x:Bind WarpTypeStats.Avarage_5_Up_Text}" />
+            </TextBlock>
+        </Grid>
 
         <!--<MenuFlyoutSeparator Grid.Row="6" />-->
 
         <!--  5★ 统计  -->
-        <TextBlock Grid.Row="4" Foreground="{ThemeResource Rarity5ForegroundBrush}">
-            <Run Text="S" />
-            <Run Text="{x:Bind lang:Lang.GachaStatsCard_Stats}" />
-        </TextBlock>
-        <TextBlock Grid.Row="4"
-                   HorizontalAlignment="Right"
-                   Foreground="{ThemeResource Rarity5ForegroundBrush}"
-                   HorizontalTextAlignment="Left">
-            <Run Text="{x:Bind WarpTypeStats.Count_5}" />
-            <Run Text="[" /><Run Text="{x:Bind WarpTypeStats.Ratio_5.ToString('P2', x:Null)}" /><Run Text="]" />
-        </TextBlock>
+        <Grid Grid.Row="4" ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Foreground="{ThemeResource Rarity5ForegroundBrush}"
+                       TextWrapping="Wrap">
+                <Run Text="S" />
+                <Run Text="{x:Bind lang:Lang.GachaStatsCard_Stats}" />
+            </TextBlock>
+            <TextBlock Grid.Column="1"
+                       HorizontalAlignment="Right"
+                       Foreground="{ThemeResource Rarity5ForegroundBrush}">
+                <Run Text="{x:Bind WarpTypeStats.Count_5}" />
+                <Run Text="[" /><Run Text="{x:Bind WarpTypeStats.Ratio_5.ToString('P2', x:Null)}" /><Run Text="]" />
+            </TextBlock>
+        </Grid>
 
         <!--  4★ 统计  -->
-        <TextBlock Grid.Row="5" Foreground="{ThemeResource Rarity4ForegroundBrush}">
-            <Run Text="A" />
-            <Run Text="{x:Bind lang:Lang.GachaStatsCard_Stats}" />
-        </TextBlock>
-        <TextBlock Grid.Row="5"
-                   HorizontalAlignment="Right"
-                   Foreground="{ThemeResource Rarity4ForegroundBrush}"
-                   HorizontalTextAlignment="Left">
-            <Run Text="{x:Bind WarpTypeStats.Count_4}" />
-            <Run Text="[" /><Run Text="{x:Bind WarpTypeStats.Ratio_4.ToString('P2', x:Null)}" /><Run Text="]" />
-        </TextBlock>
+        <Grid Grid.Row="5" ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Foreground="{ThemeResource Rarity4ForegroundBrush}"
+                       TextWrapping="Wrap">
+                <Run Text="A" />
+                <Run Text="{x:Bind lang:Lang.GachaStatsCard_Stats}" />
+            </TextBlock>
+            <TextBlock Grid.Column="1"
+                       HorizontalAlignment="Right"
+                       Foreground="{ThemeResource Rarity4ForegroundBrush}">
+                <Run Text="{x:Bind WarpTypeStats.Count_4}" />
+                <Run Text="[" /><Run Text="{x:Bind WarpTypeStats.Ratio_4.ToString('P2', x:Null)}" /><Run Text="]" />
+            </TextBlock>
+        </Grid>
 
         <!--  3★ 统计  -->
-        <TextBlock Grid.Row="6" Foreground="{ThemeResource Rarity3ForegroundBrush}">
-            <Run Text="B" />
-            <Run Text="{x:Bind lang:Lang.GachaStatsCard_Stats}" />
-        </TextBlock>
-        <TextBlock Grid.Row="6"
-                   HorizontalAlignment="Right"
-                   Foreground="{ThemeResource Rarity3ForegroundBrush}"
-                   HorizontalTextAlignment="Left">
-            <Run Text="{x:Bind WarpTypeStats.Count_3}" />
-            <Run Text="[" /><Run Text="{x:Bind WarpTypeStats.Ratio_3.ToString('P2', x:Null)}" /><Run Text="]" />
-        </TextBlock>
+        <Grid Grid.Row="6" ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Foreground="{ThemeResource Rarity3ForegroundBrush}"
+                       TextWrapping="Wrap">
+                <Run Text="B" />
+                <Run Text="{x:Bind lang:Lang.GachaStatsCard_Stats}" />
+            </TextBlock>
+            <TextBlock Grid.Column="1"
+                       HorizontalAlignment="Right"
+                       Foreground="{ThemeResource Rarity3ForegroundBrush}">
+                <Run Text="{x:Bind WarpTypeStats.Count_3}" />
+                <Run Text="[" /><Run Text="{x:Bind WarpTypeStats.Ratio_3.ToString('P2', x:Null)}" /><Run Text="]" />
+            </TextBlock>
+        </Grid>
 
         <MenuFlyoutSeparator Grid.Row="7" Visibility="Collapsed" />
 

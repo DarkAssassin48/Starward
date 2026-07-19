@@ -78,6 +78,14 @@ internal class GameRecordService
     }
 
 
+    /// <summary>
+    /// Select the correct API client from the role itself. This prevents background
+    /// refreshes for one server from changing the client used by another role.
+    /// </summary>
+    private GameRecordClient GetClient(GameRecordRole role)
+    {
+        return new GameBiz(role.GameBiz).IsGlobalServer() ? _hoyolabClient : _hyperionClient;
+    }
 
 
 
@@ -92,19 +100,29 @@ internal class GameRecordService
         {
             return;
         }
+        await UpdateHyperionDeviceFpAsync(forceUpdate, cancellationToken);
+    }
+
+
+    /// <summary>
+    /// Updates the China server device fingerprint without changing the client
+    /// selected by the currently opened HoYoLAB toolbox page.
+    /// </summary>
+    public async Task UpdateHyperionDeviceFpAsync(bool forceUpdate = false, CancellationToken cancellationToken = default)
+    {
         string? id = AppConfig.HyperionDeviceId;
         string? fp = AppConfig.HyperionDeviceFp;
         DateTimeOffset lastUpdateTime = AppConfig.HyperionDeviceFpLastUpdateTime;
         if (!forceUpdate && !string.IsNullOrWhiteSpace(id) && !string.IsNullOrWhiteSpace(fp))
         {
-            _gameRecordClient.DeviceId = id;
-            _gameRecordClient.DeviceFp = fp;
+            _hyperionClient.DeviceId = id;
+            _hyperionClient.DeviceFp = fp;
         }
         if (forceUpdate || DateTimeOffset.Now - lastUpdateTime > TimeSpan.FromDays(3))
         {
-            await _gameRecordClient.GetDeviceFpAsync(cancellationToken);
-            AppConfig.HyperionDeviceId = _gameRecordClient.DeviceId;
-            AppConfig.HyperionDeviceFp = _gameRecordClient.DeviceFp;
+            await _hyperionClient.GetDeviceFpAsync(cancellationToken);
+            AppConfig.HyperionDeviceId = _hyperionClient.DeviceId;
+            AppConfig.HyperionDeviceFp = _hyperionClient.DeviceFp;
             AppConfig.HyperionDeviceFpLastUpdateTime = DateTimeOffset.Now;
         }
     }
@@ -160,6 +178,19 @@ internal class GameRecordService
         using var dapper = DatabaseService.CreateConnection();
         var list = dapper.Query<GameRecordRole>("SELECT * FROM GameRecordRole WHERE GameBiz = @gameBiz;", new { gameBiz });
         return list.ToList();
+    }
+
+
+    /// <summary>
+    /// Returns roles from every server of the selected game.
+    /// </summary>
+    public List<GameRecordRole> GetGameRolesOfGame(GameBiz game)
+    {
+        using var dapper = DatabaseService.CreateConnection();
+        string prefix = $"{game.Game}_";
+        return dapper.Query<GameRecordRole>(
+            "SELECT * FROM GameRecordRole WHERE substr(GameBiz, 1, @length) = @prefix ORDER BY GameBiz, Uid;",
+            new { prefix, length = prefix.Length }).ToList();
     }
 
 
@@ -247,7 +278,7 @@ internal class GameRecordService
         string key = $"game_record_role_head_icon_{role.GameBiz}_{role.Region}_{role.Uid}";
         if (!_memoryCache.TryGetValue(key, out bool _))
         {
-            role = await _gameRecordClient.UpdateGameRoleHeadIconAsync(role);
+            role = await GetClient(role).UpdateGameRoleHeadIconAsync(role);
             using var dapper = DatabaseService.CreateConnection();
             dapper.Execute("""
                 INSERT OR REPLACE INTO GameRecordRole (Uid, GameBiz, Nickname, Level, Region, RegionName, Cookie, HeadIcon)
@@ -300,7 +331,7 @@ internal class GameRecordService
     /// <returns></returns>
     public async Task<SpiralAbyssInfo> RefreshSpiralAbyssInfoAsync(GameRecordRole role, int schedule, CancellationToken cancellationToken = default)
     {
-        var info = await _gameRecordClient.GetSpiralAbyssInfoAsync(role, schedule);
+        var info = await GetClient(role).GetSpiralAbyssInfoAsync(role, schedule);
         var obj = new
         {
             info.Uid,
@@ -369,7 +400,7 @@ internal class GameRecordService
 
     public async Task<TravelersDiarySummary> GetTravelersDiarySummaryAsync(GameRecordRole role, int month = 0)
     {
-        var summary = await _gameRecordClient.GetTravelsDiarySummaryAsync(role, month);
+        var summary = await GetClient(role).GetTravelsDiarySummaryAsync(role, month);
         if (summary.MonthData is null)
         {
             return summary;
@@ -399,7 +430,7 @@ internal class GameRecordService
 
     public async Task<int> GetTravelersDiaryDetailAsync(GameRecordRole role, int month, int type, int limit = 100)
     {
-        var detail = await _gameRecordClient.GetTravelsDiaryDetailAsync(role, month, type, limit);
+        var detail = await GetClient(role).GetTravelsDiaryDetailAsync(role, month, type, limit);
         if (detail.List is null || detail.List.Count == 0)
         {
             return 0;
@@ -450,7 +481,7 @@ internal class GameRecordService
     /// <returns></returns>
     public async Task RefreshImaginariumTheaterInfoAsync(GameRecordRole role, CancellationToken cancellationToken = default)
     {
-        var infos = await _gameRecordClient.GetImaginariumTheaterInfosAsync(role, cancellationToken);
+        var infos = await GetClient(role).GetImaginariumTheaterInfosAsync(role, cancellationToken);
         if (infos.Count == 0)
         {
             return;
@@ -524,7 +555,7 @@ internal class GameRecordService
 
     public async Task<SimulatedUniverseInfo> GetSimulatedUniverseInfoAsync(GameRecordRole role, bool detail)
     {
-        var info = await _gameRecordClient.GetSimulatedUniverseInfoAsync(role, detail);
+        var info = await GetClient(role).GetSimulatedUniverseInfoAsync(role, detail);
         if (detail)
         {
             using var dapper = DatabaseService.CreateConnection();
@@ -600,7 +631,7 @@ internal class GameRecordService
 
     public async Task<ForgottenHallInfo> RefreshForgottenHallInfoAsync(GameRecordRole role, int schedule, CancellationToken cancellationToken = default)
     {
-        var info = await _gameRecordClient.GetForgottenHallInfoAsync(role, schedule);
+        var info = await GetClient(role).GetForgottenHallInfoAsync(role, schedule);
         var obj = new
         {
             info.Uid,
@@ -665,7 +696,7 @@ internal class GameRecordService
 
     public async Task<PureFictionInfo> RefreshPureFictionInfoAsync(GameRecordRole role, int schedule, CancellationToken cancellationToken = default)
     {
-        var info = await _gameRecordClient.GetPureFictionInfoAsync(role, schedule);
+        var info = await GetClient(role).GetPureFictionInfoAsync(role, schedule);
         if (info.ScheduleId == 0)
         {
             return info;
@@ -734,7 +765,7 @@ internal class GameRecordService
 
     public async Task<ApocalypticShadowInfo> RefreshApocalypticShadowInfoAsync(GameRecordRole role, int schedule, CancellationToken cancellationToken = default)
     {
-        var info = await _gameRecordClient.GetApocalypticShadowInfoAsync(role, schedule);
+        var info = await GetClient(role).GetApocalypticShadowInfoAsync(role, schedule);
         if (info.ScheduleId == 0)
         {
             return info;
@@ -806,7 +837,7 @@ internal class GameRecordService
 
     public async Task<TrailblazeCalendarSummary> GetTrailblazeCalendarSummaryAsync(GameRecordRole role, string month = "")
     {
-        var summary = await _gameRecordClient.GetTrailblazeCalendarSummaryAsync(role, month);
+        var summary = await GetClient(role).GetTrailblazeCalendarSummaryAsync(role, month);
         if (summary.MonthData is null)
         {
             return summary;
@@ -835,7 +866,7 @@ internal class GameRecordService
 
     public async Task<int> GetTrailblazeCalendarDetailAsync(GameRecordRole role, string month, int type)
     {
-        int total = (await _gameRecordClient.GetTrailblazeCalendarDetailByPageAsync(role, month, type, 1, 1)).Total;
+        int total = (await GetClient(role).GetTrailblazeCalendarDetailByPageAsync(role, month, type, 1, 1)).Total;
         if (total == 0)
         {
             return 0;
@@ -846,7 +877,7 @@ internal class GameRecordService
         {
             return 0;
         }
-        var detail = await _gameRecordClient.GetTrailblazeCalendarDetailAsync(role, month, type);
+        var detail = await GetClient(role).GetTrailblazeCalendarDetailAsync(role, month, type);
         var list = detail.List;
         using var t = dapper.BeginTransaction();
         dapper.Execute($"DELETE FROM StarRailTrailblazeCalendarDetailItem WHERE Uid = @Uid AND Month = @Month AND Type = @Type;", list.FirstOrDefault(), t);
@@ -880,7 +911,7 @@ internal class GameRecordService
 
     public async Task<InterKnotReportSummary> GetInterKnotReportSummaryAsync(GameRecordRole role, string month = "")
     {
-        var summary = await _gameRecordClient.GetInterKnotReportSummaryAsync(role, month);
+        var summary = await GetClient(role).GetInterKnotReportSummaryAsync(role, month);
         using var dapper = DatabaseService.CreateConnection();
         var obj = new
         {
@@ -926,7 +957,7 @@ internal class GameRecordService
 
     public async Task<int> GetInterKnotReportDetailAsync(GameRecordRole role, string month, string type)
     {
-        int total = (await _gameRecordClient.GetInterKnotReportDetailByPageAsync(role, month, type, 1, 1)).Total;
+        int total = (await GetClient(role).GetInterKnotReportDetailByPageAsync(role, month, type, 1, 1)).Total;
         if (total == 0)
         {
             return 0;
@@ -937,7 +968,7 @@ internal class GameRecordService
         {
             return 0;
         }
-        var detail = await _gameRecordClient.GetInterKnotReportDetailAsync(role, month, type);
+        var detail = await GetClient(role).GetInterKnotReportDetailAsync(role, month, type);
         var list = detail.List;
         using var t = dapper.BeginTransaction();
         dapper.Execute($"DELETE FROM ZZZInterKnotReportDetailItem WHERE Uid = @Uid AND DataMonth = @DataMonth AND DataType = @DataType;", list.FirstOrDefault(), t);
@@ -975,7 +1006,7 @@ internal class GameRecordService
         {
             await UpdateDeviceFpAsync(cancellationToken: cancellationToken);
         }
-        return await _gameRecordClient.GetZZZGachaRecordAsync(role, gachaType, endId, language, cancellationToken);
+        return await GetClient(role).GetZZZGachaRecordAsync(role, gachaType, endId, language, cancellationToken);
     }
 
 
@@ -992,7 +1023,7 @@ internal class GameRecordService
 
     public async Task<ShiyuDefenseWrapper> RefreshShiyuDefenseInfoAsync(GameRecordRole role, int schedule, CancellationToken cancellationToken = default)
     {
-        var wrapper = await _gameRecordClient.GetShiyuDefenseInfoAsync(role, schedule);
+        var wrapper = await GetClient(role).GetShiyuDefenseInfoAsync(role, schedule);
         if (wrapper.HadalVer is "v1" && wrapper.InfoV1 is not null)
         {
             var info = wrapper.InfoV1;
@@ -1099,7 +1130,7 @@ internal class GameRecordService
 
     public async Task<DeadlyAssaultInfo> RefreshDeadlyAssaultInfoAsync(GameRecordRole role, int schedule, CancellationToken cancellationToken = default)
     {
-        var info = await _gameRecordClient.GetDeadlyAssaultInfoAsync(role, schedule);
+        var info = await GetClient(role).GetDeadlyAssaultInfoAsync(role, schedule);
         if (!info.HasData)
         {
             return info;
@@ -1170,7 +1201,7 @@ internal class GameRecordService
         string key = $"{nameof(BH3DailyNote)}_{role.Region}_{role.Uid}";
         if (forceUpdate || !_memoryCache.TryGetValue(key, out BH3DailyNote? note))
         {
-            note = await _gameRecordClient.GetBH3DailyNoteAsync(role, cancellationToken);
+            note = await GetClient(role).GetBH3DailyNoteAsync(role, cancellationToken);
             _memoryCache.Set(key, note, TimeSpan.FromMinutes(5));
         }
         return note!;
@@ -1183,7 +1214,7 @@ internal class GameRecordService
         string key = $"{nameof(GenshinDailyNote)}_{role.Region}_{role.Uid}";
         if (forceUpdate || !_memoryCache.TryGetValue(key, out GenshinDailyNote? note))
         {
-            note = await _gameRecordClient.GetGenshinDailyNoteAsync(role, cancellationToken);
+            note = await GetClient(role).GetGenshinDailyNoteAsync(role, cancellationToken);
             _memoryCache.Set(key, note, TimeSpan.FromMinutes(5));
         }
         return note!;
@@ -1196,7 +1227,7 @@ internal class GameRecordService
         string key = $"{nameof(StarRailDailyNote)}_{role.Region}_{role.Uid}";
         if (forceUpdate || !_memoryCache.TryGetValue(key, out StarRailDailyNote? note))
         {
-            note = await _gameRecordClient.GetStarRailDailyNoteAsync(role, cancellationToken);
+            note = await GetClient(role).GetStarRailDailyNoteAsync(role, cancellationToken);
             _memoryCache.Set(key, note, TimeSpan.FromMinutes(5));
         }
         return note!;
@@ -1208,7 +1239,7 @@ internal class GameRecordService
         string key = $"{nameof(ZZZDailyNote)}_{role.Region}_{role.Uid}";
         if (forceUpdate || !_memoryCache.TryGetValue(key, out ZZZDailyNote? note))
         {
-            note = await _gameRecordClient.GetZZZDailyNoteAsync(role, cancellationToken);
+            note = await GetClient(role).GetZZZDailyNoteAsync(role, cancellationToken);
             _memoryCache.Set(key, note, TimeSpan.FromMinutes(5));
         }
         return note!;
@@ -1227,7 +1258,7 @@ internal class GameRecordService
 
     public async Task<List<StygianOnslaughtInfo>> RefreshStygianOnslaughtInfosAsync(GameRecordRole role, CancellationToken cancellationToken = default)
     {
-        var infos = await _gameRecordClient.GetStygianOnslaughtInfosAsync(role, cancellationToken);
+        var infos = await GetClient(role).GetStygianOnslaughtInfosAsync(role, cancellationToken);
         if (infos.Count == 0)
         {
             return infos;
@@ -1312,7 +1343,7 @@ internal class GameRecordService
     {
         using var dapper = DatabaseService.CreateConnection();
 
-        var data = await _gameRecordClient.GetStarRailChallengePeakDataAsync(role, 1, cancellationToken);
+        var data = await GetClient(role).GetStarRailChallengePeakDataAsync(role, 1, cancellationToken);
         if (data.ChallengePeakRecords?.Count == 1)
         {
             var record = data.ChallengePeakRecords[0];
@@ -1332,7 +1363,7 @@ internal class GameRecordService
                 """, obj);
         }
 
-        data = await _gameRecordClient.GetStarRailChallengePeakDataAsync(role, 3, cancellationToken);
+        data = await GetClient(role).GetStarRailChallengePeakDataAsync(role, 3, cancellationToken);
         foreach (var record in data.ChallengePeakRecords.ToList())
         {
             data.ChallengePeakRecords.Clear();

@@ -16,6 +16,7 @@ using Starward.Frameworks;
 using Starward.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -31,6 +32,10 @@ public sealed partial class GameRecordPage : PageBase
 
 
     private readonly GameRecordService _gameRecordService = AppConfig.GetService<GameRecordService>();
+
+    private readonly GameRecordAutoRefreshService _autoRefreshService = AppConfig.GetService<GameRecordAutoRefreshService>();
+
+    private NavigationViewItem? _autoRefreshSettingsItem;
 
 
 
@@ -53,11 +58,16 @@ public sealed partial class GameRecordPage : PageBase
             _ => CurrentGameBiz,
         };
         _gameRecordService.IsHoyolab = CurrentGameBiz.IsGlobalServer();
-        if (CurrentGameBiz.IsGlobalServer())
+        NavigationViewItem_UpdateDeviceInfo.Visibility = CurrentGameBiz.IsGlobalServer()
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+        _gameRecordService.Language = CultureInfo.CurrentUICulture.Name;
+        if (_autoRefreshSettingsItem is not null)
         {
-            NavigationViewItem_UpdateDeviceInfo.Visibility = Visibility.Collapsed;
+            _autoRefreshSettingsItem.Visibility = CurrentGameBiz.Game is GameBiz.hk4e or GameBiz.hkrpg or GameBiz.nap
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         }
-        _gameRecordService.Language = System.Globalization.CultureInfo.CurrentUICulture.Name;
         InitializeNavigationViewItemVisibility();
     }
 
@@ -82,6 +92,13 @@ public sealed partial class GameRecordPage : PageBase
         {
             ShowBattleChronicleWindow();
         });
+        WeakReferenceMessenger.Default.Register<GameRecordAutoRefreshCompletedMessage>(this, (r, m) =>
+        {
+            if (CurrentGameBiz.Game == m.Game.Game && frame.SourcePageType is Type pageType && pageType != typeof(LoginPage))
+            {
+                DispatcherQueue.TryEnqueue(() => NavigateTo(pageType, force_navigate: true));
+            }
+        });
         await Task.Delay(16);
         NavigateTo(typeof(BlankPage));
         if (await CheckAgreementAsync())
@@ -99,6 +116,10 @@ public sealed partial class GameRecordPage : PageBase
         WeakReferenceMessenger.Default.UnregisterAll(this);
         NavigationViewItem_BattleChronicle.Tapped -= NavigationViewItem_BattleChronicle_Tapped;
         NavigationViewItem_UpdateDeviceInfo.Tapped -= NavigationViewItem_UpdateDeviceInfo_Tapped;
+        if (_autoRefreshSettingsItem is not null)
+        {
+            _autoRefreshSettingsItem.Tapped -= NavigationViewItem_AutoRefreshSettings_Tapped;
+        }
         CurrentRole = null;
         GameRoleList = null!;
         _battleChronicleWindow = null;
@@ -555,6 +576,204 @@ public sealed partial class GameRecordPage : PageBase
     }
 
 
+
+
+    #endregion
+
+
+
+
+    #region Game Record Auto Refresh
+
+
+    private void InitializeAutoRefreshSettingsItem()
+    {
+        // PaneFooter currently contains the device fingerprint item. Re-wrap it in
+        // a panel so the new automatic refresh settings are available beside it.
+        NavigationView_Toolbox.PaneFooter = null;
+
+        _autoRefreshSettingsItem = new NavigationViewItem
+        {
+            Margin = new Thickness(-2, 0, 0, -4),
+            Content = Localized("Настройки автообновления", "Automatic refresh settings"),
+            Icon = new FontIcon { Glyph = "\uE895" },
+        };
+        _autoRefreshSettingsItem.Tapped += NavigationViewItem_AutoRefreshSettings_Tapped;
+
+        var footer = new StackPanel();
+        footer.Children.Add(_autoRefreshSettingsItem);
+        footer.Children.Add(NavigationViewItem_UpdateDeviceInfo);
+        NavigationView_Toolbox.PaneFooter = footer;
+    }
+
+
+    private async void NavigationViewItem_AutoRefreshSettings_Tapped(object sender, Microsoft.UI.Xaml.Input.TappedRoutedEventArgs e)
+    {
+        await ShowAutoRefreshSettingsAsync();
+    }
+
+
+    private async Task ShowAutoRefreshSettingsAsync()
+    {
+        try
+        {
+            GameBiz game = CurrentGameBiz.ToGame();
+            GameRecordAutoRefreshInterval current = AppConfig.GetGameRecordAutoRefreshInterval(game);
+
+            var scheduleComboBox = new ComboBox
+            {
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                MinWidth = 300,
+            };
+
+            GameRecordAutoRefreshInterval[] values =
+            [
+                GameRecordAutoRefreshInterval.Disabled,
+                GameRecordAutoRefreshInterval.OnStartup,
+                GameRecordAutoRefreshInterval.Daily,
+                GameRecordAutoRefreshInterval.Weekly,
+                GameRecordAutoRefreshInterval.Monthly,
+            ];
+
+            foreach (GameRecordAutoRefreshInterval value in values)
+            {
+                scheduleComboBox.Items.Add(new ComboBoxItem
+                {
+                    Content = GetAutoRefreshIntervalText(value),
+                    Tag = value,
+                });
+            }
+            scheduleComboBox.SelectedIndex = Array.IndexOf(values, current);
+
+            DateTimeOffset lastRefresh = _autoRefreshService.GetLastSuccessfulRefreshTime(game);
+            string lastRefreshText = lastRefresh == default
+                ? Localized("Ещё не выполнялось", "Not performed yet")
+                : lastRefresh.LocalDateTime.ToString("g");
+
+            var content = new StackPanel
+            {
+                Spacing = 10,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = GetAutoRefreshDescription(game),
+                        TextWrapping = TextWrapping.Wrap,
+                        MaxWidth = 520,
+                    },
+                    new TextBlock
+                    {
+                        Text = Localized("Расписание", "Schedule"),
+                        FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                    },
+                    scheduleComboBox,
+                    new TextBlock
+                    {
+                        Text = $"{Localized("Последнее успешное обновление", "Last successful refresh")}: {lastRefreshText}",
+                        Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorSecondaryBrush"],
+                        TextWrapping = TextWrapping.Wrap,
+                    },
+                    new TextBlock
+                    {
+                        Text = Localized(
+                            "Расписание проверяется при запуске Starward и каждые 30 минут, пока клиент открыт. Если срок наступил при закрытом клиенте, данные обновятся при следующем запуске.",
+                            "The schedule is checked when Starward starts and every 30 minutes while it is open. Missed refreshes run on the next launch."),
+                        Foreground = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["TextFillColorSecondaryBrush"],
+                        TextWrapping = TextWrapping.Wrap,
+                        MaxWidth = 520,
+                    },
+                },
+            };
+
+            var dialog = new ContentDialog
+            {
+                Title = $"{Localized("Автообновление", "Automatic refresh")} — {game.ToGameName()}",
+                Content = content,
+                PrimaryButtonText = Localized("Сохранить", "Save"),
+                SecondaryButtonText = Localized("Обновить сейчас", "Refresh now"),
+                CloseButtonText = Localized("Отмена", "Cancel"),
+                DefaultButton = ContentDialogButton.Primary,
+                XamlRoot = XamlRoot,
+            };
+
+            ContentDialogResult result = await dialog.ShowAsync();
+            if (result is ContentDialogResult.Primary or ContentDialogResult.Secondary &&
+                scheduleComboBox.SelectedItem is ComboBoxItem { Tag: GameRecordAutoRefreshInterval interval })
+            {
+                AppConfig.SetGameRecordAutoRefreshInterval(game, interval);
+            }
+
+            if (result is ContentDialogResult.Primary)
+            {
+                InAppToast.MainWindow?.Success(Localized("Настройки автообновления сохранены", "Automatic refresh settings saved"));
+            }
+            else if (result is ContentDialogResult.Secondary)
+            {
+                GameRecordAutoRefreshResult refreshResult = await _autoRefreshService.RefreshGameNowAsync(game);
+                if (refreshResult.HasAnySuccess)
+                {
+                    InAppToast.MainWindow?.Success(
+                        Localized("Обновление завершено", "Refresh completed"),
+                        string.Format(
+                            Localized("Аккаунтов обновлено: {0}. Успешных операций: {1}, ошибок: {2}", "Roles refreshed: {0}. Successful operations: {1}, errors: {2}"),
+                            refreshResult.RefreshedRoles,
+                            refreshResult.SuccessfulOperations,
+                            refreshResult.FailedOperations));
+                }
+                else
+                {
+                    InAppToast.MainWindow?.Warning(
+                        Localized("Нет данных для обновления", "Nothing was refreshed"),
+                        Localized("Проверьте, что аккаунт добавлен и Cookie действителен", "Check that an account is added and its cookie is valid"));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Show or execute game record auto refresh settings ({gameBiz}).", CurrentGameBiz);
+            InAppToast.MainWindow?.Error(ex);
+        }
+    }
+
+
+    private static string GetAutoRefreshIntervalText(GameRecordAutoRefreshInterval interval)
+    {
+        return interval switch
+        {
+            GameRecordAutoRefreshInterval.Disabled => Localized("Отключено", "Disabled"),
+            GameRecordAutoRefreshInterval.OnStartup => Localized("При каждом запуске клиента", "Every time the client starts"),
+            GameRecordAutoRefreshInterval.Daily => Localized("Раз в день", "Once a day"),
+            GameRecordAutoRefreshInterval.Weekly => Localized("Раз в неделю", "Once a week"),
+            GameRecordAutoRefreshInterval.Monthly => Localized("Раз в месяц", "Once a month"),
+            _ => interval.ToString(),
+        };
+    }
+
+
+    private static string GetAutoRefreshDescription(GameBiz game)
+    {
+        return game.Game switch
+        {
+            GameBiz.hk4e => Localized(
+                "Будут обновляться: Витая Бездна, Театр Воображариум, Мрачный натиск и Дневник путешественника — для всех добавленных аккаунтов Genshin Impact.",
+                "Refreshes Spiral Abyss, Imaginarium Theater, Stygian Onslaught and Traveler's Diary for every added Genshin Impact account."),
+            GameBiz.hkrpg => Localized(
+                "Будут обновляться: Календарь Освоения, Виртуальная вселенная, Зал забвения, Чистый вымысел, Иллюзия конца и Арбитраж аномалий — для всех добавленных аккаунтов Honkai: Star Rail.",
+                "Refreshes Trailblaze Calendar, Simulated Universe, Forgotten Hall, Pure Fiction, Apocalyptic Shadow and Anomaly Arbitration for every added Honkai: Star Rail account."),
+            GameBiz.nap => Localized(
+                "Будут обновляться: Ежемесячный отчёт Интернота, Оборона шиюй и Смертельный штурм — для всех добавленных аккаунтов Zenless Zone Zero.",
+                "Refreshes Inter-Knot Monthly Report, Shiyu Defense and Deadly Assault for every added Zenless Zone Zero account."),
+            _ => string.Empty,
+        };
+    }
+
+
+    private static string Localized(string russian, string english)
+    {
+        return CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("ru", StringComparison.OrdinalIgnoreCase)
+            ? russian
+            : english;
+    }
 
 
     #endregion

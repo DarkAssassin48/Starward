@@ -223,76 +223,151 @@
                                          Grid.ColumnSpan="3"
                                          Margin="4" />
                     <Grid x:Name="BossPanelGrid" Grid.Row="3" Grid.ColumnSpan="3">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition />
-                            <ColumnDefinition />
-                            <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0"
-                                    HorizontalAlignment="Center"
-                                    Orientation="Horizontal"
-                                    Spacing="12">
-                            <sc:CachedImage Width="40"
-                                            Height="40"
-                                            VerticalAlignment="Center"
-                                            CornerRadius="20"
-                                            Source="{x:Bind CurrentApocalypticShadow.Meta.UpperBoss.Icon}" />
-                            <TextBlock VerticalAlignment="Center" FontSize="12">
-                                <Run Text="{x:Bind lang:Lang.ForgottenHallPage_TeamSetup}" />
-                                <Run Text="1" />
-                                <LineBreak />
-                                <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind CurrentApocalypticShadow.Meta.UpperBoss.Name}" />
-                            </TextBlock>
+                        <!-- Dedicated full-width layout for records with two teams. -->
+                        <Grid ColumnSpacing="28"
+                              Visibility="{x:Bind CurrentApocalypticShadow.Meta.TierceBoss, Converter={StaticResource ObjectToVisibilityReversedConverter}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
 
-                        </StackPanel>
-                        <StackPanel Grid.Column="1"
-                                    HorizontalAlignment="Center"
-                                    Orientation="Horizontal"
-                                    Spacing="12">
-                            <sc:CachedImage Width="40"
-                                            Height="40"
+                            <Grid Grid.Column="0" Margin="12,0,6,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <sc:CachedImage Width="40"
+                                                Height="40"
+                                                VerticalAlignment="Center"
+                                                CornerRadius="20"
+                                                Source="{x:Bind CurrentApocalypticShadow.Meta.UpperBoss.Icon}" />
+                                <StackPanel Grid.Column="1"
+                                            MinWidth="0"
+                                            Margin="12,0,0,0"
                                             VerticalAlignment="Center"
-                                            CornerRadius="20"
-                                            Source="{x:Bind CurrentApocalypticShadow.Meta.LowerBoss.Icon}" />
-                            <TextBlock VerticalAlignment="Center" FontSize="12">
-                                <Run Text="{x:Bind lang:Lang.ForgottenHallPage_TeamSetup}" />
-                                <Run Text="2" />
-                                <LineBreak />
-                                <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind CurrentApocalypticShadow.Meta.LowerBoss.Name}" />
-                            </TextBlock>
+                                            Spacing="2">
+                                    <TextBlock FontSize="12">
+                                        <Run Text="{x:Bind lang:Lang.ForgottenHallPage_TeamSetup}" />
+                                        <Run Text="1" />
+                                    </TextBlock>
+                                    <TextBlock FontSize="11"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               MaxLines="2"
+                                               Text="{x:Bind CurrentApocalypticShadow.Meta.UpperBoss.Name}"
+                                               TextTrimming="CharacterEllipsis"
+                                               TextWrapping="WrapWholeWords"
+                                               ToolTipService.ToolTip="{x:Bind CurrentApocalypticShadow.Meta.UpperBoss.Name}" />
+                                </StackPanel>
+                            </Grid>
 
-                        </StackPanel>
-                        <Image Grid.Column="2"
-                               MaxHeight="44"
-                               Margin="40,-2,0,-2"
-                               Stretch="Fill"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Bottom"
-                               RenderTransformOrigin="0.5,0.5"
-                               Source="{StaticResource StarwardModeBossBg}"
-                               Visibility="{x:Bind CurrentApocalypticShadow.Meta.TierceBoss, Converter={StaticResource ObjectToVisibilityConverter}}">
-                            <Image.RenderTransform>
-                                <ScaleTransform ScaleX="-1" />
-                            </Image.RenderTransform>
-                        </Image>
-                        <StackPanel Grid.Column="2"
-                                    HorizontalAlignment="Center"
-                                    Orientation="Horizontal"
-                                    Spacing="12"
-                                    x:Name="TierceBossRoot"
-                                    x:Load="{x:Bind CurrentApocalypticShadow.Meta.TierceBoss, Converter={StaticResource ObjectToBoolConverter}}">
-                            <sc:CachedImage Width="40"
-                                            Height="40"
+                            <Grid Grid.Column="1" Margin="6,0,12,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <sc:CachedImage Width="40"
+                                                Height="40"
+                                                VerticalAlignment="Center"
+                                                CornerRadius="20"
+                                                Source="{x:Bind CurrentApocalypticShadow.Meta.LowerBoss.Icon}" />
+                                <StackPanel Grid.Column="1"
+                                            MinWidth="0"
+                                            Margin="12,0,0,0"
                                             VerticalAlignment="Center"
-                                            CornerRadius="20"
-                                            Source="{x:Bind CurrentApocalypticShadow.Meta.TierceBoss.Icon}" />
-                            <TextBlock VerticalAlignment="Center" FontSize="12">
-                                <Run Text="{x:Bind lang:Lang.ForgottenHallPage_TeamSetup}" />
-                                <Run Text="3" />
-                                <LineBreak />
-                                <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind CurrentApocalypticShadow.Meta.TierceBoss.Name}" />
-                            </TextBlock>
-                        </StackPanel>
+                                            Spacing="2">
+                                    <TextBlock FontSize="12">
+                                        <Run Text="{x:Bind lang:Lang.ForgottenHallPage_TeamSetup}" />
+                                        <Run Text="2" />
+                                    </TextBlock>
+                                    <TextBlock FontSize="11"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               MaxLines="2"
+                                               Text="{x:Bind CurrentApocalypticShadow.Meta.LowerBoss.Name}"
+                                               TextTrimming="CharacterEllipsis"
+                                               TextWrapping="WrapWholeWords"
+                                               ToolTipService.ToolTip="{x:Bind CurrentApocalypticShadow.Meta.LowerBoss.Name}" />
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
+
+                        <!-- Wider wrapping layout for records with three teams. -->
+                        <Grid ColumnSpacing="12"
+                              Visibility="{x:Bind CurrentApocalypticShadow.Meta.TierceBoss, Converter={StaticResource ObjectToVisibilityConverter}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+
+                            <Grid Grid.Column="0" Margin="6,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <sc:CachedImage Width="40"
+                                                Height="40"
+                                                VerticalAlignment="Center"
+                                                CornerRadius="20"
+                                                Source="{x:Bind CurrentApocalypticShadow.Meta.UpperBoss.Icon}" />
+                                <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" Spacing="2">
+                                    <TextBlock FontSize="12">
+                                        <Run Text="{x:Bind lang:Lang.ForgottenHallPage_TeamSetup}" />
+                                        <Run Text="1" />
+                                    </TextBlock>
+                                    <TextBlock FontSize="11"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               Text="{x:Bind CurrentApocalypticShadow.Meta.UpperBoss.Name}"
+                                               TextWrapping="WrapWholeWords"
+                                               ToolTipService.ToolTip="{x:Bind CurrentApocalypticShadow.Meta.UpperBoss.Name}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Grid.Column="1" Margin="6,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <sc:CachedImage Width="40"
+                                                Height="40"
+                                                VerticalAlignment="Center"
+                                                CornerRadius="20"
+                                                Source="{x:Bind CurrentApocalypticShadow.Meta.LowerBoss.Icon}" />
+                                <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" Spacing="2">
+                                    <TextBlock FontSize="12">
+                                        <Run Text="{x:Bind lang:Lang.ForgottenHallPage_TeamSetup}" />
+                                        <Run Text="2" />
+                                    </TextBlock>
+                                    <TextBlock FontSize="11"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               Text="{x:Bind CurrentApocalypticShadow.Meta.LowerBoss.Name}"
+                                               TextWrapping="WrapWholeWords"
+                                               ToolTipService.ToolTip="{x:Bind CurrentApocalypticShadow.Meta.LowerBoss.Name}" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid Grid.Column="2" Margin="6,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <sc:CachedImage Width="40"
+                                                Height="40"
+                                                VerticalAlignment="Center"
+                                                CornerRadius="20"
+                                                Source="{x:Bind CurrentApocalypticShadow.Meta.TierceBoss.Icon}" />
+                                <StackPanel Grid.Column="1" Margin="10,0,0,0" VerticalAlignment="Center" Spacing="2">
+                                    <TextBlock FontSize="12">
+                                        <Run Text="{x:Bind lang:Lang.ForgottenHallPage_TeamSetup}" />
+                                        <Run Text="3" />
+                                    </TextBlock>
+                                    <TextBlock FontSize="11"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               Text="{x:Bind CurrentApocalypticShadow.Meta.TierceBoss.Name}"
+                                               TextWrapping="WrapWholeWords"
+                                               ToolTipService.ToolTip="{x:Bind CurrentApocalypticShadow.Meta.TierceBoss.Name}" />
+                                </StackPanel>
+                            </Grid>
+                        </Grid>
                     </Grid>
                 </Grid>
 
@@ -316,9 +391,9 @@
                                         Translation="0,0,16">
 
                                 <!--  title & Node1 & Node2  -->
-                                <Grid Height="360" Padding="20,0,20,0">
+                                <Grid MinHeight="360" Padding="20,0,20,0">
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="56" />
+                                        <RowDefinition Height="Auto" MinHeight="56" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition />
@@ -337,12 +412,16 @@
                                             Background="{ThemeResource ControlOnImageFillColorDefaultBrush}" />
 
                                     <!--  名称  -->
-                                    <StackPanel VerticalAlignment="Center" Spacing="2">
-                                        <TextBlock FontSize="18"
-                                                   FontWeight="Bold"
-                                                   Text="{x:Bind Name}"
-                                                   TextTrimming="CharacterEllipsis" />
-                                    </StackPanel>
+                                    <TextBlock Grid.Column="0"
+                                                MinWidth="0"
+                                                Margin="0,8,16,8"
+                                                VerticalAlignment="Center"
+                                                FontSize="18"
+                                                FontWeight="Bold"
+                                                MaxLines="3"
+                                                Text="{x:Bind local:ApocalypticShadowPage.FormatStageName(Name)}"
+                                                TextTrimming="CharacterEllipsis"
+                                                TextWrapping="WrapWholeWords" />
 
                                     <!--  星星图标  -->
                                     <StackPanel Grid.Column="2"

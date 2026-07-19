@@ -2,6 +2,7 @@ using Dapper;
 using Starward.Core;
 using Starward.Features.Database;
 using Starward.Features.GameLauncher;
+using Starward.Features.GameRecord;
 using Starward.Features.ViewHost;
 using System;
 using System.Collections.Generic;
@@ -613,6 +614,45 @@ public static partial class AppConfig
     public static void SetEnableDX12(GameBiz biz, bool value)
     {
         SetValue(value, $"enable_dx12_{biz}");
+    }
+
+
+    /// <summary>
+    /// Automatic HoYoLAB game record refresh interval, stored separately for each game.
+    /// </summary>
+    public static GameRecordAutoRefreshInterval GetGameRecordAutoRefreshInterval(GameBiz game)
+    {
+        return GetValue<GameRecordAutoRefreshInterval>(GameRecordAutoRefreshInterval.Disabled, $"game_record_auto_refresh_interval_{game.Game}");
+    }
+
+
+    public static void SetGameRecordAutoRefreshInterval(GameBiz game, GameRecordAutoRefreshInterval value)
+    {
+        SetValue(value, $"game_record_auto_refresh_interval_{game.Game}");
+    }
+
+
+    public static DateTimeOffset GetGameRecordLastAutoRefreshTime(GameBiz game, long uid)
+    {
+        return GetValue<DateTimeOffset>(default, $"game_record_auto_refresh_last_time_{game.Game}_{uid}");
+    }
+
+
+    public static void SetGameRecordLastAutoRefreshTime(GameBiz game, long uid, DateTimeOffset value)
+    {
+        SetValue(value, $"game_record_auto_refresh_last_time_{game.Game}_{uid}");
+    }
+
+
+    public static DateTimeOffset GetGameRecordLastAutoRefreshAttemptTime(GameBiz game, long uid)
+    {
+        return GetValue<DateTimeOffset>(default, $"game_record_auto_refresh_last_attempt_{game.Game}_{uid}");
+    }
+
+
+    public static void SetGameRecordLastAutoRefreshAttemptTime(GameBiz game, long uid, DateTimeOffset value)
+    {
+        SetValue(value, $"game_record_auto_refresh_last_attempt_{game.Game}_{uid}");
     }
 
 

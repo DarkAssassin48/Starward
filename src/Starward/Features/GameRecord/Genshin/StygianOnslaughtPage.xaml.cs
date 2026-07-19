@@ -188,6 +188,15 @@ public sealed partial class StygianOnslaughtPage : PageBase
 
 
 
+    
+
+    public static string FormatSeconds(int seconds)
+    {
+        var format = Lang.ResourceManager.GetString("Common_SecondsFormat",
+            Lang.Culture) ?? "{0} s";
+        return string.Format(format, seconds);
+    }
+
     public static string BestTypeToString(int type)
     {
         return type switch

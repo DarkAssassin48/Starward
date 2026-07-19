@@ -110,9 +110,8 @@
                         <TextBlock Grid.Row="1"
                                    Margin="36,0,0,2"
                                    VerticalAlignment="Center"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                            <Run Text="{x:Bind Second}" /><Run Text="s" />
-                        </TextBlock>
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Text="{x:Bind local:StygianOnslaughtPage.FormatSeconds(Second)}" />
                     </Grid>
                 </DataTemplate>
             </ListView.ItemTemplate>
@@ -151,9 +150,10 @@
                                         Height="24"
                                         Margin="8,0,0,0"
                                         Source="{x:Bind local:StygianOnslaughtPage.DifficultyToImage(CurrentSelectedBattle.Best.Difficulty)}" />
-                        <TextBlock Margin="4,0,0,0" FontSize="16">
-                            <Run Text="{x:Bind CurrentSelectedBattle.Best.Seconds}" /><Run Text="s" />
-                        </TextBlock>
+                        <TextBlock Margin="4,0,0,0"
+                                   VerticalAlignment="Center"
+                                   FontSize="16"
+                                   Text="{x:Bind local:StygianOnslaughtPage.FormatSeconds(CurrentSelectedBattle.Best.Seconds)}" />
                     </StackPanel>
 
                     <!--  单人/多人模式切换  -->
@@ -194,18 +194,31 @@
                                 </Grid.ColumnDefinitions>
 
                                 <!--  怪物名称  -->
-                                <TextBlock FontSize="16" Text="{x:Bind Name}" />
+                                <TextBlock Grid.Column="0"
+                                           MinWidth="0"
+                                           Margin="0,0,16,0"
+                                           FontSize="16"
+                                           MaxLines="3"
+                                           Text="{x:Bind Name}"
+                                           TextTrimming="CharacterEllipsis"
+                                           TextWrapping="WrapWholeWords" />
                                 <!--  战斗时间  -->
-                                <StackPanel Grid.Row="1"
-                                            HorizontalAlignment="Left"
-                                            VerticalAlignment="Center"
-                                            Orientation="Horizontal"
-                                            Spacing="12">
-                                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.StygianOnslaughtPage_BattleTime}" />
-                                    <TextBlock Grid.Row="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                                        <Run Text="{x:Bind Second}" /><Run Text="s" />
-                                    </TextBlock>
-                                </StackPanel>
+                                <Grid Grid.Row="1"
+                                      HorizontalAlignment="Left"
+                                      VerticalAlignment="Center"
+                                      ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock VerticalAlignment="Center"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               Text="{x:Bind lang:Lang.StygianOnslaughtPage_BattleTime}" />
+                                    <TextBlock Grid.Column="1"
+                                               VerticalAlignment="Center"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               Text="{x:Bind local:StygianOnslaughtPage.FormatSeconds(Second)}" />
+                                </Grid>
 
                                 <!--  阵容  -->
                                 <ItemsControl Grid.Row="2"
@@ -305,6 +318,7 @@
                                 <!--  最强一击/最高总伤  -->
                                 <ItemsControl Grid.Row="3"
                                               Grid.ColumnSpan="2"
+                                              HorizontalAlignment="Stretch"
                                               ItemsSource="{x:Bind BestAvatar}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
@@ -313,21 +327,26 @@
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="so:StygianOnslaughtBestAvatar">
-                                            <StackPanel Orientation="Horizontal">
+                                            <Grid Width="318" Height="40">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="40" />
+                                                    <ColumnDefinition />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
                                                 <sc:CachedImage Width="40"
                                                                 Height="40"
-                                                                Margin="0,-16,0,0"
-                                                                HorizontalAlignment="Left"
+                                                                VerticalAlignment="Center"
                                                                 Source="{x:Bind SideIcon}" />
-                                                <TextBlock Margin="4,0,0,0"
+                                                <TextBlock Grid.Column="1"
+                                                           Margin="8,0"
                                                            VerticalAlignment="Center"
                                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                           Text="{x:Bind local:StygianOnslaughtPage.BestTypeToString(Type)}" />
-                                                <TextBlock Margin="8,0,0,0"
-                                                           HorizontalAlignment="Right"
+                                                           Text="{x:Bind local:StygianOnslaughtPage.BestTypeToString(Type)}"
+                                                           TextTrimming="CharacterEllipsis" />
+                                                <TextBlock Grid.Column="2"
                                                            VerticalAlignment="Center"
                                                            Text="{x:Bind DPS}" />
-                                            </StackPanel>
+                                            </Grid>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>

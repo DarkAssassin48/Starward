@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml.Controls;
 using Starward.Frameworks;
 using System;
+using System.Globalization;
 
 
 namespace Starward.Features.Setting;
@@ -12,6 +13,11 @@ public sealed partial class SettingPage : PageBase
 
 
     private readonly ILogger<SettingPage> _logger = AppConfig.GetLogger<SettingPage>();
+
+
+    public string HoyolabToolboxAutoRefreshTitle => Localized(
+        "Автообновление HoYoLAB Toolbox",
+        "HoYoLAB Toolbox Auto Refresh");
 
 
     public SettingPage()
@@ -39,6 +45,7 @@ public sealed partial class SettingPage : PageBase
                 nameof(ToolboxSetting) => typeof(ToolboxSetting),
                 nameof(HotkeySetting) => typeof(HotkeySetting),
                 nameof(GamepadControlSetting) => typeof(GamepadControlSetting),
+                nameof(HoyolabToolboxAutoRefreshSetting) => typeof(HoyolabToolboxAutoRefreshSetting),
                 _ => null,
             };
             if (type is not null)
@@ -60,6 +67,13 @@ public sealed partial class SettingPage : PageBase
         WeakReferenceMessenger.Default.UnregisterAll(this);
     }
 
+
+    private static string Localized(string russian, string english)
+    {
+        return CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("ru", StringComparison.OrdinalIgnoreCase)
+            ? russian
+            : english;
+    }
 
 
 }

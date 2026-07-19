@@ -2735,4 +2735,10 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="FileManageSetting_CleanUpLauncherBackgroundFiles" xml:space="preserve">
     <value>Dọn dẹp tệp nền trình khởi chạy</value>
   </data>
+  <data name="Common_SecondsFormat" xml:space="preserve">
+    <value>{0} giây</value>
+  </data>
+  <data name="ImaginariumTheaterPage_TotalPerformanceDurationFormat" xml:space="preserve">
+    <value>{0} phút {1} giây</value>
+  </data>
 </root>

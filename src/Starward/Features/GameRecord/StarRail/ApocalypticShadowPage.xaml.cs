@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 
@@ -162,23 +163,29 @@ public sealed partial class ApocalypticShadowPage : PageBase
 
     public static bool FloorHasExtraStar(int starNum) => starNum > 3;
 
+    public static string FormatStageName(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return name ?? string.Empty;
+        }
+
+        // HoYoLAB sometimes joins the stage name and the Starward-mode suffix
+        // without a separator, for example "Difficulty 4Starward Mode".
+        return Regex.Replace(
+            name,
+            @"(?<=[\p{L}\p{N}\)])(?=(?:Starward Mode|Режим(?:\s+Starward)?\b))",
+            Environment.NewLine,
+            RegexOptions.CultureInvariant);
+    }
+
 
 
 
     partial void OnCurrentApocalypticShadowChanged(ApocalypticShadowInfo? value)
     {
-        if (BossPanelGrid is null)
-        {
-            return;
-        }
-        if (value?.Meta?.TierceBoss != null)
-        {
-            BossPanelGrid.ColumnDefinitions[2].Width = new GridLength(1, GridUnitType.Star);
-        }
-        else
-        {
-            BossPanelGrid.ColumnDefinitions[2].Width = new GridLength(0);
-        }
+        // Two-team and three-team layouts are selected by XAML visibility bindings.
+        // No column mutation is required here.
     }
 
 

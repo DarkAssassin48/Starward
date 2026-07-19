@@ -2738,4 +2738,10 @@
   <data name="FileManageSetting_CleanUpLauncherBackgroundFiles" xml:space="preserve">
     <value>런처 배경 파일 정리</value>
   </data>
+  <data name="Common_SecondsFormat" xml:space="preserve">
+    <value>{0} 초</value>
+  </data>
+  <data name="ImaginariumTheaterPage_TotalPerformanceDurationFormat" xml:space="preserve">
+    <value>{0} 분 {1} 초</value>
+  </data>
 </root>

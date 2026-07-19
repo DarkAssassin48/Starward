@@ -246,7 +246,7 @@
                 <TextBlock Margin="0,8,0,0" Text="{x:Bind lang:Lang.ChallengePeakPage_KingInCheckStageRecords}" />
 
                 <Grid Height="192"
-                      Background="{ThemeResource CustomOverlayAcrylicBrush}"
+                       Background="{ThemeResource CustomOverlayAcrylicBrush}"
                       CornerRadius="8"
                       Shadow="{ThemeResource ThemeShadow}"
                       Translation="0,0,16">
@@ -255,13 +255,13 @@
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
                         <ColumnDefinition />
+                        <ColumnDefinition Width="220" />
                     </Grid.ColumnDefinitions>
 
                     <!--  BOSS 图  -->
                     <sc:CachedImage Grid.RowSpan="2"
-                                    Grid.ColumnSpan="2"
+                                    Grid.Column="1"
                                     HorizontalAlignment="Right"
                                     Source="{x:Bind CurrentChallengePeakRecord.BossInfo.Icon}"
                                     Stretch="Uniform" />
@@ -269,9 +269,14 @@
 
                     <StackPanel Grid.Row="0" Margin="20,12,0,0">
                         <!--  BOSS 名称  -->
-                        <TextBlock FontSize="16"
+                        <TextBlock MinWidth="0"
+                                   Margin="0,0,16,0"
+                                   FontSize="16"
                                    FontWeight="Bold"
-                                   Text="{x:Bind CurrentChallengePeakRecord.BossInfo.NameMi18n}" />
+                                   MaxLines="2"
+                                   Text="{x:Bind CurrentChallengePeakRecord.BossInfo.NameMi18n}"
+                                   TextTrimming="CharacterEllipsis"
+                                   TextWrapping="WrapWholeWords" />
 
                         <!--  通关数据  -->
                         <StackPanel Margin="0,8,0,0"
@@ -342,21 +347,35 @@
                         </ItemsControl>
                     </StackPanel>
 
-                    <StackPanel Grid.Row="1"
-                                Grid.Column="1"
-                                Margin="12,0,12,0"
-                                Visibility="{x:Bind CurrentChallengePeakRecord.BossRecord, Converter={StaticResource ObjectToVisibilityConverter}}">
-                        <!--  Buff  -->
-                        <StackPanel Orientation="Horizontal">
-                            <sc:CachedImage Width="28"
-                                            Height="28"
-                                            Source="{x:Bind CurrentChallengePeakRecord.BossRecord.Buff.Icon}" />
-                            <TextBlock VerticalAlignment="Center" Text="{x:Bind CurrentChallengePeakRecord.BossRecord.Buff.NameMi18n}" />
+                    <Border Grid.RowSpan="2"
+                            Grid.Column="1"
+                            Margin="8,8,12,8"
+                            Padding="10,8"
+                            VerticalAlignment="Center"
+                            Background="Transparent"
+                            Visibility="{x:Bind CurrentChallengePeakRecord.BossRecord, Converter={StaticResource ObjectToVisibilityConverter}}">
+                        <StackPanel VerticalAlignment="Center" Spacing="6">
+                            <!--  Buff  -->
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <sc:CachedImage Width="30"
+                                                Height="30"
+                                                VerticalAlignment="Center"
+                                                Source="{x:Bind CurrentChallengePeakRecord.BossRecord.Buff.Icon}" />
+                                <TextBlock MinWidth="0"
+                                           VerticalAlignment="Center"
+                                           FontWeight="SemiBold"
+                                           MaxLines="2"
+                                           Text="{x:Bind CurrentChallengePeakRecord.BossRecord.Buff.NameMi18n}"
+                                           TextTrimming="CharacterEllipsis"
+                                           TextWrapping="WrapWholeWords" />
+                            </StackPanel>
+                            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       MaxLines="4"
+                                        Text="{x:Bind CurrentChallengePeakRecord.BossRecord.Buff.DescMi18n}"
+                                       TextTrimming="CharacterEllipsis"
+                                       TextWrapping="WrapWholeWords" />
                         </StackPanel>
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                   Text="{x:Bind CurrentChallengePeakRecord.BossRecord.Buff.DescMi18n}"
-                                   TextWrapping="Wrap" />
-                    </StackPanel>
+                    </Border>
 
 
                 </Grid>

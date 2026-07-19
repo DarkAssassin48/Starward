@@ -5,7 +5,9 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Starward.Core;
 using Starward.Features.Database;
+using Starward.Language;
 using System;
+using System.Globalization;
 
 
 namespace Starward.Features.PlayTime;
@@ -116,7 +118,9 @@ public sealed partial class PlayTimeButton : UserControl
     public static string TimeSpanToString(TimeSpan timeSpan)
     {
 
-        return $"{Math.Floor(timeSpan.TotalHours)}h {timeSpan.Minutes}m";
+        string format = Lang.ResourceManager.GetString("PlayTimeButton_DurationFormat", Lang.Culture)
+            ?? "{0}h {1}m";
+        return string.Format(CultureInfo.CurrentUICulture, format, Math.Floor(timeSpan.TotalHours), timeSpan.Minutes);
     }
 
 

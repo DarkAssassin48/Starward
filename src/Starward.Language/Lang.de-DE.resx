@@ -2736,4 +2736,10 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
   <data name="FileManageSetting_CleanUpLauncherBackgroundFiles" xml:space="preserve">
     <value>Launcher-Hintergrunddateien bereinigen</value>
   </data>
+  <data name="Common_SecondsFormat" xml:space="preserve">
+    <value>{0} s</value>
+  </data>
+  <data name="ImaginariumTheaterPage_TotalPerformanceDurationFormat" xml:space="preserve">
+    <value>{0} Min. {1} Sek.</value>
+  </data>
 </root>

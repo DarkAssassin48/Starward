@@ -2732,4 +2732,10 @@
   <data name="FileManageSetting_CleanUpLauncherBackgroundFiles" xml:space="preserve">
     <value>ล้างไฟล์พื้นหลังตัวเรียกใช้</value>
   </data>
+  <data name="Common_SecondsFormat" xml:space="preserve">
+    <value>{0} วิ</value>
+  </data>
+  <data name="ImaginariumTheaterPage_TotalPerformanceDurationFormat" xml:space="preserve">
+    <value>{0} นาที {1} วินาที</value>
+  </data>
 </root>

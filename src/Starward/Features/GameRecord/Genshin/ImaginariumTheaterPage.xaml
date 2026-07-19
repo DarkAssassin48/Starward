@@ -290,14 +290,14 @@
                       Visibility="{x:Bind local:ImaginariumTheaterPage.FightStatisicVisibility(CurrentTheater.Detail.FightStatisic.TotalUseTime)}">
                     <Grid.RowDefinitions>
                         <RowDefinition MinHeight="32" />
-                        <RowDefinition MinHeight="32" />
-                        <RowDefinition MinHeight="32" />
-                        <RowDefinition MinHeight="32" />
-                        <RowDefinition MinHeight="32" />
+                        <RowDefinition MinHeight="40" />
+                        <RowDefinition MinHeight="40" />
+                        <RowDefinition MinHeight="40" />
+                        <RowDefinition MinHeight="40" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="4*" />
-                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <Border Grid.Row="1"
                             Grid.ColumnSpan="3"
@@ -314,16 +314,31 @@
                                Text="{x:Bind lang:Lang.ImaginariumTheaterPage_TotalPerformanceDuration}" />
                     <!--  最高伤害输出  -->
                     <TextBlock Grid.Row="1"
-                               VerticalAlignment="Center"
-                               Text="{x:Bind lang:Lang.ImaginariumTheaterPage_HighestDamageDealt}" />
+                                MinWidth="0"
+                                Margin="0,0,16,0"
+                                VerticalAlignment="Center"
+                                MaxLines="1"
+                                Text="{x:Bind lang:Lang.ImaginariumTheaterPage_HighestDamageDealt}"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="NoWrap" />
                     <!--  击败最多敌人  -->
                     <TextBlock Grid.Row="2"
-                               VerticalAlignment="Center"
-                               Text="{x:Bind lang:Lang.ImaginariumTheaterPage_MostOpponentsDefeated}" />
+                                MinWidth="0"
+                                Margin="0,0,16,0"
+                                VerticalAlignment="Center"
+                                MaxLines="1"
+                                Text="{x:Bind lang:Lang.ImaginariumTheaterPage_MostOpponentsDefeated}"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="NoWrap" />
                     <!--  最高承受伤害  -->
                     <TextBlock Grid.Row="3"
-                               VerticalAlignment="Center"
-                               Text="{x:Bind lang:Lang.SpiralAbyssPage_MostDamageTaken}" />
+                                MinWidth="0"
+                                Margin="0,0,16,0"
+                                VerticalAlignment="Center"
+                                MaxLines="1"
+                                Text="{x:Bind lang:Lang.SpiralAbyssPage_MostDamageTaken}"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="NoWrap" />
                     <!--  最快完成演出队伍  -->
                     <TextBlock Grid.Row="4"
                                VerticalAlignment="Center"
@@ -335,33 +350,60 @@
                                VerticalAlignment="Center">
                         <Run Text="{x:Bind local:ImaginariumTheaterPage.PerformancesTime(CurrentTheater.Detail.FightStatisic.TotalUseTime)}" />
                     </TextBlock>
-                    <StackPanel Grid.Row="1"
-                                Grid.Column="1"
-                                Orientation="Horizontal">
-                        <sc:CachedImage Width="44"
+                    <Grid Grid.Row="1"
+                          Grid.Column="1"
+                          Margin="8,0,0,0"
+                          VerticalAlignment="Center"
+                          ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="36" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <sc:CachedImage Width="36"
                                         Height="36"
-                                        Margin="-12,-4,0,4"
+                                        VerticalAlignment="Center"
                                         Source="{x:Bind CurrentTheater.Detail.FightStatisic.MaxDamageAvatar.AvatarIcon}" />
-                        <TextBlock VerticalAlignment="Center" Text="{x:Bind CurrentTheater.Detail.FightStatisic.MaxDamageAvatar.Value}" />
-                    </StackPanel>
-                    <StackPanel Grid.Row="2"
-                                Grid.Column="1"
-                                Orientation="Horizontal">
-                        <sc:CachedImage Width="44"
+                        <TextBlock Grid.Column="1"
+                                   VerticalAlignment="Center"
+                                   Text="{x:Bind CurrentTheater.Detail.FightStatisic.MaxDamageAvatar.Value}"
+                                   TextWrapping="NoWrap" />
+                    </Grid>
+                    <Grid Grid.Row="2"
+                          Grid.Column="1"
+                          Margin="8,0,0,0"
+                          VerticalAlignment="Center"
+                          ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="36" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <sc:CachedImage Width="36"
                                         Height="36"
-                                        Margin="-12,-4,0,4"
+                                        VerticalAlignment="Center"
                                         Source="{x:Bind CurrentTheater.Detail.FightStatisic.MaxDefeatAvatar.AvatarIcon}" />
-                        <TextBlock VerticalAlignment="Center" Text="{x:Bind CurrentTheater.Detail.FightStatisic.MaxDefeatAvatar.Value}" />
-                    </StackPanel>
-                    <StackPanel Grid.Row="3"
-                                Grid.Column="1"
-                                Orientation="Horizontal">
-                        <sc:CachedImage Width="44"
+                        <TextBlock Grid.Column="1"
+                                   VerticalAlignment="Center"
+                                   Text="{x:Bind CurrentTheater.Detail.FightStatisic.MaxDefeatAvatar.Value}"
+                                   TextWrapping="NoWrap" />
+                    </Grid>
+                    <Grid Grid.Row="3"
+                          Grid.Column="1"
+                          Margin="8,0,0,0"
+                          VerticalAlignment="Center"
+                          ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="36" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <sc:CachedImage Width="36"
                                         Height="36"
-                                        Margin="-12,-4,0,4"
+                                        VerticalAlignment="Center"
                                         Source="{x:Bind CurrentTheater.Detail.FightStatisic.MaxTakeDamageAvatar.AvatarIcon}" />
-                        <TextBlock VerticalAlignment="Center" Text="{x:Bind CurrentTheater.Detail.FightStatisic.MaxTakeDamageAvatar.Value}" />
-                    </StackPanel>
+                        <TextBlock Grid.Column="1"
+                                   VerticalAlignment="Center"
+                                   Text="{x:Bind CurrentTheater.Detail.FightStatisic.MaxTakeDamageAvatar.Value}"
+                                   TextWrapping="NoWrap" />
+                    </Grid>
                     <ItemsControl Grid.Row="4"
                                   Grid.Column="1"
                                   ItemsSource="{x:Bind CurrentTheater.Detail.FightStatisic.ShortestAvatarList}">

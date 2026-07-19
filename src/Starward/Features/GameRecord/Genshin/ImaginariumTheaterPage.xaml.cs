@@ -194,7 +194,10 @@ public sealed partial class ImaginariumTheaterPage : PageBase
     public static string PerformancesTime(int second)
     {
         var ts = TimeSpan.FromSeconds(second);
-        return $"{ts.Minutes}m {ts.Seconds}s";
+        var format = Lang.ResourceManager.GetString(
+            "ImaginariumTheaterPage_TotalPerformanceDurationFormat",
+            Lang.Culture) ?? "{0} m {1} s";
+        return string.Format(format, (int)ts.TotalMinutes, ts.Seconds);
     }
 
 

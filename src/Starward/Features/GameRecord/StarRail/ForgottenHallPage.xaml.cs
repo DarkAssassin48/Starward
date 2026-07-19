@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 
@@ -156,6 +157,20 @@ public sealed partial class ForgottenHallPage : PageBase
 
 
     public static bool FloorHasExtraStar(int starNum) => starNum > 3;
+
+    public static string FormatStageName(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return name ?? string.Empty;
+        }
+
+        return Regex.Replace(
+            name,
+            @"(?<=[\p{L}\p{N}\)])(?=(?:Starward Mode|Режим(?:\s+Starward)?\b))",
+            Environment.NewLine,
+            RegexOptions.CultureInvariant);
+    }
 
 
 }
