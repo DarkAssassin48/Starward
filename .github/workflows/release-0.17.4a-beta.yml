@@ -1,0 +1,135 @@
+name: Publish Starward 0.17.4a Beta
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/release-0.17.4a-beta.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-v0.17.4a-beta
+  cancel-in-progress: false
+
+jobs:
+  build-and-release:
+    runs-on: windows-2025-vs2026
+    env:
+      TAG_NAME: v0.17.4a-beta
+      RELEASE_TITLE: Starward 0.17.4a Beta
+      PACKAGE_VERSION: 0.17.4-beta.1
+      DISPLAY_VERSION: 0.17.4a-beta
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          show-progress: false
+
+      - name: Install .NET from global.json
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v3
+
+      - name: Build portable x64 and ARM64 packages
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          New-Item -Path 'build' -ItemType Directory -Force | Out-Null
+          New-Item -Path 'dist' -ItemType Directory -Force | Out-Null
+
+          foreach ($platform in @('x64', 'arm64')) {
+              $root = Join-Path $PWD "build/Starward-$platform"
+              New-Item -Path $root -ItemType Directory -Force | Out-Null
+              $outDir = (Resolve-Path $root).Path
+
+              msbuild src/Starward.Launcher "-property:Configuration=Release;Platform=$platform;OutDir=$outDir"
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+              dotnet publish src/Starward `
+                -c Release `
+                -r "win-$platform" `
+                -o "$root/app-$env:DISPLAY_VERSION" `
+                -p:Platform=$platform `
+                -p:Version=$env:PACKAGE_VERSION `
+                -p:InformationalVersion=$env:DISPLAY_VERSION `
+                -p:DefineConstants=DONOT_CHECK_UPDATE `
+                -v:minimal
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+              Set-Content "$root/version.ini" -Value "version=$env:PACKAGE_VERSION" -Encoding UTF8
+              Remove-Item "$root/Starward.pdb" -Force -ErrorAction SilentlyContinue
+
+              @"
+              Starward 0.17.4a Beta
+              Internal package version: $env:PACKAGE_VERSION
+              Architecture: $platform
+              Commit: $env:GITHUB_SHA
+              Built: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss K')
+              Repository: $env:GITHUB_REPOSITORY
+              This is an unofficial beta build of the DarkAssassin48 Starward fork.
+              "@ | Set-Content "$root/RELEASE_INFO.txt" -Encoding UTF8
+
+              $archName = if ($platform -eq 'arm64') { 'ARM64' } else { 'x64' }
+              $archive = "dist/Starward_0.17.4a_Beta_$archName.zip"
+              Compress-Archive -Path "$root/*" -DestinationPath $archive -CompressionLevel Optimal -Force
+          }
+
+      - name: Generate SHA-256 checksums
+        shell: pwsh
+        run: |
+          $lines = Get-ChildItem 'dist/*.zip' | Sort-Object Name | ForEach-Object {
+              $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+              "$hash  $($_.Name)"
+          }
+          $lines | Set-Content 'dist/SHA256SUMS.txt' -Encoding ascii
+          Get-Content 'dist/SHA256SUMS.txt'
+
+      - name: Upload workflow artifact backup
+        uses: actions/upload-artifact@v7
+        with:
+          name: Starward_0.17.4a_Beta_Portable
+          path: dist/
+          if-no-files-found: error
+          compression-level: 0
+
+      - name: Create or update GitHub pre-release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $assets = @(
+              'dist/Starward_0.17.4a_Beta_x64.zip',
+              'dist/Starward_0.17.4a_Beta_ARM64.zip',
+              'dist/SHA256SUMS.txt'
+          )
+
+          gh release view $env:TAG_NAME --repo $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -eq 0) {
+              gh release upload $env:TAG_NAME @assets --clobber --repo $env:GITHUB_REPOSITORY
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+              gh release edit $env:TAG_NAME `
+                --title $env:RELEASE_TITLE `
+                --notes-file RELEASE_NOTES_0.17.4A_BETA_RU.md `
+                --prerelease `
+                --repo $env:GITHUB_REPOSITORY
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          else {
+              gh release create $env:TAG_NAME @assets `
+                --target $env:GITHUB_SHA `
+                --title $env:RELEASE_TITLE `
+                --notes-file RELEASE_NOTES_0.17.4A_BETA_RU.md `
+                --prerelease `
+                --repo $env:GITHUB_REPOSITORY
+              if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
