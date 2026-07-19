@@ -1,11 +1,6 @@
 name: Materialize AutoRefresh Direct Source
 
 on:
-  push:
-    branches:
-      - feature/auto-game-record-refresh
-    paths:
-      - '.github/workflows/materialize-direct-source.yml'
   pull_request:
     branches:
       - main
@@ -81,99 +76,9 @@ jobs:
           Remove-Item '.github/scripts/fix-stygian-seconds-resource-access.ps1' -Force
           Remove-Item '.github/scripts/apply-duration-imaginarium-settings-fixes.ps1' -Force
           Remove-Item '.github/scripts/run-duration-imaginarium-settings-fixes.ps1' -Force
-          Remove-Item '.github/workflows/materialize-direct-source.yml' -Force
           Remove-Item 'auto-game-record-refresh.patch' -Force -ErrorAction SilentlyContinue
           Remove-Item 'autorefresh-settings-page.patch' -Force -ErrorAction SilentlyContinue
           Remove-Item 'autorefresh-scheduling-monthly-ui-fixes.patch' -Force -ErrorAction SilentlyContinue
-
-      - name: Replace test workflow with direct source build
-        shell: pwsh
-        run: |
-          @'
-          name: Build Starward AutoRefresh Direct
-
-          on:
-            push:
-              branches:
-                - feature/auto-game-record-refresh
-              paths:
-                - 'src/**'
-                - '.github/workflows/build-autorefresh.yml'
-                - 'global.json'
-            pull_request:
-              branches:
-                - main
-              paths:
-                - 'src/**'
-                - '.github/workflows/build-autorefresh.yml'
-                - 'global.json'
-            workflow_dispatch:
-
-          permissions:
-            contents: read
-
-          jobs:
-            build-x64:
-              runs-on: windows-2025-vs2026
-              env:
-                Configuration: Release
-                Platform: x64
-
-              steps:
-                - name: Checkout
-                  uses: actions/checkout@v5
-                  with:
-                    show-progress: false
-
-                - name: Install .NET from global.json
-                  uses: actions/setup-dotnet@v5
-                  with:
-                    global-json-file: global.json
-
-                - name: Setup MSBuild
-                  uses: microsoft/setup-msbuild@v3
-
-                - name: Build launcher and app directly from source
-                  shell: pwsh
-                  run: |
-                    $version = '0.17.4-autorefresh-direct-test'
-                    New-Item -Path 'build/Starward' -ItemType Directory -Force | Out-Null
-                    msbuild src/Starward.Launcher "-property:Configuration=$env:Configuration;Platform=$env:Platform;OutDir=$((Resolve-Path 'build/Starward').Path)"
-                    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                    dotnet publish src/Starward `
-                      -c $env:Configuration `
-                      -r "win-$env:Platform" `
-                      -o "build/Starward/app-$version" `
-                      -p:Platform=$env:Platform `
-                      -p:Version=$version `
-                      -p:DefineConstants=DONOT_CHECK_UPDATE `
-                      -v:minimal
-                    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-                    Set-Content 'build/Starward/version.ini' -Value "version=$version"
-                    Remove-Item 'build/Starward/Starward.pdb' -Force -ErrorAction SilentlyContinue
-
-                - name: Add build information
-                  shell: pwsh
-                  run: |
-                    @"
-                    Starward AutoRefresh direct-source test build
-                    Base version: 0.17.4
-                    Architecture: x64
-                    Commit: $env:GITHUB_SHA
-                    Built: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss K')
-                    All AutoRefresh, UI, and localization changes are stored directly in source files.
-                    No patch or source-rewriting scripts are used by this build.
-                    Official update check is disabled for this test build.
-                    "@ | Set-Content 'build/Starward/AUTOREFRESH_TEST_BUILD.txt' -Encoding UTF8
-
-                - name: Upload portable build
-                  uses: actions/upload-artifact@v7
-                  with:
-                    name: Starward_AutoRefresh_DirectSource_Test_x64
-                    path: build/Starward/
-                    if-no-files-found: error
-                    compression-level: 6
-          '@ | Set-Content '.github/workflows/build-autorefresh.yml' -Encoding UTF8
 
       - name: Install .NET from global.json
         uses: actions/setup-dotnet@v5
@@ -207,7 +112,7 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -A
+          git add src .github/patches .github/scripts
           git status --short
           git commit -m 'Materialize AutoRefresh changes directly in source'
           git push origin HEAD:feature/auto-game-record-refresh
