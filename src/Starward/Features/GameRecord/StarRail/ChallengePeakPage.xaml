@@ -245,7 +245,7 @@
                 <!--  王棋通关战绩  -->
                 <TextBlock Margin="0,8,0,0" Text="{x:Bind lang:Lang.ChallengePeakPage_KingInCheckStageRecords}" />
 
-                <Grid MinHeight="150"
+                <Grid Height="192"
                       Background="{ThemeResource CustomOverlayAcrylicBrush}"
                       CornerRadius="8"
                       Shadow="{ThemeResource ThemeShadow}"
@@ -349,10 +349,10 @@
 
                     <Button Grid.RowSpan="2"
                             Grid.Column="1"
-                            Margin="8,8,12,8"
+                            Margin="8,0,12,8"
                             Padding="10,8"
                             HorizontalAlignment="Stretch"
-                            VerticalAlignment="Center"
+                            VerticalAlignment="Bottom"
                             HorizontalContentAlignment="Stretch"
                             Background="Transparent"
                             BorderThickness="0"
@@ -489,7 +489,7 @@
                                             <ItemsControl.ItemsPanel>
                                                 <ItemsPanelTemplate>
                                                     <StackPanel Orientation="Horizontal" Spacing="12" />
-                                                </ItemsPanelTemplate>
+                                            </ItemsPanelTemplate>
                                             </ItemsControl.ItemsPanel>
                                         </ItemsControl>
 
