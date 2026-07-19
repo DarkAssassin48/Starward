@@ -32,33 +32,35 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+        with:
+          show-progress: false
 
-      - name: Decode and apply AutoRefresh patches
+      - name: Apply AutoRefresh core patch
         shell: pwsh
         run: |
           $encoded = Get-Content '.github/patches/auto-game-record-refresh.patch.gz.b64' -Raw
           [IO.File]::WriteAllBytes('auto-game-record-refresh.patch.gz', [Convert]::FromBase64String($encoded.Trim()))
           gzip -d -f auto-game-record-refresh.patch.gz
           git apply --check auto-game-record-refresh.patch
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           git apply auto-game-record-refresh.patch
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-          $settingsEncoded = Get-Content '.github/patches/autorefresh-settings-page.patch.gz.b64' -Raw
-          [IO.File]::WriteAllBytes('autorefresh-settings-page.patch.gz', [Convert]::FromBase64String($settingsEncoded.Trim()))
+      - name: Apply AutoRefresh settings page patch
+        shell: pwsh
+        run: |
+          $encoded = Get-Content '.github/patches/autorefresh-settings-page.patch.gz.b64' -Raw
+          [IO.File]::WriteAllBytes('autorefresh-settings-page.patch.gz', [Convert]::FromBase64String($encoded.Trim()))
           gzip -d -f autorefresh-settings-page.patch.gz
           git apply --check autorefresh-settings-page.patch
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           git apply autorefresh-settings-page.patch
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-          $fixesEncoded = Get-Content '.github/patches/autorefresh-scheduling-monthly-ui-fixes.patch.gz.b64' -Raw
-          [IO.File]::WriteAllBytes('autorefresh-scheduling-monthly-ui-fixes.patch.gz', [Convert]::FromBase64String($fixesEncoded.Trim()))
+      - name: Apply scheduling, monthly details, and UI fixes patch
+        shell: pwsh
+        run: |
+          $encoded = Get-Content '.github/patches/autorefresh-scheduling-monthly-ui-fixes.patch.gz.b64' -Raw
+          [IO.File]::WriteAllBytes('autorefresh-scheduling-monthly-ui-fixes.patch.gz', [Convert]::FromBase64String($encoded.Trim()))
           gzip -d -f autorefresh-scheduling-monthly-ui-fixes.patch.gz
-          git apply --check autorefresh-scheduling-monthly-ui-fixes.patch
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          git apply autorefresh-scheduling-monthly-ui-fixes.patch
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git apply --check --verbose autorefresh-scheduling-monthly-ui-fixes.patch
+          git apply --verbose autorefresh-scheduling-monthly-ui-fixes.patch
 
       - name: Install .NET from global.json
         uses: actions/setup-dotnet@v5
