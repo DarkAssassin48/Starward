@@ -1,0 +1,74 @@
+name: Diagnose Game Record Layouts
+
+on:
+  push:
+    branches:
+      - feature/auto-game-record-refresh
+    paths:
+      - '.github/workflows/diagnose-game-record-layouts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: windows-2025-vs2026
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          show-progress: false
+
+      - name: Apply current test changes
+        shell: pwsh
+        run: |
+          $encoded = Get-Content '.github/patches/auto-game-record-refresh.patch.gz.b64' -Raw
+          [IO.File]::WriteAllBytes('core.patch.gz', [Convert]::FromBase64String($encoded.Trim()))
+          gzip -d -f core.patch.gz
+          git apply core.patch
+
+          $encoded = Get-Content '.github/patches/autorefresh-settings-page.patch.gz.b64' -Raw
+          [IO.File]::WriteAllBytes('settings.patch.gz', [Convert]::FromBase64String($encoded.Trim()))
+          gzip -d -f settings.patch.gz
+          git apply settings.patch
+
+          $encoded = Get-Content '.github/patches/autorefresh-scheduling-monthly-ui-fixes.patch.gz.b64' -Raw
+          [IO.File]::WriteAllBytes('schedule.patch.gz', [Convert]::FromBase64String($encoded.Trim()))
+          gzip -d -f schedule.patch.gz
+          git apply schedule.patch
+
+          & '.github/scripts/apply-ui-l10n-fixes.ps1'
+          & '.github/scripts/apply-apocalyptic-crash-combobox-style-fix.ps1'
+
+      - name: Collect relevant XAML snippets
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path diagnostics -Force | Out-Null
+          $files = Get-ChildItem 'src/Starward/Features/GameRecord' -Recurse -Filter '*.xaml'
+          $matches = foreach ($file in $files) {
+            $text = Get-Content $file.FullName -Raw
+            if ($file.Name -match 'Apocalyptic|PureFiction|Stygian|Arbitr' -or $text -match 'Anomaly|Arbitration|StarwardMode|Buff|EffectDesc|Stage Records') {
+              "===== $($file.FullName.Substring((Resolve-Path '.').Path.Length + 1)) ====="
+              $lines = Get-Content $file.FullName
+              for ($i = 0; $i -lt $lines.Count; $i++) {
+                if ($lines[$i] -match 'Text=|Run Text=|ColorfulTextBlock|Description|Desc|Buff|StarwardMode|Name}|Effect|Stage') {
+                  $start = [Math]::Max(0, $i - 4)
+                  $end = [Math]::Min($lines.Count - 1, $i + 8)
+                  for ($j = $start; $j -le $end; $j++) { '{0,4}: {1}' -f ($j + 1), $lines[$j] }
+                  '----'
+                }
+              }
+            }
+          }
+          $matches | Set-Content 'diagnostics/layout-snippets.txt' -Encoding UTF8
+          Get-ChildItem 'src/Starward/Features/GameRecord' -Recurse -File |
+            Where-Object { $_.Name -match 'Arbitr|Anomaly|PureFiction|Stygian|Apocalyptic' } |
+            ForEach-Object { $_.FullName.Substring((Resolve-Path '.').Path.Length + 1) } |
+            Set-Content 'diagnostics/relevant-files.txt' -Encoding UTF8
+          Get-Content 'diagnostics/relevant-files.txt'
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: GameRecord_Layout_Diagnostics
+          path: diagnostics/
+          compression-level: 6
