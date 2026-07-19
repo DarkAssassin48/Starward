@@ -7,6 +7,14 @@ on:
     paths:
       - '.github/workflows/build-autorefresh.yml'
       - '.github/patches/auto-game-record-refresh.patch.gz.b64'
+      - 'src/Starward/Features/Setting/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/build-autorefresh.yml'
+      - '.github/patches/auto-game-record-refresh.patch.gz.b64'
+      - 'src/Starward/Features/Setting/**'
   workflow_dispatch:
 
 permissions:
@@ -45,7 +53,7 @@ jobs:
       - name: Build launcher and app
         shell: pwsh
         run: |
-          $version = '0.17.4-autorefresh-test'
+          $version = '0.17.4-autorefresh-settings-test'
           New-Item -Path 'build/Starward' -ItemType Directory -Force | Out-Null
 
           msbuild src/Starward.Launcher "-property:Configuration=$env:Configuration;Platform=$env:Platform;OutDir=$((Resolve-Path 'build/Starward').Path)"
@@ -67,7 +75,7 @@ jobs:
         shell: pwsh
         run: |
           @"
-          Starward AutoRefresh test build
+          Starward AutoRefresh settings test build
           Base version: 0.17.4
           Architecture: x64
           Commit: $env:GITHUB_SHA
@@ -78,7 +86,7 @@ jobs:
       - name: Upload portable build
         uses: actions/upload-artifact@v7
         with:
-          name: Starward_AutoRefresh_Test_x64
+          name: Starward_AutoRefresh_Settings_Test_x64
           path: build/Starward/
           if-no-files-found: error
           compression-level: 6
