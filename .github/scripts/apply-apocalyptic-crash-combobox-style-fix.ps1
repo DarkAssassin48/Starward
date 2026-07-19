@@ -32,7 +32,7 @@ function Replace-Once(
 # which caused a NullReferenceException both on selection and when unloading.
 $codePath = 'src/Starward/Features/GameRecord/StarRail/ApocalypticShadowPage.xaml.cs'
 $code = Read-TextFile $codePath
-$callbackPattern = 'partial void OnCurrentApocalypticShadowChanged\(ApocalypticShadowInfo\? value\)\s*\{.*?\n\s*\}'
+$callbackPattern = 'partial void OnCurrentApocalypticShadowChanged\(ApocalypticShadowInfo\? value\)\s*\{\s*if \(BossPanelGrid is null\)\s*\{\s*return;\s*\}\s*if \(value\?\.Meta\?\.TierceBoss != null\)\s*\{\s*BossPanelGrid\.ColumnDefinitions\[2\]\.Width = new GridLength\(1, GridUnitType\.Star\);\s*\}\s*else\s*\{\s*BossPanelGrid\.ColumnDefinitions\[2\]\.Width = new GridLength\(0\);\s*\}\s*\}'
 $callbackReplacement = @'
 partial void OnCurrentApocalypticShadowChanged(ApocalypticShadowInfo? value)
     {
