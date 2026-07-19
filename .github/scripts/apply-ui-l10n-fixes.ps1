@@ -24,8 +24,6 @@ function Replace-Once(
     return $regex.Replace($Content, $Replacement, 1)
 }
 
-# Apocalyptic Shadow: keep long stage names inside the title column instead of
-# allowing StackPanel's infinite-width measurement to draw under the star icons.
 $xamlPath = 'src/Starward/Features/GameRecord/StarRail/ApocalypticShadowPage.xaml'
 $xaml = Read-TextFile $xamlPath
 
@@ -45,8 +43,6 @@ $titleReplacement = @'
 '@
 $xaml = Replace-Once $xaml $titlePattern $titleReplacement 'Apocalyptic Shadow floor title'
 
-# Constrain each boss name independently, so translated names wrap/trim and never
-# overlap the neighbouring boss icon or column.
 $bosses = @(
     @{ Key = 'UpperBoss'; Description = 'upper boss text' },
     @{ Key = 'LowerBoss'; Description = 'lower boss text' },
@@ -69,7 +65,6 @@ foreach ($boss in $bosses) {
 
 Write-TextFile $xamlPath $xaml
 
-# Playtime: load the entire duration format from localization resources.
 $playTimePath = 'src/Starward/Features/PlayTime/PlayTimeButton.xaml.cs'
 $playTime = Read-TextFile $playTimePath
 
@@ -108,20 +103,22 @@ function Add-ResxEntry([string]$Path, [string]$Name, [string]$Value) {
 Add-ResxEntry 'src/Starward.Language/Lang.resx' 'PlayTimeButton_DurationFormat' '{0}h {1}m'
 Add-ResxEntry 'src/Starward.Language/Lang.ru-RU.resx' 'PlayTimeButton_DurationFormat' '{0} ч {1} м'
 
-# Temporary diagnostics: capture the actual source files created by the preceding
-# patches so their layout can be adjusted against the built branch precisely.
 $diagnosticDir = 'build/logs/patched-ui-sources'
 New-Item -Path $diagnosticDir -ItemType Directory -Force | Out-Null
-$matches = Get-ChildItem 'src' -Recurse -File -Include *.xaml,*.cs,*.resx |
-    Select-String -Pattern 'GameRecordAutoRefresh|HoYoLAB Toolbox automatic refresh|Настройки автообновления HoYoLAB Toolbox' -List
-$index = New-Object System.Collections.Generic.List[string]
-foreach ($match in $matches) {
-    $sourcePath = $match.Path
-    $relative = [IO.Path]::GetRelativePath((Resolve-Path '.').Path, $sourcePath)
-    $safeName = ($relative -replace '[\\/:*?"<>|]', '_')
-    Copy-Item $sourcePath (Join-Path $diagnosticDir $safeName) -Force
-    $index.Add($relative)
+$diagnosticFiles = @(
+    'src/Starward/Features/Setting/HoyolabToolboxAutoRefreshSetting.xaml',
+    'src/Starward/Features/Setting/HoyolabToolboxAutoRefreshSetting.xaml.cs',
+    'src/Starward/Features/Setting/SettingPage.xaml',
+    'src/Starward/Features/Setting/SettingPage.xaml.cs',
+    'src/Starward/Features/GameRecord/StarRail/ApocalypticShadowPage.xaml',
+    'src/Starward.Language/Lang.resx',
+    'src/Starward.Language/Lang.ru-RU.resx'
+)
+foreach ($sourcePath in $diagnosticFiles) {
+    if (Test-Path $sourcePath) {
+        $safeName = ($sourcePath -replace '[\\/:*?"<>|]', '_')
+        Copy-Item $sourcePath (Join-Path $diagnosticDir $safeName) -Force
+    }
 }
-$index | Set-Content 'build/logs/patched-ui-source-index.txt' -Encoding UTF8
 
 Write-Host 'Apocalyptic Shadow layout and localized playtime format fixes applied.'
