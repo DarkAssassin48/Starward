@@ -8,6 +8,7 @@ on:
       - '.github/workflows/build-autorefresh.yml'
       - '.github/patches/auto-game-record-refresh.patch.gz.b64'
       - '.github/patches/autorefresh-settings-page.patch.gz.b64'
+      - '.github/patches/autorefresh-scheduling-monthly-ui-fixes.patch.gz.b64'
   pull_request:
     branches:
       - main
@@ -15,6 +16,7 @@ on:
       - '.github/workflows/build-autorefresh.yml'
       - '.github/patches/auto-game-record-refresh.patch.gz.b64'
       - '.github/patches/autorefresh-settings-page.patch.gz.b64'
+      - '.github/patches/autorefresh-scheduling-monthly-ui-fixes.patch.gz.b64'
   workflow_dispatch:
 
 permissions:
@@ -50,6 +52,14 @@ jobs:
           git apply autorefresh-settings-page.patch
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
+          $fixesEncoded = Get-Content '.github/patches/autorefresh-scheduling-monthly-ui-fixes.patch.gz.b64' -Raw
+          [IO.File]::WriteAllBytes('autorefresh-scheduling-monthly-ui-fixes.patch.gz', [Convert]::FromBase64String($fixesEncoded.Trim()))
+          gzip -d -f autorefresh-scheduling-monthly-ui-fixes.patch.gz
+          git apply --check autorefresh-scheduling-monthly-ui-fixes.patch
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git apply autorefresh-scheduling-monthly-ui-fixes.patch
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
       - name: Install .NET from global.json
         uses: actions/setup-dotnet@v5
         with:
@@ -61,7 +71,7 @@ jobs:
       - name: Build launcher and app
         shell: pwsh
         run: |
-          $version = '0.17.4-autorefresh-settings-test'
+          $version = '0.17.4-autorefresh-schedule-test'
           New-Item -Path 'build/Starward' -ItemType Directory -Force | Out-Null
           New-Item -Path 'build/logs' -ItemType Directory -Force | Out-Null
 
@@ -106,18 +116,19 @@ jobs:
         shell: pwsh
         run: |
           @"
-          Starward AutoRefresh settings test build
+          Starward AutoRefresh scheduled test build
           Base version: 0.17.4
           Architecture: x64
           Commit: $env:GITHUB_SHA
           Built: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss K')
+          Fixed 30-minute polling is disabled.
           Official update check is disabled for this test build.
           "@ | Set-Content 'build/Starward/AUTOREFRESH_TEST_BUILD.txt' -Encoding UTF8
 
       - name: Upload portable build
         uses: actions/upload-artifact@v7
         with:
-          name: Starward_AutoRefresh_Settings_Test_x64
+          name: Starward_AutoRefresh_Scheduled_Test_x64
           path: build/Starward/
           if-no-files-found: error
           compression-level: 6
