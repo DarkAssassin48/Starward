@@ -1,3 +1,4 @@
+# One-time direct source migration; removed after the verified commit.
 name: Apply Anomaly Arbitration Buff Button
 
 on:
