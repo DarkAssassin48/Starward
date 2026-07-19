@@ -7,14 +7,14 @@ on:
     paths:
       - '.github/workflows/build-autorefresh.yml'
       - '.github/patches/auto-game-record-refresh.patch.gz.b64'
-      - 'src/Starward/Features/Setting/**'
+      - '.github/patches/autorefresh-settings-page.patch.gz.b64'
   pull_request:
     branches:
       - main
     paths:
       - '.github/workflows/build-autorefresh.yml'
       - '.github/patches/auto-game-record-refresh.patch.gz.b64'
-      - 'src/Starward/Features/Setting/**'
+      - '.github/patches/autorefresh-settings-page.patch.gz.b64'
   workflow_dispatch:
 
 permissions:
@@ -31,7 +31,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Decode and apply AutoRefresh patch
+      - name: Decode and apply AutoRefresh patches
         shell: pwsh
         run: |
           $encoded = Get-Content '.github/patches/auto-game-record-refresh.patch.gz.b64' -Raw
@@ -40,6 +40,14 @@ jobs:
           git apply --check auto-game-record-refresh.patch
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           git apply auto-game-record-refresh.patch
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+          $settingsEncoded = Get-Content '.github/patches/autorefresh-settings-page.patch.gz.b64' -Raw
+          [IO.File]::WriteAllBytes('autorefresh-settings-page.patch.gz', [Convert]::FromBase64String($settingsEncoded.Trim()))
+          gzip -d -f autorefresh-settings-page.patch.gz
+          git apply --check autorefresh-settings-page.patch
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git apply autorefresh-settings-page.patch
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Install .NET from global.json
