@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build-x64:
@@ -28,54 +28,10 @@ jobs:
       Platform: x64
 
     steps:
-      - name: Checkout feature branch
+      - name: Checkout
         uses: actions/checkout@v5
         with:
-          ref: feature/auto-game-record-refresh
-          fetch-depth: 0
           show-progress: false
-
-      - name: Update Anomaly Arbitration layout directly
-        shell: pwsh
-        run: |
-          $path = 'src/Starward/Features/GameRecord/StarRail/ChallengePeakPage.xaml'
-          $content = [IO.File]::ReadAllText($path)
-
-          $heightOld = '<Grid MinHeight="150"'
-          $heightNew = '<Grid Height="192"'
-          if (($content.Split($heightOld).Count - 1) -ne 1) {
-            throw 'Expected exactly one Anomaly Arbitration MinHeight declaration.'
-          }
-          $content = $content.Replace($heightOld, $heightNew)
-
-          $buttonOld = @'
-                    <Button Grid.RowSpan="2"
-                            Grid.Column="1"
-                            Margin="8,8,12,8"
-                            Padding="10,8"
-                            HorizontalAlignment="Stretch"
-                            VerticalAlignment="Center"
-                            HorizontalContentAlignment="Stretch"
-                            Background="Transparent"
-                            BorderThickness="0"
-'@
-          $buttonNew = @'
-                    <Button Grid.RowSpan="2"
-                            Grid.Column="1"
-                            Margin="8,0,12,8"
-                            Padding="10,8"
-                            HorizontalAlignment="Stretch"
-                            VerticalAlignment="Bottom"
-                            HorizontalContentAlignment="Stretch"
-                            Background="Transparent"
-                            BorderThickness="0"
-'@
-          if (($content.Split($buttonOld).Count - 1) -ne 1) {
-            throw 'Expected exactly one Anomaly Arbitration buff button block.'
-          }
-          $content = $content.Replace($buttonOld, $buttonNew)
-
-          [IO.File]::WriteAllText($path, $content, [Text.UTF8Encoding]::new($false))
 
       - name: Install .NET from global.json
         uses: actions/setup-dotnet@v5
@@ -88,7 +44,7 @@ jobs:
       - name: Build launcher and app directly from source
         shell: pwsh
         run: |
-          $version = '0.17.4-autorefresh-anomaly-height192-bottom-button-test'
+          $version = '0.17.4-autorefresh-direct-test'
           New-Item -Path 'build/Starward' -ItemType Directory -Force | Out-Null
 
           msbuild src/Starward.Launcher "-property:Configuration=$env:Configuration;Platform=$env:Platform;OutDir=$((Resolve-Path 'build/Starward').Path)"
@@ -107,33 +63,24 @@ jobs:
           Set-Content 'build/Starward/version.ini' -Value "version=$version"
           Remove-Item 'build/Starward/Starward.pdb' -Force -ErrorAction SilentlyContinue
 
-      - name: Commit direct XAML change
-        shell: pwsh
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add src/Starward/Features/GameRecord/StarRail/ChallengePeakPage.xaml
-          git commit -m 'Restore Anomaly Arbitration height and bottom-align buff button'
-          git push origin HEAD:feature/auto-game-record-refresh
-
       - name: Add build information
         shell: pwsh
         run: |
           @"
-          Starward AutoRefresh Anomaly Arbitration layout test
+          Starward AutoRefresh direct-source test build
           Base version: 0.17.4
           Architecture: x64
           Commit: $env:GITHUB_SHA
           Built: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss K')
-          Anomaly Arbitration card uses the original fixed Height=192.
-          The transparent buff button is aligned to the bottom of the boss image.
+          All AutoRefresh, UI, and localization changes are stored directly in source files.
+          No patch or source-rewriting scripts are used by this build.
           Official update check is disabled for this test build.
           "@ | Set-Content 'build/Starward/AUTOREFRESH_TEST_BUILD.txt' -Encoding UTF8
 
       - name: Upload portable build
         uses: actions/upload-artifact@v7
         with:
-          name: Starward_AutoRefresh_AnomalyHeight192_BottomButton_Test_x64
+          name: Starward_AutoRefresh_DirectSource_Test_x64
           path: build/Starward/
           if-no-files-found: error
           compression-level: 6
