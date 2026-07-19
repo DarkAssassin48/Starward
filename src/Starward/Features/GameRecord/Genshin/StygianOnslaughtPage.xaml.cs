@@ -33,6 +33,7 @@ public sealed partial class StygianOnslaughtPage : PageBase
     }
 
 
+
     private GameRecordRole gameRole;
 
 
@@ -163,6 +164,7 @@ public sealed partial class StygianOnslaughtPage : PageBase
 
 
 
+
     private void Segmented_PlayerMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         try
@@ -181,6 +183,7 @@ public sealed partial class StygianOnslaughtPage : PageBase
 
 
 
+
     public static Visibility RankToVisibility(int rank)
     {
         return rank > 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -188,7 +191,6 @@ public sealed partial class StygianOnslaughtPage : PageBase
 
 
 
-    
 
     public static string FormatSeconds(int seconds)
     {
@@ -197,14 +199,18 @@ public sealed partial class StygianOnslaughtPage : PageBase
         return string.Format(format, seconds);
     }
 
+
     public static string BestTypeToString(int type)
     {
-        return type switch
+        var text = type switch
         {
             1 => Lang.SpiralAbyssPage_StrongestSingleStrike,
             2 => Lang.StygianOnslaughtPage_HighestTotalDamageDealt,
             _ => "",
         };
+
+        return string.Join(" ", text
+            .Split(['\r', '\n', '\t', ' '], StringSplitOptions.RemoveEmptyEntries));
     }
 
 
@@ -216,6 +222,7 @@ public sealed partial class StygianOnslaughtPage : PageBase
             _ => $"ms-appx:///Assets/Image/UI_LeyLineChallenge_Medal_0.png",
         };
     }
+
 
 
 }
