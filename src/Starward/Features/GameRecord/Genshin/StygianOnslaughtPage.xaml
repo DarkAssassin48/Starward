@@ -318,7 +318,7 @@
                                 <!--  最强一击/最高总伤  -->
                                 <ItemsControl Grid.Row="3"
                                               Grid.ColumnSpan="2"
-                                              HorizontalAlignment="Stretch"
+                                              HorizontalAlignment="Left"
                                               ItemsSource="{x:Bind BestAvatar}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
@@ -327,10 +327,10 @@
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="so:StygianOnslaughtBestAvatar">
-                                            <Grid Width="318" Height="40">
+                                            <Grid Height="40">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="40" />
-                                                    <ColumnDefinition />
+                                                    <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
                                                 <sc:CachedImage Width="40"
                                                                 Height="40"
@@ -340,7 +340,6 @@
                                                            Margin="8,0"
                                                            VerticalAlignment="Center"
                                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                           TextTrimming="CharacterEllipsis"
                                                            TextWrapping="NoWrap">
                                                     <Run Text="{x:Bind local:StygianOnslaughtPage.BestTypeToString(Type)}" />
                                                     <Run Text=" " />
