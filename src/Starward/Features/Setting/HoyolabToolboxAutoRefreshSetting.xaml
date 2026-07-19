@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<sf:PageBase x:Class="Starward.Features.Setting.HoyolabToolboxAutoRefreshSetting"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sf="using:Starward.Frameworks"
+             mc:Ignorable="d">
+
+    <ScrollViewer>
+        <StackPanel MaxWidth="760" HorizontalAlignment="Left" Spacing="20">
+            <StackPanel Spacing="6">
+                <TextBlock FontSize="24" FontWeight="SemiBold" Text="Настройки автообновления HoYoLAB Toolbox" />
+                <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           Text="Автоматически обновляет сохранённые игровые записи всех добавленных аккаунтов."
+                           TextWrapping="Wrap" />
+            </StackPanel>
+
+            <Border Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="8">
+                <Grid ColumnSpacing="16" RowSpacing="10">
+                    <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="220" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <StackPanel>
+                        <TextBlock FontSize="18" FontWeight="SemiBold" Text="Genshin Impact" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Витая Бездна, Театр Воображариум, Мрачный натиск и Дневник путешественника" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <ComboBox x:Name="GenshinInterval" Grid.Column="1" HorizontalAlignment="Stretch" SelectionChanged="Interval_SelectionChanged" />
+                    <Button Grid.Column="2" Content="Обновить сейчас" Tag="hk4e" Click="RefreshNow_Click" />
+                    <TextBlock x:Name="GenshinLastRefresh" Grid.Row="1" Grid.ColumnSpan="3" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </Grid>
+            </Border>
+
+            <Border Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="8">
+                <Grid ColumnSpacing="16" RowSpacing="10">
+                    <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="220" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <StackPanel>
+                        <TextBlock FontSize="18" FontWeight="SemiBold" Text="Honkai: Star Rail" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Календарь Освоения, Виртуальная вселенная, Зал забвения, Чистый вымысел, Иллюзия конца и Арбитраж аномалий" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <ComboBox x:Name="StarRailInterval" Grid.Column="1" HorizontalAlignment="Stretch" SelectionChanged="Interval_SelectionChanged" />
+                    <Button Grid.Column="2" Content="Обновить сейчас" Tag="hkrpg" Click="RefreshNow_Click" />
+                    <TextBlock x:Name="StarRailLastRefresh" Grid.Row="1" Grid.ColumnSpan="3" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </Grid>
+            </Border>
+
+            <Border Padding="20" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" CornerRadius="8">
+                <Grid ColumnSpacing="16" RowSpacing="10">
+                    <Grid.ColumnDefinitions><ColumnDefinition /><ColumnDefinition Width="220" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="Auto" /></Grid.RowDefinitions>
+                    <StackPanel>
+                        <TextBlock FontSize="18" FontWeight="SemiBold" Text="Zenless Zone Zero" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Ежемесячный отчёт Интернота, Оборона шиюй и Смертельный штурм" TextWrapping="Wrap" />
+                    </StackPanel>
+                    <ComboBox x:Name="ZzzInterval" Grid.Column="1" HorizontalAlignment="Stretch" SelectionChanged="Interval_SelectionChanged" />
+                    <Button Grid.Column="2" Content="Обновить сейчас" Tag="nap" Click="RefreshNow_Click" />
+                    <TextBlock x:Name="ZzzLastRefresh" Grid.Row="1" Grid.ColumnSpan="3" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </Grid>
+            </Border>
+
+            <InfoBar IsOpen="True" IsClosable="False" Severity="Informational"
+                     Message="Starward проверяет расписание при запуске и каждые 30 минут, пока клиент открыт. Пропущенное обновление выполняется при следующем запуске." />
+        </StackPanel>
+    </ScrollViewer>
+</sf:PageBase>
