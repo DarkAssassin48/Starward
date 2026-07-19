@@ -2,6 +2,11 @@
 name: Apply Anomaly Arbitration Buff Button
 
 on:
+  push:
+    branches:
+      - feature/auto-game-record-refresh
+    paths:
+      - '.github/workflows/apply-anomaly-buff-button.yml'
   pull_request:
     branches:
       - main
