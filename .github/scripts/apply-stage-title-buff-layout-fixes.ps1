@@ -138,8 +138,24 @@ Write-TextFile $stygianPath $stygian
 # -----------------------------------------------------------------------------
 $challengePeakPath = 'src/Starward/Features/GameRecord/StarRail/ChallengePeakPage.xaml'
 $challengePeak = Read-TextFile $challengePeakPath
-$challengePeak = Replace-Once $challengePeak '<Grid Height="192"\s+Background="\{ThemeResource CustomOverlayAcrylicBrush\}"' '<Grid MinHeight="220"`r`n                       Background="{ThemeResource CustomOverlayAcrylicBrush}"' 'Challenge Peak boss card height'
-$challengePeak = Replace-Once $challengePeak '<Grid\.ColumnDefinitions>\s*<ColumnDefinition Width="Auto" />\s*<ColumnDefinition />\s*</Grid\.ColumnDefinitions>\s*\r?\n\s*<!--  BOSS 图  -->\s*<sc:CachedImage Grid.RowSpan="2"\s+Grid.ColumnSpan="2"' '<Grid.ColumnDefinitions>`r`n                        <ColumnDefinition />`r`n                        <ColumnDefinition Width="240" />`r`n                    </Grid.ColumnDefinitions>`r`n`r`n                    <!--  BOSS 图  -->`r`n                    <sc:CachedImage Grid.RowSpan="2"`r`n                                    Grid.Column="1"' 'Challenge Peak boss columns and image'
+$challengeHeightReplacement = @'
+<Grid MinHeight="220"
+                       Background="{ThemeResource CustomOverlayAcrylicBrush}"
+'@
+$challengePeak = Replace-Once $challengePeak '<Grid Height="192"\s+Background="\{ThemeResource CustomOverlayAcrylicBrush\}"' $challengeHeightReplacement 'Challenge Peak boss card height'
+
+$challengeColumnsReplacement = @'
+<Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="240" />
+                    </Grid.ColumnDefinitions>
+
+                    <!--  BOSS 图  -->
+                    <sc:CachedImage Grid.RowSpan="2"
+                                    Grid.Column="1"
+'@
+$challengePeak = Replace-Once $challengePeak '<Grid\.ColumnDefinitions>\s*<ColumnDefinition Width="Auto" />\s*<ColumnDefinition />\s*</Grid\.ColumnDefinitions>\s*\r?\n\s*<!--  BOSS 图  -->\s*<sc:CachedImage Grid.RowSpan="2"\s+Grid.ColumnSpan="2"' $challengeColumnsReplacement 'Challenge Peak boss columns and image'
+
 $buffPattern = '<StackPanel Grid.Row="1"\s+Grid.Column="1"\s+Margin="12,0,12,0"\s+Visibility="\{x:Bind CurrentChallengePeakRecord\.BossRecord, Converter=\{StaticResource ObjectToVisibilityConverter\}\}">\s*<!--  Buff  -->\s*<StackPanel Orientation="Horizontal">\s*<sc:CachedImage Width="28"\s+Height="28"\s+Source="\{x:Bind CurrentChallengePeakRecord\.BossRecord\.Buff\.Icon\}" />\s*<TextBlock VerticalAlignment="Center" Text="\{x:Bind CurrentChallengePeakRecord\.BossRecord\.Buff\.NameMi18n\}" />\s*</StackPanel>\s*<TextBlock Foreground="\{ThemeResource TextFillColorSecondaryBrush\}"\s+Text="\{x:Bind CurrentChallengePeakRecord\.BossRecord\.Buff\.DescMi18n\}"\s+TextWrapping="Wrap" />\s*</StackPanel>'
 $buffReplacement = @'
 <Border Grid.RowSpan="2"
