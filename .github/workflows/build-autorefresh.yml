@@ -15,6 +15,7 @@ on:
       - '.github/scripts/apply-final-record-ui-l10n-fixes.ps1'
       - '.github/scripts/fix-stygian-seconds-resource-access.ps1'
       - '.github/scripts/apply-duration-imaginarium-settings-fixes.ps1'
+      - '.github/scripts/run-duration-imaginarium-settings-fixes.ps1'
   pull_request:
     branches:
       - main
@@ -29,6 +30,7 @@ on:
       - '.github/scripts/apply-final-record-ui-l10n-fixes.ps1'
       - '.github/scripts/fix-stygian-seconds-resource-access.ps1'
       - '.github/scripts/apply-duration-imaginarium-settings-fixes.ps1'
+      - '.github/scripts/run-duration-imaginarium-settings-fixes.ps1'
   workflow_dispatch:
 
 permissions:
@@ -129,7 +131,7 @@ jobs:
       - name: Apply duration, Imaginarium, settings, and Anomaly fixes
         shell: pwsh
         run: |
-          & '.github/scripts/apply-duration-imaginarium-settings-fixes.ps1' *> 'build/logs/duration-imaginarium-settings.log'
+          & '.github/scripts/run-duration-imaginarium-settings-fixes.ps1' *> 'build/logs/duration-imaginarium-settings.log'
           $fixExit = $LASTEXITCODE
           Get-Content 'build/logs/duration-imaginarium-settings.log'
           if ($fixExit -ne 0) { exit $fixExit }
