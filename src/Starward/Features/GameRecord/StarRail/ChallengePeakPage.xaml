@@ -245,7 +245,7 @@
                 <!--  王棋通关战绩  -->
                 <TextBlock Margin="0,8,0,0" Text="{x:Bind lang:Lang.ChallengePeakPage_KingInCheckStageRecords}" />
 
-                <Grid Height="192"
+                <Grid Height="200"
                       Background="{ThemeResource CustomOverlayAcrylicBrush}"
                       CornerRadius="8"
                       Shadow="{ThemeResource ThemeShadow}"
