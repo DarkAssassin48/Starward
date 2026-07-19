@@ -68,6 +68,7 @@ public sealed partial class ChallengePeakPage : PageBase
 
     private ChallengePeakData? CurrentChallengePeakData { get; set => SetProperty(ref field, value); }
 
+    // The card height and buff button placement are defined in XAML.
     private ChallengePeakRecord? CurrentChallengePeakRecord { get; set => SetProperty(ref field, value); }
 
 
