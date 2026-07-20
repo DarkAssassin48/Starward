@@ -127,15 +127,15 @@ replace_once(
 
 replace_once(
     "src/Starward/Features/GameRecord/StarRail/ChallengePeakPage.xaml",
-    '''                    <StackPanel Grid.Row="0" Margin="20,12,0,0">''',
-    '''                    <StackPanel Grid.Row="0"
+    '''<StackPanel Grid.Row="0" Margin="20,12,0,0">''',
+    '''<StackPanel Grid.Row="0"
                                 Grid.ColumnSpan="2"
                                 Margin="20,12,120,0">''',
 )
 
 replace_once(
     "src/Starward/Features/GameRecord/StarRail/ChallengePeakPage.xaml",
-    '''                        <StackPanel Orientation="Horizontal">
+    '''<StackPanel Orientation="Horizontal">
                             <StackPanel Orientation="Horizontal"
                                         Visibility="{x:Bind CurrentChallengePeakRecord.BossRecord.HardMode, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <TextBlock FontSize="16" FontWeight="Bold">
@@ -148,7 +148,7 @@ replace_once(
                                        FontWeight="Bold"
                                        Text="{x:Bind CurrentChallengePeakRecord.BossInfo.NameMi18n}" />
                         </StackPanel>''',
-    '''                        <Grid>
+    '''<Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition />
