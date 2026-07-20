@@ -1,3 +1,4 @@
+
 name: Build
 
 on:
@@ -6,54 +7,10 @@ on:
   pull_request:
     branches: [ "main", "dev/*" ]
 
-permissions:
-  contents: write
 
 jobs:
 
-  apply_text_wrapping:
-    runs-on: ubuntu-latest
-    outputs:
-      changed: ${{ steps.result.outputs.changed }}
-    steps:
-    - name: Checkout branch
-      uses: actions/checkout@v5
-      with:
-        ref: fix/localized-time-units-0.18.0
-        fetch-depth: 2
-
-    - name: Apply migration
-      run: python .github/scripts/apply_star_rail_text_wrapping.py 2> migration-error.txt
-
-    - name: Upload migration diagnostics
-      if: failure()
-      uses: actions/upload-artifact@v7
-      with:
-        name: star-rail-migration-error
-        path: migration-error.txt
-
-    - name: Restore workflow and remove migration files
-      run: |
-        git show HEAD^:.github/workflows/build.yml > .github/workflows/build.yml
-        rm -f .github/scripts/apply_star_rail_text_wrapping.py
-        rm -f .github/workflows/apply-star-rail-text-wrapping.yml
-        rm -f .github/apply-star-rail-text-wrapping.trigger
-
-    - name: Commit changes
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git add -A
-        git commit -m "Fix Star Rail long title wrapping and spacing"
-        git push
-
-    - name: Mark migration run
-      id: result
-      run: echo "changed=true" >> "$GITHUB_OUTPUT"
-
   build:
-    needs: apply_text_wrapping
-    if: needs.apply_text_wrapping.outputs.changed != 'true'
     runs-on: windows-2025-vs2026
     strategy:
       matrix:
