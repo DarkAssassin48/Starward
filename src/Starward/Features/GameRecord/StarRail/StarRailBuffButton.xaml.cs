@@ -13,7 +13,6 @@ public sealed partial class StarRailBuffButton : UserControl
     public StarRailBuffButton()
     {
         InitializeComponent();
-        MechanicTitle = Lang.ResourceManager.GetString("PureFictionPage_GritMechanic", Lang.Culture) ?? "Grit Mechanic";
         Loaded += StarRailBuffButton_Loaded;
     }
 
