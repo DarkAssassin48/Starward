@@ -2750,7 +2750,4 @@ Puede enviar los datos exportados al siguiente repositorio:</value>
   <data name="Common_SecondShort" xml:space="preserve">
     <value>s</value>
   </data>
-  <data name="PureFictionPage_GritMechanic" xml:space="preserve">
-    <value>Mecánica de Espíritu de Combate</value>
-  </data>
 </root>

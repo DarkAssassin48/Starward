@@ -2750,7 +2750,4 @@ You are welcome to submit the exported data to the following repository:</value>
   <data name="Common_SecondShort" xml:space="preserve">
     <value>s</value>
   </data>
-  <data name="PureFictionPage_GritMechanic" xml:space="preserve">
-    <value>Grit Mechanic</value>
-  </data>
 </root>
