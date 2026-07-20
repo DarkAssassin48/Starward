@@ -1,20 +1,14 @@
 using System.Globalization;
-using System.Resources;
 
 namespace Starward.Language;
 
 
 /// <summary>
-/// Formats user-visible durations with localized short time-unit labels.
-/// Localization strings are stored in TimeUnits*.resx files in this project.
+/// Formats user-visible durations with localized one-character time-unit labels.
+/// Unit labels are stored in the existing Lang*.resx language packs.
 /// </summary>
 public static class LocalizedTimeFormatter
 {
-
-    private static readonly ResourceManager resourceManager = new(
-        "Starward.Language.TimeUnits",
-        typeof(LocalizedTimeFormatter).Assembly);
-
 
     private static CultureInfo CurrentCulture => Lang.Culture ?? CultureInfo.CurrentUICulture;
 
@@ -23,11 +17,9 @@ public static class LocalizedTimeFormatter
     {
         value = Normalize(value);
         long hours = (long)Math.Floor(value.TotalHours);
-        return string.Format(
-            CurrentCulture,
-            GetString("HoursMinutesShortFormat", "{0} h {1} min"),
-            hours,
-            value.Minutes);
+        return Join(
+            hours.ToString(CurrentCulture), GetUnit("Common_HourShort", "h"),
+            value.Minutes.ToString(CurrentCulture), GetUnit("Common_MinuteShort", "m"));
     }
 
 
@@ -35,18 +27,12 @@ public static class LocalizedTimeFormatter
     {
         value = Normalize(value);
         long minutes = (long)Math.Floor(value.TotalMinutes);
-        string resourceName = padSeconds
-            ? "MinutesSecondsPaddedShortFormat"
-            : "MinutesSecondsShortFormat";
-        string fallback = padSeconds
-            ? "{0} min {1:D2} s"
-            : "{0} min {1} s";
-
-        return string.Format(
-            CurrentCulture,
-            GetString(resourceName, fallback),
-            minutes,
-            value.Seconds);
+        string seconds = padSeconds
+            ? value.Seconds.ToString("D2", CurrentCulture)
+            : value.Seconds.ToString(CurrentCulture);
+        return Join(
+            minutes.ToString(CurrentCulture), GetUnit("Common_MinuteShort", "m"),
+            seconds, GetUnit("Common_SecondShort", "s"));
     }
 
 
@@ -54,19 +40,16 @@ public static class LocalizedTimeFormatter
     {
         value = Normalize(value);
         long hours = (long)Math.Floor(value.TotalHours);
-        string resourceName = padMinutesAndSeconds
-            ? "HoursMinutesSecondsPaddedShortFormat"
-            : "HoursMinutesSecondsShortFormat";
-        string fallback = padMinutesAndSeconds
-            ? "{0} h {1:D2} min {2:D2} s"
-            : "{0} h {1} min {2} s";
-
-        return string.Format(
-            CurrentCulture,
-            GetString(resourceName, fallback),
-            hours,
-            value.Minutes,
-            value.Seconds);
+        string minutes = padMinutesAndSeconds
+            ? value.Minutes.ToString("D2", CurrentCulture)
+            : value.Minutes.ToString(CurrentCulture);
+        string seconds = padMinutesAndSeconds
+            ? value.Seconds.ToString("D2", CurrentCulture)
+            : value.Seconds.ToString(CurrentCulture);
+        return Join(
+            hours.ToString(CurrentCulture), GetUnit("Common_HourShort", "h"),
+            minutes, GetUnit("Common_MinuteShort", "m"),
+            seconds, GetUnit("Common_SecondShort", "s"));
     }
 
 
@@ -76,9 +59,15 @@ public static class LocalizedTimeFormatter
     }
 
 
-    private static string GetString(string name, string fallback)
+    private static string GetUnit(string name, string fallback)
     {
-        return resourceManager.GetString(name, CurrentCulture) ?? fallback;
+        return Lang.ResourceManager.GetString(name, CurrentCulture) ?? fallback;
+    }
+
+
+    private static string Join(params string[] parts)
+    {
+        return string.Join(' ', parts);
     }
 
 }

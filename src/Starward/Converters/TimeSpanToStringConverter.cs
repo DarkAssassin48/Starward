@@ -1,4 +1,4 @@
-﻿using Microsoft.UI.Xaml.Data;
+using Microsoft.UI.Xaml.Data;
 using Starward.Language;
 using System;
 
@@ -10,7 +10,7 @@ internal partial class TimeSpanToStringConverter : IValueConverter
     {
         if (value is TimeSpan time)
         {
-            return LocalizedTimeFormatter.FormatHoursMinutes(time);
+            return LocalizedTimeFormatter.FormatHoursMinutesSeconds(time);
         }
         else
         {

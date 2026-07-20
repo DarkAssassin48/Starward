@@ -2738,4 +2738,13 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="DailyNoteButton_StarRail_AccumulatedPoints" xml:space="preserve">
     <value>Điểm tích lũy</value>
   </data>
+  <data name="Common_HourShort" xml:space="preserve">
+    <value>g</value>
+  </data>
+  <data name="Common_MinuteShort" xml:space="preserve">
+    <value>p</value>
+  </data>
+  <data name="Common_SecondShort" xml:space="preserve">
+    <value>s</value>
+  </data>
 </root>

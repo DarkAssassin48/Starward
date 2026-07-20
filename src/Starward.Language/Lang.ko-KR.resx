@@ -2741,4 +2741,13 @@
   <data name="DailyNoteButton_StarRail_AccumulatedPoints" xml:space="preserve">
     <value>누적 포인트</value>
   </data>
+  <data name="Common_HourShort" xml:space="preserve">
+    <value>시</value>
+  </data>
+  <data name="Common_MinuteShort" xml:space="preserve">
+    <value>분</value>
+  </data>
+  <data name="Common_SecondShort" xml:space="preserve">
+    <value>초</value>
+  </data>
 </root>

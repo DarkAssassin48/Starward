@@ -116,7 +116,7 @@ public sealed partial class PlayTimeButton : UserControl
 
     public static string TimeSpanToString(TimeSpan timeSpan)
     {
-        return LocalizedTimeFormatter.FormatHoursMinutes(timeSpan);
+        return LocalizedTimeFormatter.FormatHoursMinutesSeconds(timeSpan);
     }
 
 

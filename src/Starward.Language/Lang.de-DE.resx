@@ -2739,4 +2739,13 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
   <data name="DailyNoteButton_StarRail_AccumulatedPoints" xml:space="preserve">
     <value>Angesammelte Punkte</value>
   </data>
+  <data name="Common_HourShort" xml:space="preserve">
+    <value>h</value>
+  </data>
+  <data name="Common_MinuteShort" xml:space="preserve">
+    <value>m</value>
+  </data>
+  <data name="Common_SecondShort" xml:space="preserve">
+    <value>s</value>
+  </data>
 </root>
