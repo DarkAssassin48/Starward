@@ -502,7 +502,8 @@
                                                                                     </DataTemplate>
                                                                                 </ItemsControl.ItemTemplate>
                                                                             </ItemsControl>
-                                        <local:StarRailBuffButton BuffDescription="{x:Bind Node1.Buff.Desc}"
+                                        <local:StarRailBuffButton x:Name="ApocalypticShadowNode1BuffButton"
+                                                                   BuffDescription="{x:Bind Node1.Buff.Desc}"
                                                                   BuffIcon="{x:Bind Node1.Buff.Icon}"
                                                                   BuffName="{x:Bind Node1.Buff.Name}"
                                                                   HorizontalAlignment="Center"
@@ -590,7 +591,8 @@
                                                                                     </DataTemplate>
                                                                                 </ItemsControl.ItemTemplate>
                                                                             </ItemsControl>
-                                        <local:StarRailBuffButton BuffDescription="{x:Bind Node2.Buff.Desc}"
+                                        <local:StarRailBuffButton x:Name="ApocalypticShadowNode2BuffButton"
+                                                                   BuffDescription="{x:Bind Node2.Buff.Desc}"
                                                                   BuffIcon="{x:Bind Node2.Buff.Icon}"
                                                                   BuffName="{x:Bind Node2.Buff.Name}"
                                                                   HorizontalAlignment="Center"
@@ -714,7 +716,8 @@
                                                                                     </DataTemplate>
                                                                                 </ItemsControl.ItemTemplate>
                                                                             </ItemsControl>
-                                        <local:StarRailBuffButton BuffDescription="{x:Bind Node3.Buff.Desc}"
+                                        <local:StarRailBuffButton x:Name="ApocalypticShadowNode3BuffButton"
+                                                                   BuffDescription="{x:Bind Node3.Buff.Desc}"
                                                                   BuffIcon="{x:Bind Node3.Buff.Icon}"
                                                                   BuffName="{x:Bind Node3.Buff.Name}"
                                                                   HorizontalAlignment="Center"
