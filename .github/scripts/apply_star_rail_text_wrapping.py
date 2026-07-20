@@ -1,24 +1,16 @@
 from pathlib import Path
+import re
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def replace_once(relative_path: str, old: str, new: str) -> None:
+def replace_regex(relative_path: str, pattern: str, replacement: str, expected: int = 1) -> None:
     path = ROOT / relative_path
     text = path.read_text(encoding="utf-8-sig")
-    count = text.count(old)
-    if count != 1:
-        raise RuntimeError(f"Expected one match in {relative_path}, found {count}")
-    path.write_text(text.replace(old, new, 1), encoding="utf-8")
-
-
-def replace_count(relative_path: str, old: str, new: str, expected: int) -> None:
-    path = ROOT / relative_path
-    text = path.read_text(encoding="utf-8-sig")
-    count = text.count(old)
+    result, count = re.subn(pattern, replacement, text, flags=re.MULTILINE | re.DOTALL)
     if count != expected:
-        raise RuntimeError(f"Expected {expected} matches in {relative_path}, found {count}")
-    path.write_text(text.replace(old, new), encoding="utf-8")
+        raise RuntimeError(f"Expected {expected} matches in {relative_path}, found {count}: {pattern}")
+    path.write_text(result, encoding="utf-8")
 
 
 helper = ROOT / "src/Starward/Features/GameRecord/StarRail/StarRailRecordTextHelper.cs"
@@ -59,39 +51,35 @@ public static class StarRailRecordTextHelper
     encoding="utf-8",
 )
 
-replace_once(
+stage_title_pattern = (
+    r'<TextBlock\s+FontWeight="Bold"\s+'
+    r'Text="\{x:Bind Name\}"\s+'
+    r'TextTrimming="CharacterEllipsis"\s*/>'
+)
+stage_title_replacement = '''<TextBlock FontWeight="Bold"
+                                                   MaxLines="2"
+                                                   Text="{x:Bind local:StarRailRecordTextHelper.NormalizeStageName(Name)}"
+                                                   TextTrimming="None"
+                                                   TextWrapping="Wrap" />'''
+
+replace_regex(
     "src/Starward/Features/GameRecord/StarRail/ForgottenHallPage.xaml",
-    '''                                        <TextBlock FontWeight="Bold"
-                                                   Text="{x:Bind Name}"
-                                                   TextTrimming="CharacterEllipsis" />''',
-    '''                                        <TextBlock FontWeight="Bold"
-                                                   MaxLines="2"
-                                                   Text="{x:Bind local:StarRailRecordTextHelper.NormalizeStageName(Name)}"
-                                                   TextTrimming="None"
-                                                   TextWrapping="Wrap" />''',
+    stage_title_pattern,
+    stage_title_replacement,
 )
-
-replace_once(
+replace_regex(
     "src/Starward/Features/GameRecord/StarRail/PureFictionPage.xaml",
-    '''                                        <TextBlock FontWeight="Bold"
-                                                   Text="{x:Bind Name}"
-                                                   TextTrimming="CharacterEllipsis" />''',
-    '''                                        <TextBlock FontWeight="Bold"
-                                                   MaxLines="2"
-                                                   Text="{x:Bind local:StarRailRecordTextHelper.NormalizeStageName(Name)}"
-                                                   TextTrimming="None"
-                                                   TextWrapping="Wrap" />''',
+    stage_title_pattern,
+    stage_title_replacement,
 )
 
-replace_once(
+replace_regex(
     "src/Starward/Features/GameRecord/StarRail/ApocalypticShadowPage.xaml",
-    '''                    <TextBlock Name="TextBlock_Deepest"
-                               Grid.Column="1"
-                               HorizontalAlignment="Left"
-                               VerticalAlignment="Center"
-                               IsTextTrimmedChanged="TextBlock_Deepest_IsTextTrimmedChanged"
-                               TextTrimming="CharacterEllipsis">''',
-    '''                    <TextBlock Name="TextBlock_Deepest"
+    r'<TextBlock\s+Name="TextBlock_Deepest"\s+Grid\.Column="1"\s+'
+    r'HorizontalAlignment="Left"\s+VerticalAlignment="Center"\s+'
+    r'IsTextTrimmedChanged="TextBlock_Deepest_IsTextTrimmedChanged"\s+'
+    r'TextTrimming="CharacterEllipsis">',
+    '''<TextBlock Name="TextBlock_Deepest"
                                Grid.Column="1"
                                HorizontalAlignment="Stretch"
                                VerticalAlignment="Center"
@@ -100,24 +88,22 @@ replace_once(
                                TextWrapping="Wrap">''',
 )
 
-replace_count(
+replace_regex(
     "src/Starward/Features/GameRecord/StarRail/ApocalypticShadowPage.xaml",
-    '''                            <TextBlock VerticalAlignment="Center" FontSize="12">''',
-    '''                            <TextBlock MaxWidth="150"
+    r'<TextBlock\s+VerticalAlignment="Center"\s+FontSize="12">',
+    '''<TextBlock MaxWidth="150"
                                        VerticalAlignment="Center"
                                        FontSize="12"
                                        TextTrimming="None"
                                        TextWrapping="Wrap">''',
-    3,
+    expected=3,
 )
 
-replace_once(
+replace_regex(
     "src/Starward/Features/GameRecord/StarRail/ApocalypticShadowPage.xaml",
-    '''                                        <TextBlock FontSize="18"
-                                                   FontWeight="Bold"
-                                                   Text="{x:Bind Name}"
-                                                   TextTrimming="CharacterEllipsis" />''',
-    '''                                        <TextBlock FontSize="18"
+    r'<TextBlock\s+FontSize="18"\s+FontWeight="Bold"\s+'
+    r'Text="\{x:Bind Name\}"\s+TextTrimming="CharacterEllipsis"\s*/>',
+    '''<TextBlock FontSize="18"
                                                    FontWeight="Bold"
                                                    MaxLines="2"
                                                    Text="{x:Bind local:StarRailRecordTextHelper.NormalizeStageName(Name)}"
@@ -125,30 +111,30 @@ replace_once(
                                                    TextWrapping="Wrap" />''',
 )
 
-replace_once(
+replace_regex(
     "src/Starward/Features/GameRecord/StarRail/ChallengePeakPage.xaml",
-    '''<StackPanel Grid.Row="0" Margin="20,12,0,0">''',
+    r'<StackPanel\s+Grid\.Row="0"\s+Margin="20,12,0,0">',
     '''<StackPanel Grid.Row="0"
                                 Grid.ColumnSpan="2"
                                 Margin="20,12,120,0">''',
 )
 
-replace_once(
+replace_regex(
     "src/Starward/Features/GameRecord/StarRail/ChallengePeakPage.xaml",
-    '''<StackPanel Orientation="Horizontal">
-                            <StackPanel Orientation="Horizontal"
-                                        Visibility="{x:Bind CurrentChallengePeakRecord.BossRecord.HardMode, Converter={StaticResource BoolToVisibilityConverter}}">
-                                <TextBlock FontSize="16" FontWeight="Bold">
-                                    <Run Text="["/>
-                                    <Run Text="{x:Bind CurrentChallengePeakRecord.BossInfo.HardModeNameMi18n}"/>
-                                    <Run Text="]"/>
-                                </TextBlock>
-                            </StackPanel>
-                            <TextBlock FontSize="16"
-                                       FontWeight="Bold"
-                                       Text="{x:Bind CurrentChallengePeakRecord.BossInfo.NameMi18n}" />
-                        </StackPanel>''',
-    '''<Grid>
+    r'<!--\s+BOSS 名称\s+-->\s*'
+    r'<StackPanel\s+Orientation="Horizontal">\s*'
+    r'<StackPanel\s+Orientation="Horizontal"\s+'
+    r'Visibility="\{x:Bind CurrentChallengePeakRecord\.BossRecord\.HardMode, Converter=\{StaticResource BoolToVisibilityConverter\}\}">\s*'
+    r'<TextBlock\s+FontSize="16"\s+FontWeight="Bold">\s*'
+    r'<Run\s+Text="\["\s*/>\s*'
+    r'<Run\s+Text="\{x:Bind CurrentChallengePeakRecord\.BossInfo\.HardModeNameMi18n\}"\s*/>\s*'
+    r'<Run\s+Text="\]"\s*/>\s*'
+    r'</TextBlock>\s*</StackPanel>\s*'
+    r'<TextBlock\s+FontSize="16"\s+FontWeight="Bold"\s+'
+    r'Text="\{x:Bind CurrentChallengePeakRecord\.BossInfo\.NameMi18n\}"\s*/>\s*'
+    r'</StackPanel>',
+    '''<!--  BOSS 名称  -->
+                        <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition />
