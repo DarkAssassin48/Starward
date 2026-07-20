@@ -194,7 +194,10 @@
                                 </Grid.ColumnDefinitions>
 
                                 <!--  怪物名称  -->
-                                <TextBlock FontSize="16" Text="{x:Bind Name}" />
+                                <TextBlock FontSize="16"
+                                           Text="{x:Bind Name}"
+                                           TextTrimming="None"
+                                           TextWrapping="Wrap" />
                                 <!--  战斗时间  -->
                                 <StackPanel Grid.Row="1"
                                             HorizontalAlignment="Left"
