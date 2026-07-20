@@ -41,7 +41,8 @@
                         <TextBlock FontSize="14"
                                    FontWeight="SemiBold"
                                    Text="{Binding MechanicTitle, ElementName=Root}"
-                                   TextWrapping="Wrap" />
+                                   TextWrapping="Wrap"
+                                   Visibility="{Binding MechanicTitle, ElementName=Root, Converter={StaticResource ObjectToVisibilityConverter}}" />
                         <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    Text="{Binding MechanicDescription, ElementName=Root}"
                                    TextWrapping="WrapWholeWords" />
