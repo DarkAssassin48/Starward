@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:sc="using:Starward.Controls"
+             x:Name="Root"
              x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
 
@@ -31,6 +32,20 @@
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                Text="{x:Bind BuffDescription}"
                                TextWrapping="WrapWholeWords" />
+
+                    <StackPanel Spacing="8"
+                                Visibility="{Binding MechanicDescription, ElementName=Root, Converter={StaticResource ObjectToVisibilityConverter}}">
+                        <Rectangle Height="1"
+                                   Margin="0,2"
+                                   Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                        <TextBlock FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Text="{Binding MechanicTitle, ElementName=Root}"
+                                   TextWrapping="Wrap" />
+                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding MechanicDescription, ElementName=Root}"
+                                   TextWrapping="WrapWholeWords" />
+                    </StackPanel>
                 </StackPanel>
             </Flyout>
         </Button.Flyout>
