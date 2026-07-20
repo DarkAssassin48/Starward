@@ -15,7 +15,7 @@ namespace Starward.Features.GameRecord.StarRail;
 
 /// <summary>
 /// Loads localized strings used by the HoYoLAB game-record pages.
-/// Results are cached per locale for the lifetime of the application.
+/// Successful results are cached per locale for the lifetime of the application.
 /// </summary>
 internal static class HoYoLabMi18nService
 {
@@ -40,7 +40,13 @@ internal static class HoYoLabMi18nService
         string locale = NormalizeLocale((culture ?? Lang.Culture).Name);
         IReadOnlyDictionary<string, string>? values = await GetLocaleAsync(locale, cancellationToken);
 
-        if (values?.TryGetValue(key, out string? value) is true && !string.IsNullOrWhiteSpace(value))
+        if (values is null)
+        {
+            LocaleCache.TryRemove(locale, out _);
+            return null;
+        }
+
+        if (values.TryGetValue(key, out string? value) && !string.IsNullOrWhiteSpace(value))
         {
             return value;
         }
