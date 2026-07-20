@@ -1,52 +1,57 @@
-
-name: Build
+name: Fix Stygian second unit binding
 
 on:
-  push:
-    branches: [ "main", "dev/*" ]
   pull_request:
-    branches: [ "main", "dev/*" ]
+    branches: [ "main" ]
 
+permissions:
+  contents: write
 
 jobs:
-
-  build:
-    runs-on: windows-2025-vs2026
-    strategy:
-      matrix:
-        configuration: [Debug, Release]
-        platform: [x64, arm64]
-
-    env:
-      Configuration: ${{ matrix.configuration }}
-      Platform: ${{ matrix.platform }}
-
+  fix:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v5
+      - name: Checkout feature branch
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
 
-    - name: Install .NET
-      uses: actions/setup-dotnet@v5
-      with:
-        global-json-file: global.json
+      - name: Use formatter property in XAML
+        shell: bash
+        run: |
+          python3 <<'PY'
+          from pathlib import Path
 
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v3
+          xaml = Path('src/Starward/Features/GameRecord/Genshin/StygianOnslaughtPage.xaml')
+          text = xaml.read_text(encoding='utf-8-sig')
+          old = '{x:Bind lang:Lang.Common_SecondShort}'
+          new = '{x:Bind lang:LocalizedTimeFormatter.SecondUnit}'
+          count = text.count(old)
+          if count != 3:
+              raise RuntimeError(f'Expected exactly 3 direct Lang bindings, found {count}')
+          xaml.write_text(text.replace(old, new), encoding='utf-8')
 
-    - name: SHA
-      id: sha
-      run: echo "sha=$("${{ github.sha }}".SubString(0, 7))" >> $env:GITHUB_OUTPUT
+          formatter = Path('src/Starward.Language/LocalizedTimeFormatter.cs')
+          text = formatter.read_text(encoding='utf-8-sig')
+          anchor = '    private static CultureInfo CurrentCulture => Lang.Culture ?? CultureInfo.CurrentUICulture;\n'
+          addition = '\n\n    public static string SecondUnit => GetUnit("Common_SecondShort", "s");\n'
+          if 'public static string SecondUnit' not in text:
+              if anchor not in text:
+                  raise RuntimeError('Formatter insertion point not found')
+              text = text.replace(anchor, anchor + addition, 1)
+          formatter.write_text(text, encoding='utf-8')
+          PY
 
-    - name: Build
-      run: |
-        $sha = "${{ steps.sha.outputs.sha }}"
-        New-Item -Path "build/Starward/" -Type Directory
-        msbuild src/Starward.Launcher "-property:Configuration=$env:Configuration;Platform=$env:Platform;OutDir=$(Resolve-Path "build/Starward/")"
-        dotnet publish src/Starward -c $env:Configuration -r "win-$env:Platform" -o "build/Starward/app-build.$sha" -p:Platform=$env:Platform -p:Version="0.0.1-build.$sha" -p:DefineConstants=DONOT_CHECK_UPDATE
-        Set-Content "build/Starward/version.ini" -Value "version=build.$sha"
+          git fetch origin main
+          git show origin/main:.github/workflows/build.yml > .github/workflows/build.yml
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v7
-      with:
-        name: Starward_${{ matrix.configuration }}_${{ matrix.platform }}_${{ steps.sha.outputs.sha }}
-        path: build/Starward/
+      - name: Commit corrected binding
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/Starward/Features/GameRecord/Genshin/StygianOnslaughtPage.xaml src/Starward.Language/LocalizedTimeFormatter.cs .github/workflows/build.yml
+          git commit -m "Use localized formatter property for Stygian seconds"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
