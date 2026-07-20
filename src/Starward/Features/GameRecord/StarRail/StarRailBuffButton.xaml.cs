@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Starward.Language;
+using System.Threading.Tasks;
 
 namespace Starward.Features.GameRecord.StarRail;
 
@@ -8,6 +9,7 @@ public sealed partial class StarRailBuffButton : UserControl
 {
 
     private bool _mechanicTitleLoaded;
+    private bool _mechanicTitleLoading;
 
 
     public StarRailBuffButton()
@@ -19,16 +21,65 @@ public sealed partial class StarRailBuffButton : UserControl
 
     private async void StarRailBuffButton_Loaded(object sender, RoutedEventArgs e)
     {
-        if (_mechanicTitleLoaded || string.IsNullOrWhiteSpace(MechanicDescription))
+        UpdateMechanicSection();
+        await EnsureMechanicTitleAsync();
+    }
+
+
+    private async void BuffButton_Click(object sender, RoutedEventArgs e)
+    {
+        UpdateMechanicSection();
+        await EnsureMechanicTitleAsync();
+    }
+
+
+    private static void OnMechanicDescriptionChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+    {
+        if (sender is StarRailBuffButton control)
+        {
+            control.UpdateMechanicSection();
+            _ = control.EnsureMechanicTitleAsync();
+        }
+    }
+
+
+    private void UpdateMechanicSection()
+    {
+        bool hasDescription = !string.IsNullOrWhiteSpace(MechanicDescription);
+
+        if (MechanicSection is not null)
+        {
+            MechanicSection.Visibility = hasDescription ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        if (!hasDescription)
+        {
+            MechanicTitle = null;
+            _mechanicTitleLoaded = false;
+        }
+    }
+
+
+    private async Task EnsureMechanicTitleAsync()
+    {
+        if (_mechanicTitleLoaded || _mechanicTitleLoading || string.IsNullOrWhiteSpace(MechanicDescription))
         {
             return;
         }
 
-        _mechanicTitleLoaded = true;
-        string? title = await HoYoLabMi18nService.GetStringAsync("mechanism_buff", Lang.Culture);
-        if (!string.IsNullOrWhiteSpace(title))
+        _mechanicTitleLoading = true;
+        try
         {
-            MechanicTitle = title.Trim();
+            string? title = await HoYoLabMi18nService.GetStringAsync("mechanism_buff", Lang.Culture);
+            if (!string.IsNullOrWhiteSpace(title))
+            {
+                MechanicTitle = title.Trim();
+                _mechanicTitleLoaded = true;
+            }
+        }
+        finally
+        {
+            _mechanicTitleLoading = false;
         }
     }
 
@@ -82,7 +133,7 @@ public sealed partial class StarRailBuffButton : UserControl
         nameof(MechanicDescription),
         typeof(string),
         typeof(StarRailBuffButton),
-        new PropertyMetadata(null));
+        new PropertyMetadata(null, OnMechanicDescriptionChanged));
 
 
     public string? MechanicTitle
