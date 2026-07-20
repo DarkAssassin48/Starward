@@ -1,30 +1,52 @@
+
 name: Build
 
 on:
+  push:
+    branches: [ "main", "dev/*" ]
   pull_request:
     branches: [ "main", "dev/*" ]
 
-permissions:
-  contents: write
 
 jobs:
-  apply_buff_ui:
-    runs-on: ubuntu-latest
+
+  build:
+    runs-on: windows-2025-vs2026
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+        platform: [x64, arm64]
+
+    env:
+      Configuration: ${{ matrix.configuration }}
+      Platform: ${{ matrix.platform }}
+
     steps:
-    - name: Checkout branch
+    - name: Checkout
       uses: actions/checkout@v5
+
+    - name: Install .NET
+      uses: actions/setup-dotnet@v5
       with:
-        ref: fix/localized-time-units-0.18.0
-        fetch-depth: 2
+        global-json-file: global.json
 
-    - name: Apply buff UI
-      run: python .github/scripts/apply_star_rail_buff_ui.py
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v3
 
-    - name: Commit page changes
+    - name: SHA
+      id: sha
+      run: echo "sha=$("${{ github.sha }}".SubString(0, 7))" >> $env:GITHUB_OUTPUT
+
+    - name: Build
       run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git add src/Starward/Features/GameRecord/StarRail/PureFictionPage.xaml
-        git add src/Starward/Features/GameRecord/StarRail/ApocalypticShadowPage.xaml
-        git commit -m "Show selected buffs for Pure Fiction and Apocalyptic Shadow"
-        git push
+        $sha = "${{ steps.sha.outputs.sha }}"
+        New-Item -Path "build/Starward/" -Type Directory
+        msbuild src/Starward.Launcher "-property:Configuration=$env:Configuration;Platform=$env:Platform;OutDir=$(Resolve-Path "build/Starward/")"
+        dotnet publish src/Starward -c $env:Configuration -r "win-$env:Platform" -o "build/Starward/app-build.$sha" -p:Platform=$env:Platform -p:Version="0.0.1-build.$sha" -p:DefineConstants=DONOT_CHECK_UPDATE
+        Set-Content "build/Starward/version.ini" -Value "version=build.$sha"
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v7
+      with:
+        name: Starward_${{ matrix.configuration }}_${{ matrix.platform }}_${{ steps.sha.outputs.sha }}
+        path: build/Starward/
