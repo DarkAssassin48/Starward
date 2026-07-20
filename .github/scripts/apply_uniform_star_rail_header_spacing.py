@@ -36,7 +36,7 @@ replace_once(
                                             <Run Text="{x:Bind RoundNum}" />
                                         </TextBlock>
                                     </StackPanel>''',
-    '''                                    <!--  名称，回оличество ходов  -->
+    '''                                    <!--  名称，回合数  -->
                                     <Grid MinHeight="56" Padding="0,8,0,8">
                                         <StackPanel VerticalAlignment="Center" Spacing="2">
                                             <TextBlock FontWeight="Bold"
