@@ -26,6 +26,7 @@ jobs:
         run: |
           rm .github/scripts/apply_star_rail_text_wrapping.py
           rm .github/workflows/apply-star-rail-text-wrapping.yml
+          rm -f .github/apply-star-rail-text-wrapping.trigger
 
       - name: Commit changes
         run: |
