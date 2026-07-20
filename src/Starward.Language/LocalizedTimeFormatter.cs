@@ -13,7 +13,7 @@ public static class LocalizedTimeFormatter
     private static CultureInfo CurrentCulture => Lang.Culture ?? CultureInfo.CurrentUICulture;
 
 
-    public static string SecondUnit => GetUnit("Common_SecondShort", "s");
+    public static string SecondUnit => $" {GetUnit("Common_SecondShort", "s")}";
 
 
     public static string FormatHoursMinutes(TimeSpan value)
