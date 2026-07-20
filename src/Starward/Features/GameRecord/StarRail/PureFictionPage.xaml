@@ -238,9 +238,9 @@
                                         Translation="0,0,16">
 
                                 <!--  title & Node1 & Node2  -->
-                                <Grid Height="304" Padding="20,0,20,0">
+                                <Grid MinHeight="304" Padding="20,0,20,0">
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="56" />
+                                        <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition />
                                         <RowDefinition Height="Auto" />
@@ -256,17 +256,19 @@
                                             Background="{ThemeResource ControlOnImageFillColorDefaultBrush}" />
 
                                     <!--  名称，回合数  -->
-                                    <StackPanel VerticalAlignment="Center" Spacing="2">
-                                        <TextBlock FontWeight="Bold"
-                                                   MaxLines="2"
-                                                   Text="{x:Bind local:StarRailRecordTextHelper.NormalizeStageName(Name)}"
-                                                   TextTrimming="None"
-                                                   TextWrapping="Wrap" />
-                                        <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                                            <Run Text="{x:Bind lang:Lang.ForgottenHallPage_CyclesUsed}" />
-                                            <Run Text="{x:Bind RoundNum}" />
-                                        </TextBlock>
-                                    </StackPanel>
+                                    <Grid MinHeight="56" Padding="0,8,0,8">
+                                        <StackPanel VerticalAlignment="Center" Spacing="2">
+                                            <TextBlock FontWeight="Bold"
+                                                       MaxLines="2"
+                                                       Text="{x:Bind local:StarRailRecordTextHelper.NormalizeStageName(Name)}"
+                                                       TextTrimming="None"
+                                                       TextWrapping="Wrap" />
+                                            <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                                <Run Text="{x:Bind lang:Lang.ForgottenHallPage_CyclesUsed}" />
+                                                <Run Text="{x:Bind RoundNum}" />
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Grid>
 
                                     <!--  星星图标  -->
                                     <StackPanel Grid.Column="1"

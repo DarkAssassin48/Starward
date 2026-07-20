@@ -329,9 +329,9 @@
                                         Translation="0,0,16">
 
                                 <!--  title & Node1 & Node2  -->
-                                <Grid Height="360" Padding="20,0,20,0">
+                                <Grid MinHeight="360" Padding="20,0,20,0">
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="56" />
+                                        <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition />
@@ -350,14 +350,16 @@
                                             Background="{ThemeResource ControlOnImageFillColorDefaultBrush}" />
 
                                     <!--  名称  -->
-                                    <StackPanel VerticalAlignment="Center" Spacing="2">
-                                        <TextBlock FontSize="18"
-                                                   FontWeight="Bold"
-                                                   MaxLines="2"
-                                                   Text="{x:Bind local:StarRailRecordTextHelper.NormalizeStageName(Name)}"
-                                                   TextTrimming="None"
-                                                   TextWrapping="Wrap" />
-                                    </StackPanel>
+                                    <Grid MinHeight="56" Padding="0,8,0,8">
+                                        <StackPanel VerticalAlignment="Center" Spacing="2">
+                                            <TextBlock FontSize="18"
+                                                       FontWeight="Bold"
+                                                       MaxLines="2"
+                                                       Text="{x:Bind local:StarRailRecordTextHelper.NormalizeStageName(Name)}"
+                                                       TextTrimming="None"
+                                                       TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Grid>
 
                                     <!--  星星图标  -->
                                     <StackPanel Grid.Column="2"
