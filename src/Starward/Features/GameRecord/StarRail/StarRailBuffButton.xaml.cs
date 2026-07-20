@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Starward.Language;
 
 namespace Starward.Features.GameRecord.StarRail;
 
@@ -49,5 +50,22 @@ public sealed partial class StarRailBuffButton : UserControl
         typeof(string),
         typeof(StarRailBuffButton),
         new PropertyMetadata(null));
+
+
+    public string? MechanicDescription
+    {
+        get => (string?)GetValue(MechanicDescriptionProperty);
+        set => SetValue(MechanicDescriptionProperty, value);
+    }
+
+    public static readonly DependencyProperty MechanicDescriptionProperty = DependencyProperty.Register(
+        nameof(MechanicDescription),
+        typeof(string),
+        typeof(StarRailBuffButton),
+        new PropertyMetadata(null));
+
+
+    public string MechanicTitle =>
+        Lang.ResourceManager.GetString("PureFictionPage_GritMechanic", Lang.Culture) ?? "Grit Mechanic";
 
 }
