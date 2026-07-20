@@ -4,41 +4,27 @@ on:
   pull_request:
     branches: [ "main", "dev/*" ]
 
+permissions:
+  contents: write
+
 jobs:
-  diagnose:
-    runs-on: windows-2025-vs2026
+  apply_buff_names:
+    runs-on: ubuntu-latest
     steps:
-    - name: Checkout
+    - name: Checkout branch
       uses: actions/checkout@v5
-
-    - name: Install .NET
-      uses: actions/setup-dotnet@v5
       with:
-        global-json-file: global.json
+        ref: fix/localized-time-units-0.18.0
+        fetch-depth: 2
 
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v3
+    - name: Name lazy-loaded buff controls
+      run: python .github/scripts/name_star_rail_buff_controls.py
 
-    - name: Build with complete log
-      shell: pwsh
+    - name: Commit page changes
       run: |
-        New-Item -Path "build/Starward/" -Type Directory -Force
-        & msbuild src/Starward.Launcher "-property:Configuration=Release;Platform=x64;OutDir=$(Resolve-Path "build/Starward/")" 2>&1 | Tee-Object -FilePath build.log
-        $launcherExit = $LASTEXITCODE
-        if ($launcherExit -eq 0) {
-          & dotnet publish src/Starward -c Release -r win-x64 -o "build/Starward/app-build.diag" -p:Platform=x64 -p:Version="0.0.1-build.diag" -p:DefineConstants=DONOT_CHECK_UPDATE 2>&1 | Tee-Object -FilePath build.log -Append
-          $publishExit = $LASTEXITCODE
-        } else {
-          $publishExit = 0
-        }
-        "launcher=$launcherExit`npublish=$publishExit" | Set-Content build-exit.txt
-        exit 0
-
-    - name: Upload diagnostics
-      if: always()
-      uses: actions/upload-artifact@v7
-      with:
-        name: star-rail-buff-ui-build-log
-        path: |
-          build.log
-          build-exit.txt
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add src/Starward/Features/GameRecord/StarRail/PureFictionPage.xaml
+        git add src/Starward/Features/GameRecord/StarRail/ApocalypticShadowPage.xaml
+        git commit -m "Name lazy-loaded Star Rail buff controls"
+        git push
