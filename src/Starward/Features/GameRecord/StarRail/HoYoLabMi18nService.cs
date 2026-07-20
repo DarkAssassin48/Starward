@@ -32,20 +32,11 @@ internal static class HoYoLabMi18nService
         CancellationToken cancellationToken = default)
     {
         string locale = NormalizeLocale((culture ?? Lang.Culture).Name);
-
         IReadOnlyDictionary<string, string>? values = await GetLocaleAsync(locale, cancellationToken);
+
         if (values?.TryGetValue(key, out string? value) is true && !string.IsNullOrWhiteSpace(value))
         {
             return value;
-        }
-
-        if (!locale.Equals("en-us", StringComparison.OrdinalIgnoreCase))
-        {
-            values = await GetLocaleAsync("en-us", cancellationToken);
-            if (values?.TryGetValue(key, out value) is true && !string.IsNullOrWhiteSpace(value))
-            {
-                return value;
-            }
         }
 
         return null;
