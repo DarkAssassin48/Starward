@@ -2744,4 +2744,7 @@
   <data name="Common_SecondShort" xml:space="preserve">
     <value>ว</value>
   </data>
+  <data name="PureFictionPage_GritMechanic" xml:space="preserve">
+    <value>กลไกจิตวิญญาณการต่อสู้</value>
+  </data>
 </root>
