@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Starward.Core.GameRecord.StarRail.PureFiction;
 
@@ -14,6 +14,9 @@ public class PureFictionBuff
     [JsonPropertyName("desc_mi18n")]
     public string Desc { get; set; }
 
+    [JsonPropertyName("simple_desc_mi18m")]
+    public string? SimpleDesc { get; set; }
+
     [JsonPropertyName("icon")]
     public string Icon { get; set; }
 
@@ -22,6 +25,3 @@ public class PureFictionBuff
     public Dictionary<string, object>? ExtensionData { get; set; }
 
 }
-
-
-
