@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl x:Class="Starward.Features.GameRecord.StarRail.StarRailBuffButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sc="using:Starward.Controls"
+             x:Name="Root"
+             mc:Ignorable="d">
+
+    <Button Padding="8,4"
+            HorizontalAlignment="Center"
+            Background="{ThemeResource ControlFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            CornerRadius="6">
+        <Button.Flyout>
+            <Flyout Placement="Bottom">
+                <StackPanel MaxWidth="360" Spacing="10">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <sc:CachedImage Width="32"
+                                        Height="32"
+                                        VerticalAlignment="Center"
+                                        Source="{Binding BuffIcon, ElementName=Root}" />
+                        <TextBlock VerticalAlignment="Center"
+                                   FontSize="15"
+                                   FontWeight="SemiBold"
+                                   Text="{Binding BuffName, ElementName=Root}"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="{Binding BuffDescription, ElementName=Root}"
+                               TextWrapping="WrapWholeWords" />
+                </StackPanel>
+            </Flyout>
+        </Button.Flyout>
+
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <sc:CachedImage Width="24"
+                            Height="24"
+                            VerticalAlignment="Center"
+                            Source="{Binding BuffIcon, ElementName=Root}" />
+            <TextBlock MaxWidth="280"
+                       VerticalAlignment="Center"
+                       Text="{Binding BuffName, ElementName=Root}"
+                       TextTrimming="None"
+                       TextWrapping="WrapWholeWords" />
+            <FontIcon VerticalAlignment="Center"
+                      FontSize="11"
+                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                      Glyph="&#xE70D;" />
+        </StackPanel>
+    </Button>
+
+</UserControl>
