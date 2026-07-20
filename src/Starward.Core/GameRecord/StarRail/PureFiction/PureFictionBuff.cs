@@ -1,9 +1,13 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Starward.Core.GameRecord.StarRail.PureFiction;
 
 public class PureFictionBuff
 {
+
+    private string? _simpleDesc;
+
 
     [JsonPropertyName("id")]
     public int Id { get; set; }
@@ -15,7 +19,20 @@ public class PureFictionBuff
     public string Desc { get; set; }
 
     [JsonPropertyName("simple_desc_mi18m")]
-    public string? SimpleDesc { get; set; }
+    public string? SimpleDesc
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(_simpleDesc))
+            {
+                return _simpleDesc.Trim();
+            }
+
+            return GetExtensionString("simple_desc_mi18m")
+                ?? GetExtensionString("simple_desc_mi18n");
+        }
+        set => _simpleDesc = value;
+    }
 
     [JsonPropertyName("icon")]
     public string Icon { get; set; }
@@ -23,5 +40,23 @@ public class PureFictionBuff
 
     [JsonExtensionData]
     public Dictionary<string, object>? ExtensionData { get; set; }
+
+
+    private string? GetExtensionString(string key)
+    {
+        if (ExtensionData?.TryGetValue(key, out object? value) is not true || value is null)
+        {
+            return null;
+        }
+
+        string? result = value switch
+        {
+            string text => text,
+            JsonElement { ValueKind: JsonValueKind.String } element => element.GetString(),
+            _ => null,
+        };
+
+        return string.IsNullOrWhiteSpace(result) ? null : result.Trim();
+    }
 
 }
