@@ -1,52 +1,34 @@
-
 name: Build
 
 on:
-  push:
-    branches: [ "main", "dev/*" ]
   pull_request:
     branches: [ "main", "dev/*" ]
 
+permissions:
+  contents: write
 
 jobs:
-
-  build:
-    runs-on: windows-2025-vs2026
-    strategy:
-      matrix:
-        configuration: [Debug, Release]
-        platform: [x64, arm64]
-
-    env:
-      Configuration: ${{ matrix.configuration }}
-      Platform: ${{ matrix.platform }}
-
+  apply_tierce_background:
+    runs-on: ubuntu-latest
     steps:
-    - name: Checkout
+    - name: Checkout branch
       uses: actions/checkout@v5
-
-    - name: Install .NET
-      uses: actions/setup-dotnet@v5
       with:
-        global-json-file: global.json
+        ref: fix/localized-time-units-0.18.0
+        fetch-depth: 2
 
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v3
+    - name: Apply background fix
+      run: python .github/scripts/apply_apocalyptic_shadow_tierce_background.py
 
-    - name: SHA
-      id: sha
-      run: echo "sha=$("${{ github.sha }}".SubString(0, 7))" >> $env:GITHUB_OUTPUT
-
-    - name: Build
+    - name: Restore workflow and remove migration script
       run: |
-        $sha = "${{ steps.sha.outputs.sha }}"
-        New-Item -Path "build/Starward/" -Type Directory
-        msbuild src/Starward.Launcher "-property:Configuration=$env:Configuration;Platform=$env:Platform;OutDir=$(Resolve-Path "build/Starward/")"
-        dotnet publish src/Starward -c $env:Configuration -r "win-$env:Platform" -o "build/Starward/app-build.$sha" -p:Platform=$env:Platform -p:Version="0.0.1-build.$sha" -p:DefineConstants=DONOT_CHECK_UPDATE
-        Set-Content "build/Starward/version.ini" -Value "version=build.$sha"
+        git show HEAD^:.github/workflows/build.yml > .github/workflows/build.yml
+        rm .github/scripts/apply_apocalyptic_shadow_tierce_background.py
 
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v7
-      with:
-        name: Starward_${{ matrix.configuration }}_${{ matrix.platform }}_${{ steps.sha.outputs.sha }}
-        path: build/Starward/
+    - name: Commit changes
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+        git add -A
+        git commit -m "Stretch Apocalyptic Shadow tierce boss background"
+        git push
