@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:sc="using:Starward.Controls"
-             x:Name="Root"
+             x:DefaultBindMode="OneWay"
              mc:Ignorable="d">
 
     <Button Padding="8,4"
@@ -21,15 +21,15 @@
                         <sc:CachedImage Width="32"
                                         Height="32"
                                         VerticalAlignment="Center"
-                                        Source="{Binding BuffIcon, ElementName=Root}" />
+                                        Source="{x:Bind BuffIcon}" />
                         <TextBlock VerticalAlignment="Center"
                                    FontSize="15"
                                    FontWeight="SemiBold"
-                                   Text="{Binding BuffName, ElementName=Root}"
+                                   Text="{x:Bind BuffName}"
                                    TextWrapping="Wrap" />
                     </StackPanel>
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               Text="{Binding BuffDescription, ElementName=Root}"
+                               Text="{x:Bind BuffDescription}"
                                TextWrapping="WrapWholeWords" />
                 </StackPanel>
             </Flyout>
@@ -39,10 +39,10 @@
             <sc:CachedImage Width="24"
                             Height="24"
                             VerticalAlignment="Center"
-                            Source="{Binding BuffIcon, ElementName=Root}" />
+                            Source="{x:Bind BuffIcon}" />
             <TextBlock MaxWidth="280"
                        VerticalAlignment="Center"
-                       Text="{Binding BuffName, ElementName=Root}"
+                       Text="{x:Bind BuffName}"
                        TextTrimming="None"
                        TextWrapping="WrapWholeWords" />
             <FontIcon VerticalAlignment="Center"
