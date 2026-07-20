@@ -5,6 +5,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Starward.Core;
 using Starward.Features.Database;
+using Starward.Language;
 using System;
 
 
@@ -115,8 +116,7 @@ public sealed partial class PlayTimeButton : UserControl
 
     public static string TimeSpanToString(TimeSpan timeSpan)
     {
-
-        return $"{Math.Floor(timeSpan.TotalHours)}h {timeSpan.Minutes}m";
+        return LocalizedTimeFormatter.FormatHoursMinutes(timeSpan);
     }
 
 
