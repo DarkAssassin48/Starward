@@ -1,26 +1,12 @@
-
 name: Build
 
 on:
-  push:
-    branches: [ "main", "dev/*" ]
   pull_request:
     branches: [ "main", "dev/*" ]
 
-
 jobs:
-
-  build:
+  diagnose:
     runs-on: windows-2025-vs2026
-    strategy:
-      matrix:
-        configuration: [Debug, Release]
-        platform: [x64, arm64]
-
-    env:
-      Configuration: ${{ matrix.configuration }}
-      Platform: ${{ matrix.platform }}
-
     steps:
     - name: Checkout
       uses: actions/checkout@v5
@@ -33,20 +19,18 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v3
 
-    - name: SHA
-      id: sha
-      run: echo "sha=$("${{ github.sha }}".SubString(0, 7))" >> $env:GITHUB_OUTPUT
-
-    - name: Build
+    - name: Build with complete log
+      shell: pwsh
       run: |
-        $sha = "${{ steps.sha.outputs.sha }}"
-        New-Item -Path "build/Starward/" -Type Directory
-        msbuild src/Starward.Launcher "-property:Configuration=$env:Configuration;Platform=$env:Platform;OutDir=$(Resolve-Path "build/Starward/")"
-        dotnet publish src/Starward -c $env:Configuration -r "win-$env:Platform" -o "build/Starward/app-build.$sha" -p:Platform=$env:Platform -p:Version="0.0.1-build.$sha" -p:DefineConstants=DONOT_CHECK_UPDATE
-        Set-Content "build/Starward/version.ini" -Value "version=build.$sha"
+        New-Item -Path "build/Starward/" -Type Directory -Force
+        & msbuild src/Starward.Launcher "-property:Configuration=Release;Platform=x64;OutDir=$(Resolve-Path "build/Starward/")" 2>&1 | Tee-Object -FilePath build.log
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        & dotnet publish src/Starward -c Release -r win-x64 -o "build/Starward/app-build.diag" -p:Platform=x64 -p:Version="0.0.1-build.diag" -p:DefineConstants=DONOT_CHECK_UPDATE 2>&1 | Tee-Object -FilePath build.log -Append
+        exit $LASTEXITCODE
 
-    - name: Upload Artifact
+    - name: Upload build log
+      if: always()
       uses: actions/upload-artifact@v7
       with:
-        name: Starward_${{ matrix.configuration }}_${{ matrix.platform }}_${{ steps.sha.outputs.sha }}
-        path: build/Starward/
+        name: header-spacing-build-log
+        path: build.log
