@@ -117,6 +117,7 @@ replace_regex(
     '''<StackPanel Grid.Row="0"
                                 Grid.ColumnSpan="2"
                                 Margin="20,12,120,0">''',
+    expected=2,
 )
 
 replace_regex(
@@ -155,6 +156,23 @@ replace_regex(
                                        TextTrimming="None"
                                        TextWrapping="Wrap" />
                         </Grid>''',
+)
+
+replace_regex(
+    "src/Starward/Features/GameRecord/StarRail/ChallengePeakPage.xaml",
+    r'<TextBlock\s+FontSize="16"\s+FontWeight="Bold">\s*'
+    r'<Run\s+Text="\{x:Bind MobInfo\.Name\}"\s*/>\s*'
+    r'<Run\s+Text="\{x:Bind MobInfo\.MonsterName\}"\s*/>\s*'
+    r'</TextBlock>',
+    '''<TextBlock FontSize="16"
+                                                   FontWeight="Bold"
+                                                   MaxLines="2"
+                                                   TextTrimming="None"
+                                                   TextWrapping="Wrap">
+                                            <Run Text="{x:Bind MobInfo.Name}" />
+                                            <Run Text=" " />
+                                            <Run Text="{x:Bind MobInfo.MonsterName}" />
+                                        </TextBlock>''',
 )
 
 print("Star Rail text wrapping migration applied successfully.")
