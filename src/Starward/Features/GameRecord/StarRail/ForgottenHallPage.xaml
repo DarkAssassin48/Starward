@@ -257,8 +257,10 @@
                                     <!--  名称，回合数  -->
                                     <StackPanel VerticalAlignment="Center" Spacing="2">
                                         <TextBlock FontWeight="Bold"
-                                                   Text="{x:Bind Name}"
-                                                   TextTrimming="CharacterEllipsis" />
+                                                   MaxLines="2"
+                                                   Text="{x:Bind local:StarRailRecordTextHelper.NormalizeStageName(Name)}"
+                                                   TextTrimming="None"
+                                                   TextWrapping="Wrap" />
                                         <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
                                             <Run Text="{x:Bind lang:Lang.ForgottenHallPage_CyclesUsed}" />
                                             <Run Text="{x:Bind RoundNum}" />
