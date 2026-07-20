@@ -23,7 +23,14 @@ jobs:
         fetch-depth: 2
 
     - name: Apply migration
-      run: python .github/scripts/apply_star_rail_text_wrapping.py
+      run: python .github/scripts/apply_star_rail_text_wrapping.py 2> migration-error.txt
+
+    - name: Upload migration diagnostics
+      if: failure()
+      uses: actions/upload-artifact@v7
+      with:
+        name: star-rail-migration-error
+        path: migration-error.txt
 
     - name: Restore workflow and remove migration files
       run: |
