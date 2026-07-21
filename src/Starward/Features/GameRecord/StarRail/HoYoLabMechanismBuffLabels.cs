@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using Windows.Globalization;
 
 namespace Starward.Features.GameRecord.StarRail;
 
@@ -28,19 +29,51 @@ internal static class HoYoLabMechanismBuffLabels
         };
 
 
-    public static string Get(CultureInfo? culture)
+    /// <summary>
+    /// Resolves the label from the language currently used by WinUI.
+    /// The value is evaluated on every call so changing the client language
+    /// does not require restarting the application.
+    /// </summary>
+    public static string GetCurrent(string? elementLanguage = null)
     {
-        string locale = NormalizeLocale(culture?.Name);
+        string? primaryOverride = null;
+        string? applicationLanguage = null;
 
-        if (Labels.TryGetValue(locale, out string? value))
+        try
         {
-            return value;
+            primaryOverride = ApplicationLanguages.PrimaryLanguageOverride;
+            if (ApplicationLanguages.Languages.Count > 0)
+            {
+                applicationLanguage = ApplicationLanguages.Languages[0];
+            }
+        }
+        catch
+        {
+            // WinUI language APIs can be unavailable during early startup.
         }
 
-        if (locale.Equals("zh-hk", StringComparison.OrdinalIgnoreCase) &&
-            Labels.TryGetValue("zh-tw", out value))
+        string?[] candidates =
+        [
+            primaryOverride,
+            applicationLanguage,
+            elementLanguage,
+            CultureInfo.CurrentUICulture.Name,
+            CultureInfo.CurrentCulture.Name,
+        ];
+
+        foreach (string? candidate in candidates)
         {
-            return value;
+            string locale = NormalizeLocale(candidate);
+            if (Labels.TryGetValue(locale, out string? value))
+            {
+                return value;
+            }
+
+            if (locale.Equals("zh-hk", StringComparison.OrdinalIgnoreCase) &&
+                Labels.TryGetValue("zh-tw", out value))
+            {
+                return value;
+            }
         }
 
         return Labels["en-us"];
@@ -50,7 +83,7 @@ internal static class HoYoLabMechanismBuffLabels
     private static string NormalizeLocale(string? cultureName)
     {
         string locale = string.IsNullOrWhiteSpace(cultureName)
-            ? "en-us"
+            ? string.Empty
             : cultureName.Replace('_', '-').ToLowerInvariant();
 
         return locale switch
