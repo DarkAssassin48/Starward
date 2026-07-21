@@ -43,10 +43,10 @@
                                    Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
                         <TextBlock FontSize="14"
                                    FontWeight="SemiBold"
-                                   Text="{Binding MechanicTitle, ElementName=Root}"
+                                   Text="{x:Bind MechanicTitle, Mode=OneWay}"
                                    TextWrapping="Wrap" />
                         <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                   Text="{Binding MechanicDescription, ElementName=Root}"
+                                   Text="{x:Bind MechanicDescription, Mode=OneWay}"
                                    TextWrapping="WrapWholeWords" />
                     </StackPanel>
                 </StackPanel>
