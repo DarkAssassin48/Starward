@@ -8,6 +8,8 @@ public class PureFictionBuff
 
     private string? _simpleDesc;
 
+    private string? _mechanismName;
+
 
     [JsonPropertyName("id")]
     public int Id { get; set; }
@@ -32,6 +34,25 @@ public class PureFictionBuff
                 ?? GetExtensionString("simple_desc_mi18n");
         }
         set => _simpleDesc = value;
+    }
+
+    /// <summary>
+    /// Localized title of the Pure Fiction Grit mechanic.
+    /// Added by Starward before the complete record is serialized to SQLite.
+    /// </summary>
+    [JsonPropertyName("mechanism_buff")]
+    public string? MechanismName
+    {
+        get
+        {
+            if (!string.IsNullOrWhiteSpace(_mechanismName))
+            {
+                return _mechanismName.Trim();
+            }
+
+            return GetExtensionString("mechanism_buff");
+        }
+        set => _mechanismName = value;
     }
 
     [JsonPropertyName("icon")]
