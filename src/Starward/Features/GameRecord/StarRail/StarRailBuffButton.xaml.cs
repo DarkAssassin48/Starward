@@ -10,6 +10,7 @@ public sealed partial class StarRailBuffButton : UserControl
 
     private bool _mechanicTitleLoaded;
     private bool _mechanicTitleLoading;
+    private string? _mechanicTitle;
 
 
     public StarRailBuffButton()
@@ -45,16 +46,28 @@ public sealed partial class StarRailBuffButton : UserControl
 
     private void UpdateMechanicSection()
     {
-        bool hasDescription = !string.IsNullOrWhiteSpace(MechanicDescription);
+        string? description = string.IsNullOrWhiteSpace(MechanicDescription)
+            ? null
+            : MechanicDescription.Trim();
+
+        if (MechanicDescriptionTextBlock is not null)
+        {
+            MechanicDescriptionTextBlock.Text = description ?? string.Empty;
+        }
+
+        if (MechanicTitleTextBlock is not null)
+        {
+            MechanicTitleTextBlock.Text = _mechanicTitle ?? string.Empty;
+        }
 
         if (MechanicSection is not null)
         {
-            MechanicSection.Visibility = hasDescription ? Visibility.Visible : Visibility.Collapsed;
+            MechanicSection.Visibility = description is null ? Visibility.Collapsed : Visibility.Visible;
         }
 
-        if (!hasDescription)
+        if (description is null)
         {
-            MechanicTitle = null;
+            _mechanicTitle = null;
             _mechanicTitleLoaded = false;
         }
     }
@@ -73,8 +86,13 @@ public sealed partial class StarRailBuffButton : UserControl
             string? title = await HoYoLabMi18nService.GetStringAsync("mechanism_buff", Lang.Culture);
             if (!string.IsNullOrWhiteSpace(title))
             {
-                MechanicTitle = title.Trim();
+                _mechanicTitle = title.Trim();
                 _mechanicTitleLoaded = true;
+
+                if (MechanicTitleTextBlock is not null)
+                {
+                    MechanicTitleTextBlock.Text = _mechanicTitle;
+                }
             }
         }
         finally
@@ -134,18 +152,5 @@ public sealed partial class StarRailBuffButton : UserControl
         typeof(string),
         typeof(StarRailBuffButton),
         new PropertyMetadata(null, OnMechanicDescriptionChanged));
-
-
-    public string? MechanicTitle
-    {
-        get => (string?)GetValue(MechanicTitleProperty);
-        private set => SetValue(MechanicTitleProperty, value);
-    }
-
-    public static readonly DependencyProperty MechanicTitleProperty = DependencyProperty.Register(
-        nameof(MechanicTitle),
-        typeof(string),
-        typeof(StarRailBuffButton),
-        new PropertyMetadata(null));
 
 }
