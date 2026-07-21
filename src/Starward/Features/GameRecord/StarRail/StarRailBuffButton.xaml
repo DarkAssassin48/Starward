@@ -18,7 +18,9 @@
             Click="BuffButton_Click"
             CornerRadius="6">
         <Button.Flyout>
-            <Flyout Opened="BuffFlyout_Opened" Placement="Bottom">
+            <Flyout Closed="BuffFlyout_Closed"
+                    Opened="BuffFlyout_Opened"
+                    Placement="Bottom">
                 <StackPanel MaxWidth="360" Spacing="10">
                     <StackPanel Orientation="Horizontal" Spacing="10">
                         <sc:CachedImage Width="32"
