@@ -1,40 +1,21 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System;
 
 namespace Starward.Features.GameRecord.StarRail;
 
 public sealed partial class StarRailBuffButton : UserControl
 {
 
-    private readonly DispatcherTimer _languageRefreshTimer;
-    private string? _displayedMechanicTitle;
-
-
     public StarRailBuffButton()
     {
         InitializeComponent();
-
-        _languageRefreshTimer = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromMilliseconds(250),
-        };
-        _languageRefreshTimer.Tick += LanguageRefreshTimer_Tick;
-
         Loaded += StarRailBuffButton_Loaded;
-        Unloaded += StarRailBuffButton_Unloaded;
     }
 
 
     private void StarRailBuffButton_Loaded(object sender, RoutedEventArgs e)
     {
         UpdateMechanicSection();
-    }
-
-
-    private void StarRailBuffButton_Unloaded(object sender, RoutedEventArgs e)
-    {
-        _languageRefreshTimer.Stop();
     }
 
 
@@ -47,23 +28,10 @@ public sealed partial class StarRailBuffButton : UserControl
     private void BuffFlyout_Opened(object sender, object e)
     {
         UpdateMechanicSection();
-        _languageRefreshTimer.Start();
     }
 
 
-    private void BuffFlyout_Closed(object sender, object e)
-    {
-        _languageRefreshTimer.Stop();
-    }
-
-
-    private void LanguageRefreshTimer_Tick(object? sender, object e)
-    {
-        UpdateMechanicTitle();
-    }
-
-
-    private static void OnMechanicDescriptionChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
+    private static void OnMechanicContentChanged(DependencyObject sender, DependencyPropertyChangedEventArgs args)
     {
         if (sender is StarRailBuffButton control)
         {
@@ -74,9 +42,18 @@ public sealed partial class StarRailBuffButton : UserControl
 
     private void UpdateMechanicSection()
     {
+        string? title = string.IsNullOrWhiteSpace(MechanicTitle)
+            ? null
+            : MechanicTitle.Trim();
         string? description = string.IsNullOrWhiteSpace(MechanicDescription)
             ? null
             : MechanicDescription.Trim();
+
+        if (MechanicTitleTextBlock is not null)
+        {
+            MechanicTitleTextBlock.Text = title ?? string.Empty;
+            MechanicTitleTextBlock.Visibility = title is null ? Visibility.Collapsed : Visibility.Visible;
+        }
 
         if (MechanicDescriptionTextBlock is not null)
         {
@@ -86,39 +63,6 @@ public sealed partial class StarRailBuffButton : UserControl
         if (MechanicSection is not null)
         {
             MechanicSection.Visibility = description is null ? Visibility.Collapsed : Visibility.Visible;
-        }
-
-        if (description is null)
-        {
-            _displayedMechanicTitle = null;
-            if (MechanicTitleTextBlock is not null)
-            {
-                MechanicTitleTextBlock.Text = string.Empty;
-            }
-            return;
-        }
-
-        UpdateMechanicTitle();
-    }
-
-
-    private void UpdateMechanicTitle()
-    {
-        if (string.IsNullOrWhiteSpace(MechanicDescription))
-        {
-            return;
-        }
-
-        string title = HoYoLabMechanismBuffLabels.GetCurrent();
-        if (string.Equals(title, _displayedMechanicTitle, StringComparison.Ordinal))
-        {
-            return;
-        }
-
-        _displayedMechanicTitle = title;
-        if (MechanicTitleTextBlock is not null)
-        {
-            MechanicTitleTextBlock.Text = title;
         }
     }
 
@@ -162,6 +106,19 @@ public sealed partial class StarRailBuffButton : UserControl
         new PropertyMetadata(null));
 
 
+    public string? MechanicTitle
+    {
+        get => (string?)GetValue(MechanicTitleProperty);
+        set => SetValue(MechanicTitleProperty, value);
+    }
+
+    public static readonly DependencyProperty MechanicTitleProperty = DependencyProperty.Register(
+        nameof(MechanicTitle),
+        typeof(string),
+        typeof(StarRailBuffButton),
+        new PropertyMetadata(null, OnMechanicContentChanged));
+
+
     public string? MechanicDescription
     {
         get => (string?)GetValue(MechanicDescriptionProperty);
@@ -172,6 +129,6 @@ public sealed partial class StarRailBuffButton : UserControl
         nameof(MechanicDescription),
         typeof(string),
         typeof(StarRailBuffButton),
-        new PropertyMetadata(null, OnMechanicDescriptionChanged));
+        new PropertyMetadata(null, OnMechanicContentChanged));
 
 }
