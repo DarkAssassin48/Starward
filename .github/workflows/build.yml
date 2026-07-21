@@ -1,4 +1,3 @@
-
 name: Build
 
 on:
@@ -7,10 +6,67 @@ on:
   pull_request:
     branches: [ "main", "dev/*" ]
 
-
 jobs:
+  check_mi18n:
+    runs-on: windows-2025-vs2026
+    steps:
+    - name: Check Russian HoYoLAB mi18n file with HttpClient
+      shell: pwsh
+      run: |
+        $url = "https://webstatic.hoyoverse.com/admin/mi18n/bbs_oversea/m20230509hy150knmyo/m20230509hy150knmyo-ru-ru.json"
+        $handler = [System.Net.Http.HttpClientHandler]::new()
+        $handler.AutomaticDecompression = [System.Net.DecompressionMethods]::All
+        $client = [System.Net.Http.HttpClient]::new($handler)
+        $client.Timeout = [TimeSpan]::FromSeconds(20)
+        try {
+          $response = $client.GetAsync($url).GetAwaiter().GetResult()
+          $body = $response.Content.ReadAsStringAsync().GetAwaiter().GetResult()
+          Write-Host "Status: $([int]$response.StatusCode) $($response.StatusCode)"
+          Write-Host "Content length: $($body.Length)"
+          if (-not $response.IsSuccessStatusCode) {
+            throw "HoYoLAB mi18n request failed"
+          }
+
+          $json = $body | ConvertFrom-Json -Depth 100
+          function Find-JsonValue($node, [string]$key) {
+            if ($null -eq $node) { return $null }
+            if ($node -is [System.Collections.IDictionary]) {
+              foreach ($entryKey in $node.Keys) {
+                if ([string]::Equals([string]$entryKey, $key, [StringComparison]::OrdinalIgnoreCase)) {
+                  return $node[$entryKey]
+                }
+                $found = Find-JsonValue $node[$entryKey] $key
+                if ($null -ne $found) { return $found }
+              }
+            } elseif ($node -is [System.Collections.IEnumerable] -and $node -isnot [string]) {
+              foreach ($item in $node) {
+                $found = Find-JsonValue $item $key
+                if ($null -ne $found) { return $found }
+              }
+            } else {
+              foreach ($property in $node.PSObject.Properties) {
+                if ([string]::Equals($property.Name, $key, [StringComparison]::OrdinalIgnoreCase)) {
+                  return $property.Value
+                }
+                $found = Find-JsonValue $property.Value $key
+                if ($null -ne $found) { return $found }
+              }
+            }
+            return $null
+          }
+
+          $mechanismBuff = Find-JsonValue $json "mechanism_buff"
+          Write-Host "mechanism_buff: $mechanismBuff"
+          if ([string]::IsNullOrWhiteSpace([string]$mechanismBuff)) {
+            throw "mechanism_buff was not found in the official JSON"
+          }
+        } finally {
+          $client.Dispose()
+          $handler.Dispose()
+        }
 
   build:
+    needs: check_mi18n
     runs-on: windows-2025-vs2026
     strategy:
       matrix:
