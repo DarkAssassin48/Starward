@@ -27,7 +27,7 @@ public sealed partial class StarRailBuffButton : UserControl
         {
             WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(
                 this,
-                static (recipient, _) => ((StarRailBuffButton)recipient).UpdateMechanicSection());
+                (_, _) => UpdateMechanicSection());
             _languageMessageRegistered = true;
         }
 
