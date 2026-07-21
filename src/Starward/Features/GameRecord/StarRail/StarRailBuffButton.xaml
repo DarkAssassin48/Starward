@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl x:Class="Starward.Features.GameRecord.StarRail.StarRailBuffButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:sc="using:Starward.Controls"
+             x:Name="Root"
+             x:DefaultBindMode="OneWay"
+             mc:Ignorable="d">
+
+    <Button x:Name="BuffButton"
+            Padding="8,4"
+            HorizontalAlignment="Center"
+            Background="{ThemeResource ControlFillColorDefaultBrush}"
+            BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+            BorderThickness="1"
+            Click="BuffButton_Click"
+            CornerRadius="6">
+        <Button.Flyout>
+            <Flyout Opened="BuffFlyout_Opened"
+                    Placement="Bottom">
+                <StackPanel MaxWidth="360" Spacing="10">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <sc:CachedImage Width="32"
+                                        Height="32"
+                                        VerticalAlignment="Center"
+                                        Source="{x:Bind BuffIcon}" />
+                        <TextBlock VerticalAlignment="Center"
+                                   FontSize="15"
+                                   FontWeight="SemiBold"
+                                   Text="{x:Bind BuffName}"
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+                    <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               Text="{x:Bind BuffDescription}"
+                               TextWrapping="WrapWholeWords" />
+
+                    <StackPanel x:Name="MechanicSection"
+                                Spacing="8"
+                                Visibility="Collapsed">
+                        <Rectangle Height="1"
+                                   Margin="0,2"
+                                   Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                        <TextBlock x:Name="MechanicTitleTextBlock"
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   TextWrapping="Wrap" />
+                        <TextBlock x:Name="MechanicDescriptionTextBlock"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   TextWrapping="WrapWholeWords" />
+                    </StackPanel>
+                </StackPanel>
+            </Flyout>
+        </Button.Flyout>
+
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <sc:CachedImage Width="24"
+                            Height="24"
+                            VerticalAlignment="Center"
+                            Source="{x:Bind BuffIcon}" />
+            <TextBlock MaxWidth="280"
+                       VerticalAlignment="Center"
+                       Text="{x:Bind BuffName}"
+                       TextTrimming="None"
+                       TextWrapping="WrapWholeWords" />
+            <FontIcon VerticalAlignment="Center"
+                      FontSize="11"
+                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                      Glyph="&#xE70D;" />
+        </StackPanel>
+    </Button>
+
+</UserControl>

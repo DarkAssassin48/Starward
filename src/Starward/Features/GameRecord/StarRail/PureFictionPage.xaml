@@ -238,9 +238,9 @@
                                         Translation="0,0,16">
 
                                 <!--  title & Node1 & Node2  -->
-                                <Grid Height="304" Padding="20,0,20,0">
+                                <Grid MinHeight="304" Padding="20,0,20,0">
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="56" />
+                                        <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition />
                                         <RowDefinition Height="Auto" />
@@ -256,15 +256,19 @@
                                             Background="{ThemeResource ControlOnImageFillColorDefaultBrush}" />
 
                                     <!--  名称，回合数  -->
-                                    <StackPanel VerticalAlignment="Center" Spacing="2">
-                                        <TextBlock FontWeight="Bold"
-                                                   Text="{x:Bind Name}"
-                                                   TextTrimming="CharacterEllipsis" />
-                                        <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                                            <Run Text="{x:Bind lang:Lang.ForgottenHallPage_CyclesUsed}" />
-                                            <Run Text="{x:Bind RoundNum}" />
-                                        </TextBlock>
-                                    </StackPanel>
+                                    <Grid MinHeight="56" Padding="0,8,0,8">
+                                        <StackPanel VerticalAlignment="Center" Spacing="2">
+                                            <TextBlock FontWeight="Bold"
+                                                       MaxLines="2"
+                                                       Text="{x:Bind local:StarRailRecordTextHelper.NormalizeStageName(Name)}"
+                                                       TextTrimming="None"
+                                                       TextWrapping="Wrap" />
+                                            <TextBlock FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
+                                                <Run Text="{x:Bind lang:Lang.ForgottenHallPage_CyclesUsed}" />
+                                                <Run Text="{x:Bind RoundNum}" />
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Grid>
 
                                     <!--  星星图标  -->
                                     <StackPanel Grid.Column="1"
@@ -346,49 +350,57 @@
                                         <Run Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Text="{x:Bind Node1.Score}" />
                                     </TextBlock>
 
-                                    <ItemsControl Grid.Row="2"
-                                                  Grid.ColumnSpan="2"
-                                                  HorizontalAlignment="Center"
-                                                  ItemsSource="{x:Bind Node1.Avatars}"
-                                                  Visibility="{x:Bind IsFast, Converter={StaticResource BoolToVisibilityReversedConverter}}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <StackPanel Orientation="Horizontal" Spacing="12" />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="fic:PureFictionAvatar">
-                                                <Grid Width="72" Height="84">
-                                                    <sc:CachedImage Source="{x:Bind Rarity, Converter={StaticResource RarityToSRBgConverter}}" />
-                                                    <sc:CachedImage VerticalAlignment="Top"
-                                                                    CornerRadius="0,12,0,0"
-                                                                    Source="{x:Bind Icon}"
-                                                                    Stretch="UniformToFill" />
-                                                    <Border HorizontalAlignment="Right"
-                                                            VerticalAlignment="Top"
-                                                            Background="#A0000000"
-                                                            CornerRadius="0,12,0,8"
-                                                            Visibility="{x:Bind sfgr:AvatarRankHelper.RankToVisibility(Rank)}">
-                                                        <TextBlock Margin="4,2,4,2"
-                                                                   FontSize="14"
-                                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                                   IsTextScaleFactorEnabled="False"
-                                                                   Text="{x:Bind Rank}" />
-                                                    </Border>
-                                                    <Border Height="16"
-                                                            Margin="0,0,0,1.5"
-                                                            VerticalAlignment="Bottom"
-                                                            Background="#A0000000">
-                                                        <TextBlock Margin="0,0,0,1"
-                                                                   HorizontalAlignment="Center"
-                                                                   VerticalAlignment="Center">
-                                                            <Run Text="Lv." /><Run Text="{x:Bind Level}" />
-                                                        </TextBlock>
-                                                    </Border>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
+                                    <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0,0,0,8" HorizontalAlignment="Center" Spacing="8" Visibility="{x:Bind IsFast, Converter={StaticResource BoolToVisibilityReversedConverter}}">
+                                        <ItemsControl
+                                                                                          HorizontalAlignment="Center"
+                                                                                          ItemsSource="{x:Bind Node1.Avatars}">
+                                                                                <ItemsControl.ItemsPanel>
+                                                                                    <ItemsPanelTemplate>
+                                                                                        <StackPanel Orientation="Horizontal" Spacing="12" />
+                                                                                    </ItemsPanelTemplate>
+                                                                                </ItemsControl.ItemsPanel>
+                                                                                <ItemsControl.ItemTemplate>
+                                                                                    <DataTemplate x:DataType="fic:PureFictionAvatar">
+                                                                                        <Grid Width="72" Height="84">
+                                                                                            <sc:CachedImage Source="{x:Bind Rarity, Converter={StaticResource RarityToSRBgConverter}}" />
+                                                                                            <sc:CachedImage VerticalAlignment="Top"
+                                                                                                            CornerRadius="0,12,0,0"
+                                                                                                            Source="{x:Bind Icon}"
+                                                                                                            Stretch="UniformToFill" />
+                                                                                            <Border HorizontalAlignment="Right"
+                                                                                                    VerticalAlignment="Top"
+                                                                                                    Background="#A0000000"
+                                                                                                    CornerRadius="0,12,0,8"
+                                                                                                    Visibility="{x:Bind sfgr:AvatarRankHelper.RankToVisibility(Rank)}">
+                                                                                                <TextBlock Margin="4,2,4,2"
+                                                                                                           FontSize="14"
+                                                                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                                                           IsTextScaleFactorEnabled="False"
+                                                                                                           Text="{x:Bind Rank}" />
+                                                                                            </Border>
+                                                                                            <Border Height="16"
+                                                                                                    Margin="0,0,0,1.5"
+                                                                                                    VerticalAlignment="Bottom"
+                                                                                                    Background="#A0000000">
+                                                                                                <TextBlock Margin="0,0,0,1"
+                                                                                                           HorizontalAlignment="Center"
+                                                                                                           VerticalAlignment="Center">
+                                                                                                    <Run Text="Lv." /><Run Text="{x:Bind Level}" />
+                                                                                                </TextBlock>
+                                                                                            </Border>
+                                                                                        </Grid>
+                                                                                    </DataTemplate>
+                                                                                </ItemsControl.ItemTemplate>
+                                                                            </ItemsControl>
+                                        <local:StarRailBuffButton x:Name="PureFictionNode1BuffButton"
+                                                                   BuffDescription="{x:Bind Node1.Buff.Desc}"
+                                                                   MechanicDescription="{x:Bind Node1.Buff.SimpleDesc}"
+                                                                   MechanicTitle="{x:Bind Node1.Buff.MechanismName}"
+                                                                  BuffIcon="{x:Bind Node1.Buff.Icon}"
+                                                                  BuffName="{x:Bind Node1.Buff.Name}"
+                                                                  HorizontalAlignment="Center"
+                                                                  x:Load="{x:Bind Node1.Buff, Converter={StaticResource ObjectToBoolConverter}}" />
+                                    </StackPanel>
 
                                     <!--  节点2  -->
                                     <TextBlock Grid.Row="3"
@@ -409,50 +421,57 @@
                                         <Run Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Text="{x:Bind Node2.Score}" />
                                     </TextBlock>
 
-                                    <ItemsControl Grid.Row="4"
-                                                  Grid.ColumnSpan="2"
-                                                  Margin="0,0,0,4"
-                                                  HorizontalAlignment="Center"
-                                                  ItemsSource="{x:Bind Node2.Avatars}"
-                                                  Visibility="{x:Bind IsFast, Converter={StaticResource BoolToVisibilityReversedConverter}}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <StackPanel Orientation="Horizontal" Spacing="12" />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="fic:PureFictionAvatar">
-                                                <Grid Width="72" Height="84">
-                                                    <sc:CachedImage Source="{x:Bind Rarity, Converter={StaticResource RarityToSRBgConverter}}" />
-                                                    <sc:CachedImage VerticalAlignment="Top"
-                                                                    CornerRadius="0,12,0,0"
-                                                                    Source="{x:Bind Icon}"
-                                                                    Stretch="UniformToFill" />
-                                                    <Border HorizontalAlignment="Right"
-                                                            VerticalAlignment="Top"
-                                                            Background="#A0000000"
-                                                            CornerRadius="0,12,0,8"
-                                                            Visibility="{x:Bind sfgr:AvatarRankHelper.RankToVisibility(Rank)}">
-                                                        <TextBlock Margin="4,2,4,2"
-                                                                   FontSize="14"
-                                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                                   IsTextScaleFactorEnabled="False"
-                                                                   Text="{x:Bind Rank}" />
-                                                    </Border>
-                                                    <Border Height="16"
-                                                            Margin="0,0,0,1.5"
-                                                            VerticalAlignment="Bottom"
-                                                            Background="#A0000000">
-                                                        <TextBlock Margin="0,0,0,1"
-                                                                   HorizontalAlignment="Center"
-                                                                   VerticalAlignment="Center">
-                                                            <Run Text="Lv." /><Run Text="{x:Bind Level}" />
-                                                        </TextBlock>
-                                                    </Border>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
+                                    <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,0,8" HorizontalAlignment="Center" Spacing="8" Visibility="{x:Bind IsFast, Converter={StaticResource BoolToVisibilityReversedConverter}}">
+                                        <ItemsControl
+                                                                                          HorizontalAlignment="Center"
+                                                                                          ItemsSource="{x:Bind Node2.Avatars}">
+                                                                                <ItemsControl.ItemsPanel>
+                                                                                    <ItemsPanelTemplate>
+                                                                                        <StackPanel Orientation="Horizontal" Spacing="12" />
+                                                                                    </ItemsPanelTemplate>
+                                                                                </ItemsControl.ItemsPanel>
+                                                                                <ItemsControl.ItemTemplate>
+                                                                                    <DataTemplate x:DataType="fic:PureFictionAvatar">
+                                                                                        <Grid Width="72" Height="84">
+                                                                                            <sc:CachedImage Source="{x:Bind Rarity, Converter={StaticResource RarityToSRBgConverter}}" />
+                                                                                            <sc:CachedImage VerticalAlignment="Top"
+                                                                                                            CornerRadius="0,12,0,0"
+                                                                                                            Source="{x:Bind Icon}"
+                                                                                                            Stretch="UniformToFill" />
+                                                                                            <Border HorizontalAlignment="Right"
+                                                                                                    VerticalAlignment="Top"
+                                                                                                    Background="#A0000000"
+                                                                                                    CornerRadius="0,12,0,8"
+                                                                                                    Visibility="{x:Bind sfgr:AvatarRankHelper.RankToVisibility(Rank)}">
+                                                                                                <TextBlock Margin="4,2,4,2"
+                                                                                                           FontSize="14"
+                                                                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                                                           IsTextScaleFactorEnabled="False"
+                                                                                                           Text="{x:Bind Rank}" />
+                                                                                            </Border>
+                                                                                            <Border Height="16"
+                                                                                                    Margin="0,0,0,1.5"
+                                                                                                    VerticalAlignment="Bottom"
+                                                                                                    Background="#A0000000">
+                                                                                                <TextBlock Margin="0,0,0,1"
+                                                                                                           HorizontalAlignment="Center"
+                                                                                                           VerticalAlignment="Center">
+                                                                                                    <Run Text="Lv." /><Run Text="{x:Bind Level}" />
+                                                                                                </TextBlock>
+                                                                                            </Border>
+                                                                                        </Grid>
+                                                                                    </DataTemplate>
+                                                                                </ItemsControl.ItemTemplate>
+                                                                            </ItemsControl>
+                                        <local:StarRailBuffButton x:Name="PureFictionNode2BuffButton"
+                                                                   BuffDescription="{x:Bind Node2.Buff.Desc}"
+                                                                   MechanicDescription="{x:Bind Node2.Buff.SimpleDesc}"
+                                                                   MechanicTitle="{x:Bind Node2.Buff.MechanismName}"
+                                                                  BuffIcon="{x:Bind Node2.Buff.Icon}"
+                                                                  BuffName="{x:Bind Node2.Buff.Name}"
+                                                                  HorizontalAlignment="Center"
+                                                                  x:Load="{x:Bind Node2.Buff, Converter={StaticResource ObjectToBoolConverter}}" />
+                                    </StackPanel>
 
                                     <!--  快速通关  -->
                                     <StackPanel Grid.Row="1"
@@ -472,7 +491,7 @@
 
                                 <!--  节点3  -->
                                 <Grid x:Name="Node3Root"
-                                      Height="132"
+                                      MinHeight="132"
                                       Padding="20,0,20,0"
                                       VerticalAlignment="Top"
                                       x:Load="{x:Bind Node3, Converter={StaticResource ObjectToBoolConverter}}">
@@ -514,49 +533,57 @@
                                         <Run Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Text="{x:Bind Node3.Score}" />
                                     </TextBlock>
 
-                                    <ItemsControl Grid.Row="1"
-                                                  Grid.ColumnSpan="2"
-                                                  Margin="0,0,0,4"
-                                                  HorizontalAlignment="Center"
-                                                  ItemsSource="{x:Bind Node3.Avatars}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <StackPanel Orientation="Horizontal" Spacing="12" />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="fic:PureFictionAvatar">
-                                                <Grid Width="72" Height="84">
-                                                    <sc:CachedImage Source="{x:Bind Rarity, Converter={StaticResource RarityToSRBgConverter}}" />
-                                                    <sc:CachedImage VerticalAlignment="Top"
-                                                                    CornerRadius="0,12,0,0"
-                                                                    Source="{x:Bind Icon}"
-                                                                    Stretch="UniformToFill" />
-                                                    <Border HorizontalAlignment="Right"
-                                                            VerticalAlignment="Top"
-                                                            Background="#A0000000"
-                                                            CornerRadius="0,12,0,8"
-                                                            Visibility="{x:Bind sfgr:AvatarRankHelper.RankToVisibility(Rank)}">
-                                                        <TextBlock Margin="4,2,4,2"
-                                                                   FontSize="14"
-                                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                                   IsTextScaleFactorEnabled="False"
-                                                                   Text="{x:Bind Rank}" />
-                                                    </Border>
-                                                    <Border Height="16"
-                                                            Margin="0,0,0,1.5"
-                                                            VerticalAlignment="Bottom"
-                                                            Background="#A0000000">
-                                                        <TextBlock Margin="0,0,0,1"
-                                                                   HorizontalAlignment="Center"
-                                                                   VerticalAlignment="Center">
-                                                            <Run Text="Lv." /><Run Text="{x:Bind Level}" />
-                                                        </TextBlock>
-                                                    </Border>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
+                                    <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,8" HorizontalAlignment="Center" Spacing="8">
+                                        <ItemsControl
+                                                                                          HorizontalAlignment="Center"
+                                                                                          ItemsSource="{x:Bind Node3.Avatars}">
+                                                                                <ItemsControl.ItemsPanel>
+                                                                                    <ItemsPanelTemplate>
+                                                                                        <StackPanel Orientation="Horizontal" Spacing="12" />
+                                                                                    </ItemsPanelTemplate>
+                                                                                </ItemsControl.ItemsPanel>
+                                                                                <ItemsControl.ItemTemplate>
+                                                                                    <DataTemplate x:DataType="fic:PureFictionAvatar">
+                                                                                        <Grid Width="72" Height="84">
+                                                                                            <sc:CachedImage Source="{x:Bind Rarity, Converter={StaticResource RarityToSRBgConverter}}" />
+                                                                                            <sc:CachedImage VerticalAlignment="Top"
+                                                                                                            CornerRadius="0,12,0,0"
+                                                                                                            Source="{x:Bind Icon}"
+                                                                                                            Stretch="UniformToFill" />
+                                                                                            <Border HorizontalAlignment="Right"
+                                                                                                    VerticalAlignment="Top"
+                                                                                                    Background="#A0000000"
+                                                                                                    CornerRadius="0,12,0,8"
+                                                                                                    Visibility="{x:Bind sfgr:AvatarRankHelper.RankToVisibility(Rank)}">
+                                                                                                <TextBlock Margin="4,2,4,2"
+                                                                                                           FontSize="14"
+                                                                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                                                           IsTextScaleFactorEnabled="False"
+                                                                                                           Text="{x:Bind Rank}" />
+                                                                                            </Border>
+                                                                                            <Border Height="16"
+                                                                                                    Margin="0,0,0,1.5"
+                                                                                                    VerticalAlignment="Bottom"
+                                                                                                    Background="#A0000000">
+                                                                                                <TextBlock Margin="0,0,0,1"
+                                                                                                           HorizontalAlignment="Center"
+                                                                                                           VerticalAlignment="Center">
+                                                                                                    <Run Text="Lv." /><Run Text="{x:Bind Level}" />
+                                                                                                </TextBlock>
+                                                                                            </Border>
+                                                                                        </Grid>
+                                                                                    </DataTemplate>
+                                                                                </ItemsControl.ItemTemplate>
+                                                                            </ItemsControl>
+                                        <local:StarRailBuffButton x:Name="PureFictionNode3BuffButton"
+                                                                   BuffDescription="{x:Bind Node3.Buff.Desc}"
+                                                                   MechanicDescription="{x:Bind Node3.Buff.SimpleDesc}"
+                                                                   MechanicTitle="{x:Bind Node3.Buff.MechanismName}"
+                                                                  BuffIcon="{x:Bind Node3.Buff.Icon}"
+                                                                  BuffName="{x:Bind Node3.Buff.Name}"
+                                                                  HorizontalAlignment="Center"
+                                                                  x:Load="{x:Bind Node3.Buff, Converter={StaticResource ObjectToBoolConverter}}" />
+                                    </StackPanel>
                                 </Grid>
                             </StackPanel>
                         </DataTemplate>

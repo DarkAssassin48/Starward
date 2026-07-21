@@ -2741,4 +2741,13 @@ Puede enviar los datos exportados al siguiente repositorio:</value>
   <data name="DailyNoteButton_StarRail_AccumulatedPoints" xml:space="preserve">
     <value>Puntos acumulados</value>
   </data>
+  <data name="Common_HourShort" xml:space="preserve">
+    <value>h</value>
+  </data>
+  <data name="Common_MinuteShort" xml:space="preserve">
+    <value>m</value>
+  </data>
+  <data name="Common_SecondShort" xml:space="preserve">
+    <value>s</value>
+  </data>
 </root>

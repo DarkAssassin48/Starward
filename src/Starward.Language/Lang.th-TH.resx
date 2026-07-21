@@ -2735,4 +2735,13 @@
   <data name="DailyNoteButton_StarRail_AccumulatedPoints" xml:space="preserve">
     <value>คะแนนสะสม</value>
   </data>
+  <data name="Common_HourShort" xml:space="preserve">
+    <value>ช</value>
+  </data>
+  <data name="Common_MinuteShort" xml:space="preserve">
+    <value>น</value>
+  </data>
+  <data name="Common_SecondShort" xml:space="preserve">
+    <value>ว</value>
+  </data>
 </root>

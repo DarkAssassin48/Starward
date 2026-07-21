@@ -267,21 +267,31 @@
                                     Stretch="Uniform" />
 
 
-                    <StackPanel Grid.Row="0" Margin="20,12,0,0">
+                    <StackPanel Grid.Row="0"
+                                Grid.ColumnSpan="2"
+                                Margin="20,12,120,0">
                         <!--  BOSS 名称  -->
-                        <StackPanel Orientation="Horizontal">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
                             <StackPanel Orientation="Horizontal"
                                         Visibility="{x:Bind CurrentChallengePeakRecord.BossRecord.HardMode, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <TextBlock FontSize="16" FontWeight="Bold">
-                                    <Run Text="["/>
-                                    <Run Text="{x:Bind CurrentChallengePeakRecord.BossInfo.HardModeNameMi18n}"/>
-                                    <Run Text="]"/>
+                                    <Run Text="[" />
+                                    <Run Text="{x:Bind CurrentChallengePeakRecord.BossInfo.HardModeNameMi18n}" />
+                                    <Run Text="] " />
                                 </TextBlock>
                             </StackPanel>
-                            <TextBlock FontSize="16"
+                            <TextBlock Grid.Column="1"
+                                       FontSize="16"
                                        FontWeight="Bold"
-                                       Text="{x:Bind CurrentChallengePeakRecord.BossInfo.NameMi18n}" />
-                        </StackPanel>
+                                       MaxLines="2"
+                                       Text="{x:Bind CurrentChallengePeakRecord.BossInfo.NameMi18n}"
+                                       TextTrimming="None"
+                                       TextWrapping="Wrap" />
+                        </Grid>
 
                         <!--  通关数据  -->
                         <StackPanel Margin="0,8,0,0"
@@ -401,10 +411,17 @@
                                         <sc:CachedImage Source="{x:Bind MobInfo.MonsterIcon}" Stretch="Uniform" />
                                     </Grid>
 
-                                    <StackPanel Grid.Row="0" Margin="20,12,0,0">
+                                    <StackPanel Grid.Row="0"
+                                Grid.ColumnSpan="2"
+                                Margin="20,12,120,0">
                                         <!--  BOSS 名称  -->
-                                        <TextBlock FontSize="16" FontWeight="Bold">
+                                        <TextBlock FontSize="16"
+                                                   FontWeight="Bold"
+                                                   MaxLines="2"
+                                                   TextTrimming="None"
+                                                   TextWrapping="Wrap">
                                             <Run Text="{x:Bind MobInfo.Name}" />
+                                            <Run Text=" " />
                                             <Run Text="{x:Bind MobInfo.MonsterName}" />
                                         </TextBlock>
 

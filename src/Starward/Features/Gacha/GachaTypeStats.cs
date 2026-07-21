@@ -42,7 +42,7 @@ public class GachaTypeStats
 
     public List<GachaLogItemEx> List_4 { get; set; }
 
-    public string Avarage_5_Desc_Text => Count_5_Up == 0 ? "" : $" / UP";
+    public string Avarage_5_Desc_Text => Count_5_Up == 0 ? "" : " / UP";
 
     public string Avarage_5_Up_Text => Count_5_Up == 0 ? "" : $" / {Average_5_Up:F2} ({Count_5_Up})";
 

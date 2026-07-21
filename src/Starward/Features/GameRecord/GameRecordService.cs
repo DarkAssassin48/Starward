@@ -22,6 +22,7 @@ using Starward.Core.GameRecord.ZZZ.GachaRecord;
 using Starward.Core.GameRecord.ZZZ.InterKnotReport;
 using Starward.Core.GameRecord.ZZZ.ShiyuDefense;
 using Starward.Features.Database;
+using Starward.Features.GameRecord.StarRail;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -665,11 +666,20 @@ internal class GameRecordService
 
     public async Task<PureFictionInfo> RefreshPureFictionInfoAsync(GameRecordRole role, int schedule, CancellationToken cancellationToken = default)
     {
+        string recordLanguage = string.IsNullOrWhiteSpace(AppConfig.Language)
+            ? System.Globalization.CultureInfo.CurrentUICulture.Name
+            : AppConfig.Language;
+        Language = recordLanguage;
+
         var info = await _gameRecordClient.GetPureFictionInfoAsync(role, schedule);
         if (info.ScheduleId == 0)
         {
             return info;
         }
+
+        string mechanismTitle = HoYoLabMechanismBuffLabels.GetForLanguage(recordLanguage);
+        SetPureFictionMechanismTitle(info, mechanismTitle);
+
         var obj = new
         {
             info.Uid,
@@ -691,6 +701,31 @@ internal class GameRecordService
         return info;
     }
 
+
+
+    private static void SetPureFictionMechanismTitle(PureFictionInfo info, string title)
+    {
+        if (info.AllFloorDetail is null || string.IsNullOrWhiteSpace(title))
+        {
+            return;
+        }
+
+        foreach (PureFictionFloorDetail floor in info.AllFloorDetail)
+        {
+            SetPureFictionMechanismTitle(floor.Node1, title);
+            SetPureFictionMechanismTitle(floor.Node2, title);
+            SetPureFictionMechanismTitle(floor.Node3, title);
+        }
+    }
+
+
+    private static void SetPureFictionMechanismTitle(PureFictionNode? node, string title)
+    {
+        if (node?.Buff is not null && !string.IsNullOrWhiteSpace(node.Buff.SimpleDesc))
+        {
+            node.Buff.MechanismName = title;
+        }
+    }
 
 
     public List<PureFictionInfo> GetPureFictionInfoList(GameRecordRole role)
