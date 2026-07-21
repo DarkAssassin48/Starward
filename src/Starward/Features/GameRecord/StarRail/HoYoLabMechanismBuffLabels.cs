@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Windows.Globalization;
 
 namespace Starward.Features.GameRecord.StarRail;
 
@@ -30,33 +29,17 @@ internal static class HoYoLabMechanismBuffLabels
 
 
     /// <summary>
-    /// Resolves the label from the language currently used by WinUI.
-    /// The value is evaluated on every call so changing the client language
-    /// does not require restarting the application.
+    /// Resolves the label from the language selected in Starward settings.
+    /// When Starward follows the system language, installed UI culture is used.
     /// </summary>
-    public static string GetCurrent(string? elementLanguage = null)
+    public static string GetCurrent()
     {
-        string? primaryOverride = null;
-        string? applicationLanguage = null;
-
-        try
-        {
-            primaryOverride = ApplicationLanguages.PrimaryLanguageOverride;
-            if (ApplicationLanguages.Languages.Count > 0)
-            {
-                applicationLanguage = ApplicationLanguages.Languages[0];
-            }
-        }
-        catch
-        {
-            // WinUI language APIs can be unavailable during early startup.
-        }
+        string? configuredLanguage = AppConfig.Language;
 
         string?[] candidates =
         [
-            primaryOverride,
-            applicationLanguage,
-            elementLanguage,
+            configuredLanguage,
+            CultureInfo.InstalledUICulture.Name,
             CultureInfo.CurrentUICulture.Name,
             CultureInfo.CurrentCulture.Name,
         ];
