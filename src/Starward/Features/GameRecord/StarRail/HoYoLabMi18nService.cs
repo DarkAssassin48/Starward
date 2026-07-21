@@ -126,12 +126,26 @@ internal static class HoYoLabMi18nService
 
     private static string NormalizeLocale(string? cultureName)
     {
-        if (string.IsNullOrWhiteSpace(cultureName))
-        {
-            return "en-us";
-        }
+        string locale = string.IsNullOrWhiteSpace(cultureName)
+            ? "en-us"
+            : cultureName.Replace('_', '-').ToLowerInvariant();
 
-        return cultureName.Replace('_', '-').ToLowerInvariant();
+        return locale switch
+        {
+            "en" => "en-us",
+            "ru" => "ru-ru",
+            "de" => "de-de",
+            "es" => "es-es",
+            "it" => "it-it",
+            "ja" => "ja-jp",
+            "ko" => "ko-kr",
+            "th" => "th-th",
+            "vi" => "vi-vn",
+            "zh" => "zh-cn",
+            "zh-hans" => "zh-cn",
+            "zh-hant" => "zh-tw",
+            _ => locale,
+        };
     }
 
 }
