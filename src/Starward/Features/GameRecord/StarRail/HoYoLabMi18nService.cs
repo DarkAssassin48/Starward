@@ -15,7 +15,8 @@ namespace Starward.Features.GameRecord.StarRail;
 
 /// <summary>
 /// Loads localized strings used by the HoYoLAB game-record pages.
-/// Successful results are cached per locale for the lifetime of the application.
+/// Official labels bundled during the build are preferred, while successful
+/// remote results are cached per locale for the lifetime of the application.
 /// </summary>
 internal static class HoYoLabMi18nService
 {
@@ -28,6 +29,9 @@ internal static class HoYoLabMi18nService
         Timeout = TimeSpan.FromSeconds(8),
     };
 
+    private static readonly Lazy<Task<IReadOnlyDictionary<string, string>?>> BundledMechanismBuffCache =
+        new(LoadBundledMechanismBuffAsync, LazyThreadSafetyMode.ExecutionAndPublication);
+
     private static readonly ConcurrentDictionary<string, Lazy<Task<IReadOnlyDictionary<string, string>?>>> LocaleCache =
         new(StringComparer.OrdinalIgnoreCase);
 
@@ -38,6 +42,19 @@ internal static class HoYoLabMi18nService
         CancellationToken cancellationToken = default)
     {
         string locale = NormalizeLocale((culture ?? Lang.Culture).Name);
+
+        if (key.Equals("mechanism_buff", StringComparison.OrdinalIgnoreCase))
+        {
+            IReadOnlyDictionary<string, string>? bundledValues =
+                await BundledMechanismBuffCache.Value.WaitAsync(cancellationToken);
+
+            if (bundledValues?.TryGetValue(locale, out string? bundledValue) is true &&
+                !string.IsNullOrWhiteSpace(bundledValue))
+            {
+                return bundledValue;
+            }
+        }
+
         IReadOnlyDictionary<string, string>? values = await GetLocaleAsync(locale, cancellationToken);
 
         if (values is null)
@@ -52,6 +69,36 @@ internal static class HoYoLabMi18nService
         }
 
         return null;
+    }
+
+
+    private static async Task<IReadOnlyDictionary<string, string>?> LoadBundledMechanismBuffAsync()
+    {
+        try
+        {
+            string path = Path.Combine(
+                AppContext.BaseDirectory,
+                "Assets",
+                "HoYoLabMi18n",
+                "mechanism_buff.json");
+
+            if (!File.Exists(path))
+            {
+                return null;
+            }
+
+            await using FileStream stream = File.OpenRead(path);
+            Dictionary<string, string>? values =
+                await JsonSerializer.DeserializeAsync<Dictionary<string, string>>(stream);
+
+            return values is null
+                ? null
+                : new Dictionary<string, string>(values, StringComparer.OrdinalIgnoreCase);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
 
@@ -74,7 +121,14 @@ internal static class HoYoLabMi18nService
         try
         {
             string url = $"https://webstatic.hoyoverse.com/admin/mi18n/bbs_oversea/{ResourceId}/{ResourceId}-{locale}.json";
-            using HttpResponseMessage response = await HttpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+            using var request = new HttpRequestMessage(HttpMethod.Get, url);
+            request.Headers.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/144.0.0.0 Safari/537.36");
+            request.Headers.Accept.ParseAdd("application/json,text/plain,*/*");
+
+            using HttpResponseMessage response = await HttpClient.SendAsync(
+                request,
+                HttpCompletionOption.ResponseHeadersRead);
+
             if (!response.IsSuccessStatusCode)
             {
                 return null;
