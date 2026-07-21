@@ -1,17 +1,11 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Starward.Language;
-using System.Threading.Tasks;
 
 namespace Starward.Features.GameRecord.StarRail;
 
 public sealed partial class StarRailBuffButton : UserControl
 {
-
-    private bool _mechanicTitleLoaded;
-    private bool _mechanicTitleLoading;
-    private string? _mechanicTitle;
-
 
     public StarRailBuffButton()
     {
@@ -20,17 +14,21 @@ public sealed partial class StarRailBuffButton : UserControl
     }
 
 
-    private async void StarRailBuffButton_Loaded(object sender, RoutedEventArgs e)
+    private void StarRailBuffButton_Loaded(object sender, RoutedEventArgs e)
     {
         UpdateMechanicSection();
-        await EnsureMechanicTitleAsync();
     }
 
 
-    private async void BuffButton_Click(object sender, RoutedEventArgs e)
+    private void BuffButton_Click(object sender, RoutedEventArgs e)
     {
         UpdateMechanicSection();
-        await EnsureMechanicTitleAsync();
+    }
+
+
+    private void BuffFlyout_Opened(object sender, object e)
+    {
+        UpdateMechanicSection();
     }
 
 
@@ -39,7 +37,6 @@ public sealed partial class StarRailBuffButton : UserControl
         if (sender is StarRailBuffButton control)
         {
             control.UpdateMechanicSection();
-            _ = control.EnsureMechanicTitleAsync();
         }
     }
 
@@ -50,6 +47,10 @@ public sealed partial class StarRailBuffButton : UserControl
             ? null
             : MechanicDescription.Trim();
 
+        string title = description is null
+            ? string.Empty
+            : HoYoLabMechanismBuffLabels.Get(Lang.Culture);
+
         if (MechanicDescriptionTextBlock is not null)
         {
             MechanicDescriptionTextBlock.Text = description ?? string.Empty;
@@ -57,47 +58,12 @@ public sealed partial class StarRailBuffButton : UserControl
 
         if (MechanicTitleTextBlock is not null)
         {
-            MechanicTitleTextBlock.Text = _mechanicTitle ?? string.Empty;
+            MechanicTitleTextBlock.Text = title;
         }
 
         if (MechanicSection is not null)
         {
             MechanicSection.Visibility = description is null ? Visibility.Collapsed : Visibility.Visible;
-        }
-
-        if (description is null)
-        {
-            _mechanicTitle = null;
-            _mechanicTitleLoaded = false;
-        }
-    }
-
-
-    private async Task EnsureMechanicTitleAsync()
-    {
-        if (_mechanicTitleLoaded || _mechanicTitleLoading || string.IsNullOrWhiteSpace(MechanicDescription))
-        {
-            return;
-        }
-
-        _mechanicTitleLoading = true;
-        try
-        {
-            string? title = await HoYoLabMi18nService.GetStringAsync("mechanism_buff", Lang.Culture);
-            if (!string.IsNullOrWhiteSpace(title))
-            {
-                _mechanicTitle = title.Trim();
-                _mechanicTitleLoaded = true;
-
-                if (MechanicTitleTextBlock is not null)
-                {
-                    MechanicTitleTextBlock.Text = _mechanicTitle;
-                }
-            }
-        }
-        finally
-        {
-            _mechanicTitleLoading = false;
         }
     }
 
