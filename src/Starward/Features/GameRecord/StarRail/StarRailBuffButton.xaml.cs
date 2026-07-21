@@ -1,5 +1,7 @@
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Starward.Frameworks;
 using System;
 
 namespace Starward.Features.GameRecord.StarRail;
@@ -7,20 +9,13 @@ namespace Starward.Features.GameRecord.StarRail;
 public sealed partial class StarRailBuffButton : UserControl
 {
 
-    private readonly DispatcherTimer _languageRefreshTimer;
+    private bool _languageMessageRegistered;
     private string? _displayedMechanicTitle;
 
 
     public StarRailBuffButton()
     {
         InitializeComponent();
-
-        _languageRefreshTimer = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromMilliseconds(250),
-        };
-        _languageRefreshTimer.Tick += LanguageRefreshTimer_Tick;
-
         Loaded += StarRailBuffButton_Loaded;
         Unloaded += StarRailBuffButton_Unloaded;
     }
@@ -28,13 +23,25 @@ public sealed partial class StarRailBuffButton : UserControl
 
     private void StarRailBuffButton_Loaded(object sender, RoutedEventArgs e)
     {
+        if (!_languageMessageRegistered)
+        {
+            WeakReferenceMessenger.Default.Register<LanguageChangedMessage>(
+                this,
+                static (recipient, _) => ((StarRailBuffButton)recipient).UpdateMechanicSection());
+            _languageMessageRegistered = true;
+        }
+
         UpdateMechanicSection();
     }
 
 
     private void StarRailBuffButton_Unloaded(object sender, RoutedEventArgs e)
     {
-        _languageRefreshTimer.Stop();
+        if (_languageMessageRegistered)
+        {
+            WeakReferenceMessenger.Default.Unregister<LanguageChangedMessage>(this);
+            _languageMessageRegistered = false;
+        }
     }
 
 
@@ -47,19 +54,6 @@ public sealed partial class StarRailBuffButton : UserControl
     private void BuffFlyout_Opened(object sender, object e)
     {
         UpdateMechanicSection();
-        _languageRefreshTimer.Start();
-    }
-
-
-    private void BuffFlyout_Closed(object sender, object e)
-    {
-        _languageRefreshTimer.Stop();
-    }
-
-
-    private void LanguageRefreshTimer_Tick(object? sender, object e)
-    {
-        UpdateMechanicTitle();
     }
 
 
@@ -109,7 +103,7 @@ public sealed partial class StarRailBuffButton : UserControl
             return;
         }
 
-        string title = HoYoLabMechanismBuffLabels.GetCurrent(Language);
+        string title = HoYoLabMechanismBuffLabels.GetCurrent();
         if (string.Equals(title, _displayedMechanicTitle, StringComparison.Ordinal))
         {
             return;
