@@ -41,12 +41,12 @@
                         <Rectangle Height="1"
                                    Margin="0,2"
                                    Fill="{ThemeResource DividerStrokeColorDefaultBrush}" />
-                        <TextBlock FontSize="14"
+                        <TextBlock x:Name="MechanicTitleTextBlock"
+                                   FontSize="14"
                                    FontWeight="SemiBold"
-                                   Text="{x:Bind MechanicTitle, Mode=OneWay}"
                                    TextWrapping="Wrap" />
-                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                   Text="{x:Bind MechanicDescription, Mode=OneWay}"
+                        <TextBlock x:Name="MechanicDescriptionTextBlock"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                    TextWrapping="WrapWholeWords" />
                     </StackPanel>
                 </StackPanel>
