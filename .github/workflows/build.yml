@@ -64,9 +64,7 @@ jobs:
 
         $outputDirectory = "src/Starward/Assets/HoYoLabMi18n"
         New-Item -Path $outputDirectory -ItemType Directory -Force | Out-Null
-        $labels | ConvertTo-Json -Compress | Set-Content \
-          -Path "$outputDirectory/mechanism_buff.json" \
-          -Encoding utf8
+        $labels | ConvertTo-Json -Compress | Set-Content -Path "$outputDirectory/mechanism_buff.json" -Encoding utf8
 
     - name: Upload official mi18n labels
       uses: actions/upload-artifact@v7
