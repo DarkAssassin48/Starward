@@ -1,3 +1,4 @@
+
 name: Build
 
 on:
@@ -6,74 +7,10 @@ on:
   pull_request:
     branches: [ "main", "dev/*" ]
 
+
 jobs:
 
-  prepare_mi18n:
-    runs-on: windows-2025-vs2026
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v5
-
-    - name: Download official HoYoLAB mechanism labels
-      shell: pwsh
-      run: |
-        $resourceId = "m20230509hy150knmyo"
-        $locales = @(
-          "en-us", "ru-ru", "de-de", "es-es", "it-it", "ja-jp",
-          "ko-kr", "th-th", "vi-vn", "zh-cn", "zh-hk", "zh-tw"
-        )
-        $labels = [ordered]@{}
-        $headers = @{
-          "User-Agent" = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/144.0.0.0 Safari/537.36"
-          "Accept" = "application/json,text/plain,*/*"
-        }
-
-        foreach ($locale in $locales) {
-          $url = "https://webstatic.hoyoverse.com/admin/mi18n/bbs_oversea/$resourceId/$resourceId-$locale.json"
-          try {
-            $response = Invoke-WebRequest -Uri $url -Headers $headers -UseBasicParsing -TimeoutSec 30
-            $match = [regex]::Match(
-              $response.Content,
-              '"mechanism_buff"\s*:\s*"((?:\\.|[^"\\])*)"'
-            )
-
-            if (-not $match.Success) {
-              Write-Warning "mechanism_buff was not found for $locale"
-              continue
-            }
-
-            $jsonString = '"' + $match.Groups[1].Value + '"'
-            $value = ConvertFrom-Json -InputObject $jsonString
-            if (-not [string]::IsNullOrWhiteSpace([string]$value)) {
-              $labels[$locale] = [string]$value
-              Write-Host "$locale -> $value"
-            }
-          }
-          catch {
-            Write-Warning "Failed to download $locale`: $($_.Exception.Message)"
-          }
-        }
-
-        if (-not $labels.Contains("en-us")) {
-          throw "The official English mechanism_buff label was not downloaded"
-        }
-        if (-not $labels.Contains("ru-ru")) {
-          throw "The official Russian mechanism_buff label was not downloaded"
-        }
-
-        $outputDirectory = "src/Starward/Assets/HoYoLabMi18n"
-        New-Item -Path $outputDirectory -ItemType Directory -Force | Out-Null
-        $labels | ConvertTo-Json -Compress | Set-Content -Path "$outputDirectory/mechanism_buff.json" -Encoding utf8
-
-    - name: Upload official mi18n labels
-      uses: actions/upload-artifact@v7
-      with:
-        name: hoyolab-mi18n-mechanism-buff
-        path: src/Starward/Assets/HoYoLabMi18n/mechanism_buff.json
-
   build:
-    needs: prepare_mi18n
     runs-on: windows-2025-vs2026
     strategy:
       matrix:
@@ -87,12 +24,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v5
-
-    - name: Download official mi18n labels
-      uses: actions/download-artifact@v7
-      with:
-        name: hoyolab-mi18n-mechanism-buff
-        path: src/Starward/Assets/HoYoLabMi18n
 
     - name: Install .NET
       uses: actions/setup-dotnet@v5
@@ -113,18 +44,6 @@ jobs:
         msbuild src/Starward.Launcher "-property:Configuration=$env:Configuration;Platform=$env:Platform;OutDir=$(Resolve-Path "build/Starward/")"
         dotnet publish src/Starward -c $env:Configuration -r "win-$env:Platform" -o "build/Starward/app-build.$sha" -p:Platform=$env:Platform -p:Version="0.0.1-build.$sha" -p:DefineConstants=DONOT_CHECK_UPDATE
         Set-Content "build/Starward/version.ini" -Value "version=build.$sha"
-
-    - name: Verify bundled mi18n label
-      shell: pwsh
-      run: |
-        $sha = "${{ steps.sha.outputs.sha }}"
-        $path = "build/Starward/app-build.$sha/Assets/HoYoLabMi18n/mechanism_buff.json"
-        if (-not (Test-Path $path)) {
-          throw "Bundled mechanism_buff.json is missing from the published client"
-        }
-        $labels = Get-Content $path -Raw | ConvertFrom-Json
-        Write-Host "Bundled ru-ru: $($labels.'ru-ru')"
-        Write-Host "Bundled en-us: $($labels.'en-us')"
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v7
