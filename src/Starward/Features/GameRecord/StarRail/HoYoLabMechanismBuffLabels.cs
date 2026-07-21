@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 
 namespace Starward.Features.GameRecord.StarRail;
 
@@ -29,34 +28,20 @@ internal static class HoYoLabMechanismBuffLabels
 
 
     /// <summary>
-    /// Resolves the label from the language selected in Starward settings.
-    /// When Starward follows the system language, installed UI culture is used.
+    /// Resolves the official label for the language used to refresh a game record.
     /// </summary>
-    public static string GetCurrent()
+    public static string GetForLanguage(string? language)
     {
-        string? configuredLanguage = AppConfig.Language;
-
-        string?[] candidates =
-        [
-            configuredLanguage,
-            CultureInfo.InstalledUICulture.Name,
-            CultureInfo.CurrentUICulture.Name,
-            CultureInfo.CurrentCulture.Name,
-        ];
-
-        foreach (string? candidate in candidates)
+        string locale = NormalizeLocale(language);
+        if (Labels.TryGetValue(locale, out string? value))
         {
-            string locale = NormalizeLocale(candidate);
-            if (Labels.TryGetValue(locale, out string? value))
-            {
-                return value;
-            }
+            return value;
+        }
 
-            if (locale.Equals("zh-hk", StringComparison.OrdinalIgnoreCase) &&
-                Labels.TryGetValue("zh-tw", out value))
-            {
-                return value;
-            }
+        if (locale.Equals("zh-hk", StringComparison.OrdinalIgnoreCase) &&
+            Labels.TryGetValue("zh-tw", out value))
+        {
+            return value;
         }
 
         return Labels["en-us"];
