@@ -1,4 +1,4 @@
-name: Find Self Query Parser
+name: Update Self Query Parser
 
 on:
   pull_request:
@@ -8,28 +8,20 @@ permissions:
   contents: write
 
 jobs:
-  locate:
+  update:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v5
       with:
         ref: fix/localized-time-units-0.18.0
         fetch-depth: 2
-    - name: Locate parser and related files
-      shell: bash
-      run: |
-        mkdir -p .github/diagnostics
-        {
-          echo '=== Files containing authkey or URL validation ==='
-          rg -n --glob '*.cs' --glob '*.xaml' 'authkey|Input URL|InputUrl|SelfQuery|moneyRecord|user-game-search|Input url is invalid' src || true
-          echo '=== Candidate paths ==='
-          find src -type f | grep -Ei 'selfquery|account.*history|money.*record|query.*page' || true
-        } > .github/diagnostics/self-query-locations.txt
-    - name: Commit report
+    - name: Apply URL parser migration
+      run: python .github/scripts/support_new_genshin_self_query_url.py
+    - name: Commit parser update
       shell: bash
       run: |
         git config user.name "github-actions[bot]"
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-        git add .github/diagnostics/self-query-locations.txt
-        git commit -m "Record account history parser locations"
+        git add src/Starward.Core/SelfQuery/SelfQueryClient.cs
+        git commit -m "Support new Genshin account history URL"
         git push
