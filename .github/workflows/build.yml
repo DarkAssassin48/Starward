@@ -43,7 +43,8 @@ jobs:
       run: |
         $sha = "${{ steps.sha.outputs.sha }}"
         New-Item -Path "build/Starward/" -Type Directory -Force | Out-Null
-        msbuild src/Starward.Launcher "-property:Configuration=$env:Configuration;Platform=$env:Platform;OutDir=$(Resolve-Path \"build/Starward/\")"
+        $outDir = (Resolve-Path "build/Starward/").Path
+        msbuild src/Starward.Launcher "-property:Configuration=$env:Configuration;Platform=$env:Platform;OutDir=$outDir"
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         dotnet publish src/Starward -c $env:Configuration -r "win-$env:Platform" -o "build/Starward/app-build.$sha" -p:Platform=$env:Platform -p:Version="0.0.1-build.$sha" -p:DefineConstants=DONOT_CHECK_UPDATE
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
