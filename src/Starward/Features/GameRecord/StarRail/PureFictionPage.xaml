@@ -350,7 +350,7 @@
                                         <Run Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Text="{x:Bind Node1.Score}" />
                                     </TextBlock>
 
-                                    <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0,0,0,8" HorizontalAlignment="Center" Spacing="8" Visibility="{x:Bind IsFast, Converter={StaticResource BoolToVisibilityReversedConverter}}">
+                                    <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0,8,0,8" HorizontalAlignment="Center" Spacing="8" Visibility="{x:Bind IsFast, Converter={StaticResource BoolToVisibilityReversedConverter}}">
                                         <ItemsControl
                                                                                           HorizontalAlignment="Center"
                                                                                           ItemsSource="{x:Bind Node1.Avatars}">
@@ -421,7 +421,7 @@
                                         <Run Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Text="{x:Bind Node2.Score}" />
                                     </TextBlock>
 
-                                    <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,0,8" HorizontalAlignment="Center" Spacing="8" Visibility="{x:Bind IsFast, Converter={StaticResource BoolToVisibilityReversedConverter}}">
+                                    <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Margin="0,8,0,8" HorizontalAlignment="Center" Spacing="8" Visibility="{x:Bind IsFast, Converter={StaticResource BoolToVisibilityReversedConverter}}">
                                         <ItemsControl
                                                                                           HorizontalAlignment="Center"
                                                                                           ItemsSource="{x:Bind Node2.Avatars}">
@@ -533,7 +533,7 @@
                                         <Run Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Text="{x:Bind Node3.Score}" />
                                     </TextBlock>
 
-                                    <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,0,0,8" HorizontalAlignment="Center" Spacing="8">
+                                    <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Margin="0,8,0,8" HorizontalAlignment="Center" Spacing="8">
                                         <ItemsControl
                                                                                           HorizontalAlignment="Center"
                                                                                           ItemsSource="{x:Bind Node3.Avatars}">
