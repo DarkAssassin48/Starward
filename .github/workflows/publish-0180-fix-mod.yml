@@ -1,0 +1,110 @@
+name: Publish Starward 0.18.0 fix mod
+
+on:
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: windows-2025-vs2026
+    strategy:
+      matrix:
+        platform: [x64, arm64]
+
+    steps:
+    - name: Checkout exact branch head
+      uses: actions/checkout@v5
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - name: Install .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        global-json-file: global.json
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v3
+
+    - name: Build Release
+      shell: pwsh
+      run: |
+        $platform = "${{ matrix.platform }}"
+        $outputRoot = Join-Path $PWD "release"
+        $launcherOut = Join-Path $outputRoot "Starward_$platform"
+        New-Item -Path $launcherOut -ItemType Directory -Force | Out-Null
+
+        msbuild src/Starward.Launcher "-property:Configuration=Release;Platform=$platform;OutDir=$launcherOut\"
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+        $appOut = Join-Path $launcherOut "app-0.18.0-fix-mod"
+        dotnet publish src/Starward -c Release -r "win-$platform" -o $appOut -p:Platform=$platform -p:Version="0.18.0-fix-mod" -p:DefineConstants=DONOT_CHECK_UPDATE
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+        Set-Content (Join-Path $launcherOut "version.ini") -Value "version=0.18.0-fix-mod"
+
+        $archive = Join-Path $outputRoot "Starward_0.18.0_fix_mod_$platform.zip"
+        Compress-Archive -Path (Join-Path $launcherOut "*") -DestinationPath $archive -CompressionLevel Optimal -Force
+
+    - name: Upload release archive
+      uses: actions/upload-artifact@v7
+      with:
+        name: Starward_0.18.0_fix_mod_${{ matrix.platform }}
+        path: release/Starward_0.18.0_fix_mod_${{ matrix.platform }}.zip
+        if-no-files-found: error
+
+  publish-release:
+    needs: build-release
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout release notes
+      uses: actions/checkout@v5
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - name: Download release archives
+      uses: actions/download-artifact@v6
+      with:
+        pattern: Starward_0.18.0_fix_mod_*
+        path: dist
+        merge-multiple: true
+
+    - name: Prepare bilingual release notes
+      shell: bash
+      run: |
+        cat RELEASE_NOTES_RU.md > RELEASE_NOTES_BILINGUAL.md
+        printf '\n\n---\n\n' >> RELEASE_NOTES_BILINGUAL.md
+        cat RELEASE_NOTES_EN.md >> RELEASE_NOTES_BILINGUAL.md
+
+    - name: Create or update GitHub Release
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        TARGET_SHA: ${{ github.event.pull_request.head.sha }}
+      run: |
+        TAG="v0.18.0-fix-mod"
+        TITLE="Starward 0.18.0 fix mod"
+
+        if gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+          gh release edit "$TAG" \
+            --repo "${{ github.repository }}" \
+            --title "$TITLE" \
+            --notes-file RELEASE_NOTES_BILINGUAL.md \
+            --latest
+
+          gh release upload "$TAG" \
+            --repo "${{ github.repository }}" \
+            dist/*.zip RELEASE_NOTES_RU.md RELEASE_NOTES_EN.md \
+            --clobber
+        else
+          gh release create "$TAG" \
+            --repo "${{ github.repository }}" \
+            --target "$TARGET_SHA" \
+            --title "$TITLE" \
+            --notes-file RELEASE_NOTES_BILINGUAL.md \
+            --latest \
+            dist/*.zip RELEASE_NOTES_RU.md RELEASE_NOTES_EN.md
+        fi
