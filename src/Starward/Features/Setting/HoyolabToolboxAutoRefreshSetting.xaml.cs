@@ -47,11 +47,11 @@ public sealed partial class HoyolabToolboxAutoRefreshSetting : PageBase
     {
         return
         [
-            new(GameRecordAutoRefreshInterval.Disabled, Lang.HoyolabAutoRefresh_IntervalDisabled),
-            new(GameRecordAutoRefreshInterval.OnStartup, Lang.HoyolabAutoRefresh_IntervalOnStartup),
-            new(GameRecordAutoRefreshInterval.Daily, Lang.HoyolabAutoRefresh_IntervalDaily),
-            new(GameRecordAutoRefreshInterval.Weekly, Lang.HoyolabAutoRefresh_IntervalWeekly),
-            new(GameRecordAutoRefreshInterval.Monthly, Lang.HoyolabAutoRefresh_IntervalMonthly),
+            new(GameRecordAutoRefreshInterval.Disabled, HoYoLabAutoRefreshText.IntervalDisabled),
+            new(GameRecordAutoRefreshInterval.OnStartup, HoYoLabAutoRefreshText.IntervalOnStartup),
+            new(GameRecordAutoRefreshInterval.Daily, HoYoLabAutoRefreshText.IntervalDaily),
+            new(GameRecordAutoRefreshInterval.Weekly, HoYoLabAutoRefreshText.IntervalWeekly),
+            new(GameRecordAutoRefreshInterval.Monthly, HoYoLabAutoRefreshText.IntervalMonthly),
         ];
     }
 
@@ -102,7 +102,7 @@ public sealed partial class HoyolabToolboxAutoRefreshSetting : PageBase
         try
         {
             SaveSchedules();
-            InAppToast.MainWindow?.Success(Lang.HoyolabAutoRefresh_SettingsSaved);
+            InAppToast.MainWindow?.Success(HoYoLabAutoRefreshText.SettingsSaved);
         }
         catch (Exception ex)
         {
@@ -177,10 +177,10 @@ public sealed partial class HoyolabToolboxAutoRefreshSetting : PageBase
             if (successfulOperations > 0)
             {
                 InAppToast.MainWindow?.Success(
-                    Lang.HoyolabAutoRefresh_AllGamesCompleted,
+                    HoYoLabAutoRefreshText.AllGamesCompleted,
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        Lang.HoyolabAutoRefresh_ResultFormat,
+                        HoYoLabAutoRefreshText.ResultFormat,
                         refreshedRoles,
                         successfulOperations,
                         failedOperations));
@@ -207,10 +207,10 @@ public sealed partial class HoyolabToolboxAutoRefreshSetting : PageBase
         if (result.HasAnySuccess)
         {
             InAppToast.MainWindow?.Success(
-                $"{Lang.HoyolabAutoRefresh_RefreshCompleted} — {gameName}",
+                $"{HoYoLabAutoRefreshText.RefreshCompleted} — {gameName}",
                 string.Format(
                     CultureInfo.CurrentCulture,
-                    Lang.HoyolabAutoRefresh_ResultFormat,
+                    HoYoLabAutoRefreshText.ResultFormat,
                     result.RefreshedRoles,
                     result.SuccessfulOperations,
                     result.FailedOperations));
@@ -225,8 +225,8 @@ public sealed partial class HoyolabToolboxAutoRefreshSetting : PageBase
     private static void ShowNothingRefreshed()
     {
         InAppToast.MainWindow?.Warning(
-            Lang.HoyolabAutoRefresh_NothingRefreshed,
-            Lang.HoyolabAutoRefresh_CheckAccountCookie);
+            HoYoLabAutoRefreshText.NothingRefreshed,
+            HoYoLabAutoRefreshText.CheckAccountCookie);
     }
 
 
@@ -242,29 +242,29 @@ public sealed partial class HoyolabToolboxAutoRefreshSetting : PageBase
     {
         DateTimeOffset last = _autoRefreshService.GetLastSuccessfulRefreshTime(game);
         string lastText = last == default
-            ? Lang.HoyolabAutoRefresh_NotPerformedYet
+            ? HoYoLabAutoRefreshText.NotPerformedYet
             : last.LocalDateTime.ToString("g", CultureInfo.CurrentCulture);
 
         GameRecordAutoRefreshInterval interval = AppConfig.GetGameRecordAutoRefreshInterval(game);
         string nextText;
         if (interval is GameRecordAutoRefreshInterval.Disabled)
         {
-            nextText = Lang.HoyolabAutoRefresh_NotScheduled;
+            nextText = HoYoLabAutoRefreshText.NotScheduled;
         }
         else if (interval is GameRecordAutoRefreshInterval.OnStartup)
         {
-            nextText = Lang.HoyolabAutoRefresh_NextApplicationStartup;
+            nextText = HoYoLabAutoRefreshText.NextApplicationStartup;
         }
         else
         {
             DateTimeOffset next = _autoRefreshService.GetNextScheduledRefreshTime(game);
             nextText = next == default
-                ? Lang.HoyolabAutoRefresh_NotScheduled
+                ? HoYoLabAutoRefreshText.NotScheduled
                 : next.LocalDateTime.ToString("g", CultureInfo.CurrentCulture);
         }
 
-        return $"{Lang.HoyolabAutoRefresh_LastSuccessfulRefresh}: {lastText}{Environment.NewLine}" +
-               $"{Lang.HoyolabAutoRefresh_NextScheduledRefresh}: {nextText}";
+        return $"{HoYoLabAutoRefreshText.LastSuccessfulRefresh}: {lastText}{Environment.NewLine}" +
+               $"{HoYoLabAutoRefreshText.NextScheduledRefresh}: {nextText}";
     }
 
 

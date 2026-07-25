@@ -17,10 +17,10 @@
 
             <TextBlock FontSize="28"
                        FontWeight="SemiBold"
-                       Text="{x:Bind lang:Lang.HoyolabAutoRefresh_Title}"
+                       Text="{x:Bind lang:HoYoLabAutoRefreshText.Title}"
                        TextWrapping="Wrap" />
             <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Text="{x:Bind lang:Lang.HoyolabAutoRefresh_Description}"
+                       Text="{x:Bind lang:HoYoLabAutoRefreshText.Description}"
                        TextWrapping="Wrap" />
 
             <Border Padding="20"
@@ -31,7 +31,7 @@
                 <StackPanel Spacing="10">
                     <TextBlock FontSize="20" FontWeight="SemiBold" Text="Genshin Impact" />
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               Text="{x:Bind lang:Lang.HoyolabAutoRefresh_GenshinDescription}"
+                               Text="{x:Bind lang:HoYoLabAutoRefreshText.GenshinDescription}"
                                TextWrapping="Wrap" />
                     <Grid ColumnSpacing="12">
                         <Grid.ColumnDefinitions>
@@ -47,7 +47,7 @@
                                 MinWidth="140"
                                 Tag="hk4e"
                                 Click="RefreshGame_Click"
-                                Content="{x:Bind lang:Lang.HoyolabAutoRefresh_RefreshNow}" />
+                                Content="{x:Bind lang:HoYoLabAutoRefreshText.RefreshNow}" />
                     </Grid>
                     <TextBlock x:Name="TextBlock_GenshinStatus"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -63,7 +63,7 @@
                 <StackPanel Spacing="10">
                     <TextBlock FontSize="20" FontWeight="SemiBold" Text="Honkai: Star Rail" />
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               Text="{x:Bind lang:Lang.HoyolabAutoRefresh_StarRailDescription}"
+                               Text="{x:Bind lang:HoYoLabAutoRefreshText.StarRailDescription}"
                                TextWrapping="Wrap" />
                     <Grid ColumnSpacing="12">
                         <Grid.ColumnDefinitions>
@@ -79,7 +79,7 @@
                                 MinWidth="140"
                                 Tag="hkrpg"
                                 Click="RefreshGame_Click"
-                                Content="{x:Bind lang:Lang.HoyolabAutoRefresh_RefreshNow}" />
+                                Content="{x:Bind lang:HoYoLabAutoRefreshText.RefreshNow}" />
                     </Grid>
                     <TextBlock x:Name="TextBlock_StarRailStatus"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -95,7 +95,7 @@
                 <StackPanel Spacing="10">
                     <TextBlock FontSize="20" FontWeight="SemiBold" Text="Zenless Zone Zero" />
                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                               Text="{x:Bind lang:Lang.HoyolabAutoRefresh_ZZZDescription}"
+                               Text="{x:Bind lang:HoYoLabAutoRefreshText.ZZZDescription}"
                                TextWrapping="Wrap" />
                     <Grid ColumnSpacing="12">
                         <Grid.ColumnDefinitions>
@@ -111,7 +111,7 @@
                                 MinWidth="140"
                                 Tag="nap"
                                 Click="RefreshGame_Click"
-                                Content="{x:Bind lang:Lang.HoyolabAutoRefresh_RefreshNow}" />
+                                Content="{x:Bind lang:HoYoLabAutoRefreshText.RefreshNow}" />
                     </Grid>
                     <TextBlock x:Name="TextBlock_ZZZStatus"
                                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
@@ -126,16 +126,16 @@
                 </Grid.ColumnDefinitions>
                 <Button MinWidth="120"
                         Click="Save_Click"
-                        Content="{x:Bind lang:Lang.HoyolabAutoRefresh_Save}"
+                        Content="{x:Bind lang:HoYoLabAutoRefreshText.Save}"
                         Style="{ThemeResource AccentButtonStyle}" />
                 <Button Grid.Column="1"
                         HorizontalAlignment="Left"
                         Click="RefreshAll_Click"
-                        Content="{x:Bind lang:Lang.HoyolabAutoRefresh_RefreshAll}" />
+                        Content="{x:Bind lang:HoYoLabAutoRefreshText.RefreshAll}" />
             </Grid>
 
             <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                       Text="{x:Bind lang:Lang.HoyolabAutoRefresh_ScheduleNote}"
+                       Text="{x:Bind lang:HoYoLabAutoRefreshText.ScheduleNote}"
                        TextWrapping="Wrap" />
 
         </StackPanel>

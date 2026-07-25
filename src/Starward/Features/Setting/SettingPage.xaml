@@ -94,11 +94,11 @@
                 <!--  HoYoLAB Toolbox auto refresh  -->
                 <NavigationViewItem MinHeight="40"
                                     Tag="HoyolabToolboxAutoRefreshSetting"
-                                    ToolTipService.ToolTip="{x:Bind lang:Lang.SettingPage_HoyolabAutoRefresh}">
+                                    ToolTipService.ToolTip="{x:Bind lang:HoYoLabAutoRefreshText.SettingPageTitle}">
                     <NavigationViewItem.Content>
                         <TextBlock MaxWidth="174"
                                    MaxLines="2"
-                                   Text="{x:Bind lang:Lang.SettingPage_HoyolabAutoRefresh}"
+                                   Text="{x:Bind lang:HoYoLabAutoRefreshText.SettingPageTitle}"
                                    TextTrimming="CharacterEllipsis"
                                    TextWrapping="WrapWholeWords" />
                     </NavigationViewItem.Content>
