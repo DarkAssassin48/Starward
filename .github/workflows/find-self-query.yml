@@ -1,0 +1,20 @@
+name: Find Self Query Parser
+
+on:
+  pull_request:
+    branches: [ "main", "dev/*" ]
+
+jobs:
+  locate:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+      with:
+        ref: fix/localized-time-units-0.18.0
+    - name: Locate parser and related files
+      shell: bash
+      run: |
+        echo '=== Files containing authkey ==='
+        rg -n --glob '*.cs' --glob '*.xaml' 'authkey|Input URL|InputUrl|SelfQuery|moneyRecord|user-game-search' src || true
+        echo '=== SelfQuery paths ==='
+        find src -type f | grep -i 'selfquery\|account.*history\|money.*record' || true
