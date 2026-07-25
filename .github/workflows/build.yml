@@ -21,7 +21,15 @@ jobs:
       run: |
         & dotnet publish src/Starward -c Release -r win-x64 -o build/Starward -p:Platform=x64 -p:Version=0.0.1-diagnostic -p:DefineConstants=DONOT_CHECK_UPDATE *> build.log
         $code = $LASTEXITCODE
-        Write-Host '=== COMPILER ERRORS ==='
-        Select-String -Path build.log -Pattern 'error CS','error MC','XamlCompiler error','error APPX','error MSB' | ForEach-Object { Write-Host $_.Line }
-        Write-Host '=== END ERRORS ==='
+        $errors = Select-String -Path build.log -Pattern 'error CS','error MC','XamlCompiler error','error APPX','error MSB' | ForEach-Object { $_.Line }
+        $errors | Set-Content compiler-errors.txt -Encoding UTF8
+        $errors | ForEach-Object { Write-Host $_ }
         if ($code -ne 0) { exit $code }
+
+    - name: Upload compiler errors
+      if: always()
+      uses: actions/upload-artifact@v7
+      with:
+        name: compiler-errors
+        path: compiler-errors.txt
+        if-no-files-found: error
