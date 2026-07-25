@@ -1,0 +1,30 @@
+name: Diagnose HoYoLAB Auto Refresh
+
+on:
+  push:
+    branches:
+      - fix/localized-time-units-0.18.0
+    paths:
+      - '.github/workflows/diagnose-hoyolab-autorefresh.yml'
+
+jobs:
+  diagnose:
+    runs-on: windows-2025-vs2026
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Build and print errors
+        shell: pwsh
+        run: |
+          & dotnet publish src/Starward -c Release -r win-x64 -o build/Starward -p:Platform=x64 -p:Version=0.0.1-diagnostic -p:DefineConstants=DONOT_CHECK_UPDATE *> build.log
+          $code = $LASTEXITCODE
+          Write-Host '=== COMPILER ERRORS ==='
+          Select-String -Path build.log -Pattern 'error CS','error MC','XamlCompiler error','error APPX','error MSB' | ForEach-Object { Write-Host $_.Line }
+          Write-Host '=== END ERRORS ==='
+          if ($code -ne 0) { exit $code }
