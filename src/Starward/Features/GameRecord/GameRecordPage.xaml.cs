@@ -82,6 +82,15 @@ public sealed partial class GameRecordPage : PageBase
         {
             ShowBattleChronicleWindow();
         });
+        WeakReferenceMessenger.Default.Register<GameRecordAutoRefreshCompletedMessage>(this, (r, m) =>
+        {
+            if (CurrentGameBiz.Game == m.Game.Game &&
+                frame.SourcePageType is Type pageType &&
+                pageType != typeof(LoginPage))
+            {
+                DispatcherQueue.TryEnqueue(() => NavigateTo(pageType, force_navigate: true));
+            }
+        });
         await Task.Delay(16);
         NavigateTo(typeof(BlankPage));
         if (await CheckAgreementAsync())

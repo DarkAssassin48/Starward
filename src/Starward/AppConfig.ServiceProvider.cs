@@ -77,6 +77,7 @@ public static partial class AppConfig
             sc.AddSingleton<HoyolabClient>();
             sc.AddSingleton<HyperionClient>();
             sc.AddSingleton<GameRecordService>();
+            sc.AddSingleton<GameRecordAutoRefreshService>();
 
             sc.AddSingleton<SelfQueryClient>();
             sc.AddSingleton<SelfQueryService>();
