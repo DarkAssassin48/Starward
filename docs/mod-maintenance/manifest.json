@@ -1,0 +1,67 @@
+{
+  "schema_version": 2,
+  "mod_name": "Starward fix mod",
+  "release_name": "Starward 0.18.1 fix mod",
+  "upstream": {
+    "repository": "Scighost/Starward",
+    "baseline_version": "0.18.1",
+    "baseline_commit": "346e924d25ccaa0df9e53a71492814a96b418c49"
+  },
+  "verified_port": {
+    "repository": "DarkAssassin48/Starward",
+    "branch": "mod/0.18.1",
+    "commit": "e05eb80e6c08b54dcc15c11174657307f2130dc3",
+    "main_merge_commit": "a654db1f9581594ab47feecd93b3482e9f5271cd",
+    "ci_run_id": 31258462389,
+    "builds": {
+      "debug_x64": "passed",
+      "release_x64": "passed",
+      "debug_arm64": "passed",
+      "release_arm64": "passed"
+    }
+  },
+  "canonical_branch": "maintenance/starward-mod",
+  "features": [
+    "hoyolab-auto-refresh",
+    "role-safe-game-record-client-selection",
+    "localized-time-formatting",
+    "starrail-record-ui-and-buff-details",
+    "genshin-self-query-url-compatibility",
+    "gacha-statistics-layout"
+  ],
+  "persistent_keys": [
+    "game_record_auto_refresh_interval_{game}",
+    "game_record_auto_refresh_last_time_{game}_{uid}",
+    "game_record_auto_refresh_last_attempt_{game}_{uid}"
+  ],
+  "localization_policy": {
+    "overwrite_upstream_resx": false,
+    "strategy": "resource lookup with code fallback",
+    "reason": "Preserve upstream Crowdin translations and minimize future conflicts"
+  },
+  "upstream_0_18_1_preserved": [
+    "ZZZ Deadly Assault adversity/hard mode",
+    "Deadly Assault HasHard/HardTotalScore/HardTotalStar database support",
+    "Shiyu Defense rank background UI",
+    "all official 0.18.1 Crowdin resources",
+    "all other upstream 0.18.1 files not explicitly modified by the mod"
+  ],
+  "high_conflict_paths": [
+    "src/Starward/Features/GameRecord/GameRecordService.cs",
+    "src/Starward.Language/Lang*.resx",
+    "src/Starward/Features/GameRecord/StarRail/*",
+    "src/Starward/Features/GameRecord/ZZZ/*",
+    "src/Starward.Core/SelfQuery/SelfQueryClient.cs",
+    "src/Starward/Features/Gacha/*"
+  ],
+  "upgrade_policy": {
+    "source_of_truth": "semantic diff between exact upstream baseline and maintenance/starward-mod",
+    "do_not": "replay or cherry-pick the historical 0.18.0 development commit chain",
+    "required_validation": [
+      "Debug x64",
+      "Release x64",
+      "Debug ARM64",
+      "Release ARM64"
+    ]
+  }
+}
