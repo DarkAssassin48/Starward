@@ -133,6 +133,7 @@ public sealed partial class ShiyuDefensePage : PageBase
 
 
 
+
     private void ListView_ShiyuDefense_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         try
@@ -162,8 +163,9 @@ public sealed partial class ShiyuDefensePage : PageBase
 
     public static string PerformancesTime(int second)
     {
-        var ts = TimeSpan.FromSeconds(second);
-        return $"{ts.Minutes}m {ts.Seconds:D2}s";
+        return Starward.Language.LocalizedTimeFormatter.FormatMinutesSeconds(
+            TimeSpan.FromSeconds(second),
+            padSeconds: true);
     }
 
 
@@ -184,6 +186,7 @@ public sealed partial class ShiyuDefensePage : PageBase
     {
         return value is "v2" ? Visibility.Visible : Visibility.Collapsed;
     }
+
 
 
     public static string RankPercentText(int value)
@@ -215,6 +218,7 @@ public sealed partial class ShiyuDefensePage : PageBase
     {
         return dateTime == DateTime.MinValue ? Visibility.Collapsed : Visibility.Visible;
     }
+
 
 
     public string GetFourthLayerChallengeTime(ShiyuDefenseInfoV2 info)

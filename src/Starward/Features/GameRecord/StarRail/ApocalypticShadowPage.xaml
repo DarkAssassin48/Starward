@@ -201,10 +201,11 @@
                     <!--  最高难度  -->
                     <TextBlock Name="TextBlock_Deepest"
                                Grid.Column="1"
-                               HorizontalAlignment="Left"
+                               HorizontalAlignment="Stretch"
                                VerticalAlignment="Center"
-                               IsTextTrimmedChanged="TextBlock_Deepest_IsTextTrimmedChanged"
-                               TextTrimming="CharacterEllipsis">
+                               MaxLines="2"
+                               TextTrimming="None"
+                               TextWrapping="Wrap">
                         <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.ApocalypticShadowPage_HighestDifficultyCleared}" />
                         <Run Text="" />
                         <Run Text="{x:Bind CurrentApocalypticShadow.MaxFloor}" />
@@ -237,7 +238,11 @@
                                             VerticalAlignment="Center"
                                             CornerRadius="20"
                                             Source="{x:Bind CurrentApocalypticShadow.Meta.UpperBoss.Icon}" />
-                            <TextBlock VerticalAlignment="Center" FontSize="12">
+                            <TextBlock MaxWidth="150"
+                                       VerticalAlignment="Center"
+                                       FontSize="12"
+                                       TextTrimming="None"
+                                       TextWrapping="Wrap">
                                 <Run Text="{x:Bind lang:Lang.ForgottenHallPage_TeamSetup}" />
                                 <Run Text="1" />
                                 <LineBreak />
@@ -254,7 +259,11 @@
                                             VerticalAlignment="Center"
                                             CornerRadius="20"
                                             Source="{x:Bind CurrentApocalypticShadow.Meta.LowerBoss.Icon}" />
-                            <TextBlock VerticalAlignment="Center" FontSize="12">
+                            <TextBlock MaxWidth="150"
+                                       VerticalAlignment="Center"
+                                       FontSize="12"
+                                       TextTrimming="None"
+                                       TextWrapping="Wrap">
                                 <Run Text="{x:Bind lang:Lang.ForgottenHallPage_TeamSetup}" />
                                 <Run Text="2" />
                                 <LineBreak />
@@ -262,19 +271,6 @@
                             </TextBlock>
 
                         </StackPanel>
-                        <Image Grid.Column="2"
-                               MaxHeight="44"
-                               Margin="40,-2,0,-2"
-                               Stretch="Fill"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Bottom"
-                               RenderTransformOrigin="0.5,0.5"
-                               Source="{StaticResource StarwardModeBossBg}"
-                               Visibility="{x:Bind CurrentApocalypticShadow.Meta.TierceBoss, Converter={StaticResource ObjectToVisibilityConverter}}">
-                            <Image.RenderTransform>
-                                <ScaleTransform ScaleX="-1" />
-                            </Image.RenderTransform>
-                        </Image>
                         <StackPanel Grid.Column="2"
                                     HorizontalAlignment="Center"
                                     Orientation="Horizontal"
@@ -286,12 +282,29 @@
                                             VerticalAlignment="Center"
                                             CornerRadius="20"
                                             Source="{x:Bind CurrentApocalypticShadow.Meta.TierceBoss.Icon}" />
-                            <TextBlock VerticalAlignment="Center" FontSize="12">
-                                <Run Text="{x:Bind lang:Lang.ForgottenHallPage_TeamSetup}" />
-                                <Run Text="3" />
-                                <LineBreak />
-                                <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind CurrentApocalypticShadow.Meta.TierceBoss.Name}" />
-                            </TextBlock>
+                            <Grid MaxWidth="158" VerticalAlignment="Center">
+                                <Image HorizontalAlignment="Stretch"
+                                       VerticalAlignment="Stretch"
+                                       IsHitTestVisible="False"
+                                       RenderTransformOrigin="0.5,0.5"
+                                       Source="{StaticResource StarwardModeBossBg}"
+                                       Stretch="Fill">
+                                    <Image.RenderTransform>
+                                        <ScaleTransform ScaleX="-1" />
+                                    </Image.RenderTransform>
+                                </Image>
+                                <TextBlock MaxWidth="150"
+                                           Margin="4,2"
+                                           VerticalAlignment="Center"
+                                           FontSize="12"
+                                           TextTrimming="None"
+                                           TextWrapping="Wrap">
+                                    <Run Text="{x:Bind lang:Lang.ForgottenHallPage_TeamSetup}" />
+                                    <Run Text="3" />
+                                    <LineBreak />
+                                    <Run Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind CurrentApocalypticShadow.Meta.TierceBoss.Name}" />
+                                </TextBlock>
+                            </Grid>
                         </StackPanel>
                     </Grid>
                 </Grid>
@@ -316,9 +329,9 @@
                                         Translation="0,0,16">
 
                                 <!--  title & Node1 & Node2  -->
-                                <Grid Height="360" Padding="20,0,20,0">
+                                <Grid MinHeight="360" Padding="20,0,20,0">
                                     <Grid.RowDefinitions>
-                                        <RowDefinition Height="56" />
+                                        <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition Height="Auto" />
                                         <RowDefinition />
@@ -337,12 +350,16 @@
                                             Background="{ThemeResource ControlOnImageFillColorDefaultBrush}" />
 
                                     <!--  名称  -->
-                                    <StackPanel VerticalAlignment="Center" Spacing="2">
-                                        <TextBlock FontSize="18"
-                                                   FontWeight="Bold"
-                                                   Text="{x:Bind Name}"
-                                                   TextTrimming="CharacterEllipsis" />
-                                    </StackPanel>
+                                    <Grid MinHeight="56" Padding="0,8,0,8">
+                                        <StackPanel VerticalAlignment="Center" Spacing="2">
+                                            <TextBlock FontSize="18"
+                                                       FontWeight="Bold"
+                                                       MaxLines="2"
+                                                       Text="{x:Bind local:StarRailRecordTextHelper.NormalizeStageName(Name)}"
+                                                       TextTrimming="None"
+                                                       TextWrapping="Wrap" />
+                                        </StackPanel>
+                                    </Grid>
 
                                     <!--  星星图标  -->
                                     <StackPanel Grid.Column="2"
@@ -442,51 +459,56 @@
                                         <Run Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Text="{x:Bind Node1.Score}" />
                                     </TextBlock>
 
-                                    <ItemsControl Grid.Row="3"
-                                                  Grid.ColumnSpan="3"
-                                                  Margin="0,4,0,4"
-                                                  HorizontalAlignment="Center"
-                                                  ItemsSource="{x:Bind Node1.Avatars}"
-                                                  Visibility="{x:Bind IsFast, Converter={StaticResource BoolToVisibilityReversedConverter}}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <StackPanel Orientation="Horizontal" Spacing="12" />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="fic:ApocalypticShadowAvatar">
-                                                <Grid Width="72" Height="84">
-                                                    <sc:CachedImage Source="{x:Bind Rarity, Converter={StaticResource RarityToSRBgConverter}}" />
-                                                    <sc:CachedImage VerticalAlignment="Top"
-                                                                    CornerRadius="0,12,0,0"
-                                                                    Source="{x:Bind Icon}"
-                                                                    Stretch="UniformToFill" />
-                                                    <Border HorizontalAlignment="Right"
-                                                            VerticalAlignment="Top"
-                                                            Background="#A0000000"
-                                                            CornerRadius="0,12,0,8"
-                                                            Visibility="{x:Bind sfgr:AvatarRankHelper.RankToVisibility(Rank)}">
-                                                        <TextBlock Margin="4,2,4,2"
-                                                                   FontSize="14"
-                                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                                   IsTextScaleFactorEnabled="False"
-                                                                   Text="{x:Bind Rank}" />
-                                                    </Border>
-                                                    <Border Height="16"
-                                                            Margin="0,0,0,1.5"
-                                                            VerticalAlignment="Bottom"
-                                                            Background="#A0000000">
-                                                        <TextBlock Margin="0,0,0,1"
-                                                                   HorizontalAlignment="Center"
-                                                                   VerticalAlignment="Center">
-                                                            <Run Text="Lv." />
-                                                            <Run Text="{x:Bind Level}" />
-                                                        </TextBlock>
-                                                    </Border>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
+                                    <StackPanel Grid.Row="3" Grid.ColumnSpan="3" Margin="0,4,0,8" HorizontalAlignment="Center" Spacing="8" Visibility="{x:Bind IsFast, Converter={StaticResource BoolToVisibilityReversedConverter}}">
+                                        <ItemsControl
+                                                                                          HorizontalAlignment="Center"
+                                                                                          ItemsSource="{x:Bind Node1.Avatars}">
+                                                                                <ItemsControl.ItemsPanel>
+                                                                                    <ItemsPanelTemplate>
+                                                                                        <StackPanel Orientation="Horizontal" Spacing="12" />
+                                                                                    </ItemsPanelTemplate>
+                                                                                </ItemsControl.ItemsPanel>
+                                                                                <ItemsControl.ItemTemplate>
+                                                                                    <DataTemplate x:DataType="fic:ApocalypticShadowAvatar">
+                                                                                        <Grid Width="72" Height="84">
+                                                                                            <sc:CachedImage Source="{x:Bind Rarity, Converter={StaticResource RarityToSRBgConverter}}" />
+                                                                                            <sc:CachedImage VerticalAlignment="Top"
+                                                                                                            CornerRadius="0,12,0,0"
+                                                                                                            Source="{x:Bind Icon}"
+                                                                                                            Stretch="UniformToFill" />
+                                                                                            <Border HorizontalAlignment="Right"
+                                                                                                    VerticalAlignment="Top"
+                                                                                                    Background="#A0000000"
+                                                                                                    CornerRadius="0,12,0,8"
+                                                                                                    Visibility="{x:Bind sfgr:AvatarRankHelper.RankToVisibility(Rank)}">
+                                                                                                <TextBlock Margin="4,2,4,2"
+                                                                                                           FontSize="14"
+                                                                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                                                           IsTextScaleFactorEnabled="False"
+                                                                                                           Text="{x:Bind Rank}" />
+                                                                                            </Border>
+                                                                                            <Border Height="16"
+                                                                                                    Margin="0,0,0,1.5"
+                                                                                                    VerticalAlignment="Bottom"
+                                                                                                    Background="#A0000000">
+                                                                                                <TextBlock Margin="0,0,0,1"
+                                                                                                           HorizontalAlignment="Center"
+                                                                                                           VerticalAlignment="Center">
+                                                                                                    <Run Text="Lv." />
+                                                                                                    <Run Text="{x:Bind Level}" />
+                                                                                                </TextBlock>
+                                                                                            </Border>
+                                                                                        </Grid>
+                                                                                    </DataTemplate>
+                                                                                </ItemsControl.ItemTemplate>
+                                                                            </ItemsControl>
+                                        <local:StarRailBuffButton x:Name="ApocalypticShadowNode1BuffButton"
+                                                                   BuffDescription="{x:Bind Node1.Buff.Desc}"
+                                                                  BuffIcon="{x:Bind Node1.Buff.Icon}"
+                                                                  BuffName="{x:Bind Node1.Buff.Name}"
+                                                                  HorizontalAlignment="Center"
+                                                                  x:Load="{x:Bind Node1.Buff, Converter={StaticResource ObjectToBoolConverter}}" />
+                                    </StackPanel>
 
                                     <!--  节点2  -->
                                     <StackPanel Grid.Row="4"
@@ -526,51 +548,56 @@
                                         <Run Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Text="{x:Bind Node2.Score}" />
                                     </TextBlock>
 
-                                    <ItemsControl Grid.Row="6"
-                                                  Grid.ColumnSpan="3"
-                                                  Margin="0,4,0,4"
-                                                  HorizontalAlignment="Center"
-                                                  ItemsSource="{x:Bind Node2.Avatars}"
-                                                  Visibility="{x:Bind IsFast, Converter={StaticResource BoolToVisibilityReversedConverter}}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <StackPanel Orientation="Horizontal" Spacing="12" />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="fic:ApocalypticShadowAvatar">
-                                                <Grid Width="72" Height="84">
-                                                    <sc:CachedImage Source="{x:Bind Rarity, Converter={StaticResource RarityToSRBgConverter}}" />
-                                                    <sc:CachedImage VerticalAlignment="Top"
-                                                                    CornerRadius="0,12,0,0"
-                                                                    Source="{x:Bind Icon}"
-                                                                    Stretch="UniformToFill" />
-                                                    <Border HorizontalAlignment="Right"
-                                                            VerticalAlignment="Top"
-                                                            Background="#A0000000"
-                                                            CornerRadius="0,12,0,8"
-                                                            Visibility="{x:Bind sfgr:AvatarRankHelper.RankToVisibility(Rank)}">
-                                                        <TextBlock Margin="4,2,4,2"
-                                                                   FontSize="14"
-                                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                                   IsTextScaleFactorEnabled="False"
-                                                                   Text="{x:Bind Rank}" />
-                                                    </Border>
-                                                    <Border Height="16"
-                                                            Margin="0,0,0,1.5"
-                                                            VerticalAlignment="Bottom"
-                                                            Background="#A0000000">
-                                                        <TextBlock Margin="0,0,0,1"
-                                                                   HorizontalAlignment="Center"
-                                                                   VerticalAlignment="Center">
-                                                            <Run Text="Lv." />
-                                                            <Run Text="{x:Bind Level}" />
-                                                        </TextBlock>
-                                                    </Border>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
+                                    <StackPanel Grid.Row="6" Grid.ColumnSpan="3" Margin="0,4,0,8" HorizontalAlignment="Center" Spacing="8" Visibility="{x:Bind IsFast, Converter={StaticResource BoolToVisibilityReversedConverter}}">
+                                        <ItemsControl
+                                                                                          HorizontalAlignment="Center"
+                                                                                          ItemsSource="{x:Bind Node2.Avatars}">
+                                                                                <ItemsControl.ItemsPanel>
+                                                                                    <ItemsPanelTemplate>
+                                                                                        <StackPanel Orientation="Horizontal" Spacing="12" />
+                                                                                    </ItemsPanelTemplate>
+                                                                                </ItemsControl.ItemsPanel>
+                                                                                <ItemsControl.ItemTemplate>
+                                                                                    <DataTemplate x:DataType="fic:ApocalypticShadowAvatar">
+                                                                                        <Grid Width="72" Height="84">
+                                                                                            <sc:CachedImage Source="{x:Bind Rarity, Converter={StaticResource RarityToSRBgConverter}}" />
+                                                                                            <sc:CachedImage VerticalAlignment="Top"
+                                                                                                            CornerRadius="0,12,0,0"
+                                                                                                            Source="{x:Bind Icon}"
+                                                                                                            Stretch="UniformToFill" />
+                                                                                            <Border HorizontalAlignment="Right"
+                                                                                                    VerticalAlignment="Top"
+                                                                                                    Background="#A0000000"
+                                                                                                    CornerRadius="0,12,0,8"
+                                                                                                    Visibility="{x:Bind sfgr:AvatarRankHelper.RankToVisibility(Rank)}">
+                                                                                                <TextBlock Margin="4,2,4,2"
+                                                                                                           FontSize="14"
+                                                                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                                                           IsTextScaleFactorEnabled="False"
+                                                                                                           Text="{x:Bind Rank}" />
+                                                                                            </Border>
+                                                                                            <Border Height="16"
+                                                                                                    Margin="0,0,0,1.5"
+                                                                                                    VerticalAlignment="Bottom"
+                                                                                                    Background="#A0000000">
+                                                                                                <TextBlock Margin="0,0,0,1"
+                                                                                                           HorizontalAlignment="Center"
+                                                                                                           VerticalAlignment="Center">
+                                                                                                    <Run Text="Lv." />
+                                                                                                    <Run Text="{x:Bind Level}" />
+                                                                                                </TextBlock>
+                                                                                            </Border>
+                                                                                        </Grid>
+                                                                                    </DataTemplate>
+                                                                                </ItemsControl.ItemTemplate>
+                                                                            </ItemsControl>
+                                        <local:StarRailBuffButton x:Name="ApocalypticShadowNode2BuffButton"
+                                                                   BuffDescription="{x:Bind Node2.Buff.Desc}"
+                                                                  BuffIcon="{x:Bind Node2.Buff.Icon}"
+                                                                  BuffName="{x:Bind Node2.Buff.Name}"
+                                                                  HorizontalAlignment="Center"
+                                                                  x:Load="{x:Bind Node2.Buff, Converter={StaticResource ObjectToBoolConverter}}" />
+                                    </StackPanel>
 
                                     <!--  快速通关  -->
                                     <StackPanel Grid.Row="1"
@@ -588,7 +615,7 @@
                                 </Grid>
 
                                 <!--  节点3  -->
-                                <Grid Height="144"
+                                <Grid MinHeight="144"
                                       x:Name="Node3Root"
                                       Padding="20,0,20,0"
                                       VerticalAlignment="Top"
@@ -646,49 +673,56 @@
                                         <Run Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Text="{x:Bind Node3.Score}" />
                                     </TextBlock>
 
-                                    <ItemsControl Grid.Row="2"
-                                                  Grid.ColumnSpan="2"
-                                                  HorizontalAlignment="Center"
-                                                  ItemsSource="{x:Bind Node3.Avatars}">
-                                        <ItemsControl.ItemsPanel>
-                                            <ItemsPanelTemplate>
-                                                <StackPanel Orientation="Horizontal" Spacing="12" />
-                                            </ItemsPanelTemplate>
-                                        </ItemsControl.ItemsPanel>
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate x:DataType="fic:ApocalypticShadowAvatar">
-                                                <Grid Width="72" Height="84">
-                                                    <sc:CachedImage Source="{x:Bind Rarity, Converter={StaticResource RarityToSRBgConverter}}" />
-                                                    <sc:CachedImage VerticalAlignment="Top"
-                                                                    CornerRadius="0,12,0,0"
-                                                                    Source="{x:Bind Icon}"
-                                                                    Stretch="UniformToFill" />
-                                                    <Border HorizontalAlignment="Right"
-                                                            VerticalAlignment="Top"
-                                                            Background="#A0000000"
-                                                            CornerRadius="0,12,0,8"
-                                                            Visibility="{x:Bind sfgr:AvatarRankHelper.RankToVisibility(Rank)}">
-                                                        <TextBlock Margin="4,2,4,2"
-                                                                   FontSize="14"
-                                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                                   IsTextScaleFactorEnabled="False"
-                                                                   Text="{x:Bind Rank}" />
-                                                    </Border>
-                                                    <Border Height="16"
-                                                            Margin="0,0,0,1.5"
-                                                            VerticalAlignment="Bottom"
-                                                            Background="#A0000000">
-                                                        <TextBlock Margin="0,0,0,1"
-                                                                   HorizontalAlignment="Center"
-                                                                   VerticalAlignment="Center">
-                                                            <Run Text="Lv." />
-                                                            <Run Text="{x:Bind Level}" />
-                                                        </TextBlock>
-                                                    </Border>
-                                                </Grid>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
+                                    <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Margin="0,4,0,8" HorizontalAlignment="Center" Spacing="8">
+                                        <ItemsControl
+                                                                                          HorizontalAlignment="Center"
+                                                                                          ItemsSource="{x:Bind Node3.Avatars}">
+                                                                                <ItemsControl.ItemsPanel>
+                                                                                    <ItemsPanelTemplate>
+                                                                                        <StackPanel Orientation="Horizontal" Spacing="12" />
+                                                                                    </ItemsPanelTemplate>
+                                                                                </ItemsControl.ItemsPanel>
+                                                                                <ItemsControl.ItemTemplate>
+                                                                                    <DataTemplate x:DataType="fic:ApocalypticShadowAvatar">
+                                                                                        <Grid Width="72" Height="84">
+                                                                                            <sc:CachedImage Source="{x:Bind Rarity, Converter={StaticResource RarityToSRBgConverter}}" />
+                                                                                            <sc:CachedImage VerticalAlignment="Top"
+                                                                                                            CornerRadius="0,12,0,0"
+                                                                                                            Source="{x:Bind Icon}"
+                                                                                                            Stretch="UniformToFill" />
+                                                                                            <Border HorizontalAlignment="Right"
+                                                                                                    VerticalAlignment="Top"
+                                                                                                    Background="#A0000000"
+                                                                                                    CornerRadius="0,12,0,8"
+                                                                                                    Visibility="{x:Bind sfgr:AvatarRankHelper.RankToVisibility(Rank)}">
+                                                                                                <TextBlock Margin="4,2,4,2"
+                                                                                                           FontSize="14"
+                                                                                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                                                                                           IsTextScaleFactorEnabled="False"
+                                                                                                           Text="{x:Bind Rank}" />
+                                                                                            </Border>
+                                                                                            <Border Height="16"
+                                                                                                    Margin="0,0,0,1.5"
+                                                                                                    VerticalAlignment="Bottom"
+                                                                                                    Background="#A0000000">
+                                                                                                <TextBlock Margin="0,0,0,1"
+                                                                                                           HorizontalAlignment="Center"
+                                                                                                           VerticalAlignment="Center">
+                                                                                                    <Run Text="Lv." />
+                                                                                                    <Run Text="{x:Bind Level}" />
+                                                                                                </TextBlock>
+                                                                                            </Border>
+                                                                                        </Grid>
+                                                                                    </DataTemplate>
+                                                                                </ItemsControl.ItemTemplate>
+                                                                            </ItemsControl>
+                                        <local:StarRailBuffButton x:Name="ApocalypticShadowNode3BuffButton"
+                                                                   BuffDescription="{x:Bind Node3.Buff.Desc}"
+                                                                  BuffIcon="{x:Bind Node3.Buff.Icon}"
+                                                                  BuffName="{x:Bind Node3.Buff.Name}"
+                                                                  HorizontalAlignment="Center"
+                                                                  x:Load="{x:Bind Node3.Buff, Converter={StaticResource ObjectToBoolConverter}}" />
+                                    </StackPanel>
                                 </Grid>
                             </StackPanel>
                         </DataTemplate>

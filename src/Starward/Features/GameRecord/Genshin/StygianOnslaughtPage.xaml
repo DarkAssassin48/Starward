@@ -111,7 +111,7 @@
                                    Margin="36,0,0,2"
                                    VerticalAlignment="Center"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                            <Run Text="{x:Bind Second}" /><Run Text="s" />
+                            <Run Text="{x:Bind Second}" /><Run Text="{x:Bind lang:LocalizedTimeFormatter.SecondUnit}" />
                         </TextBlock>
                     </Grid>
                 </DataTemplate>
@@ -152,7 +152,7 @@
                                         Margin="8,0,0,0"
                                         Source="{x:Bind local:StygianOnslaughtPage.DifficultyToImage(CurrentSelectedBattle.Best.Difficulty)}" />
                         <TextBlock Margin="4,0,0,0" FontSize="16">
-                            <Run Text="{x:Bind CurrentSelectedBattle.Best.Seconds}" /><Run Text="s" />
+                            <Run Text="{x:Bind CurrentSelectedBattle.Best.Seconds}" /><Run Text="{x:Bind lang:LocalizedTimeFormatter.SecondUnit}" />
                         </TextBlock>
                     </StackPanel>
 
@@ -194,7 +194,10 @@
                                 </Grid.ColumnDefinitions>
 
                                 <!--  怪物名称  -->
-                                <TextBlock FontSize="16" Text="{x:Bind Name}" />
+                                <TextBlock FontSize="16"
+                                           Text="{x:Bind Name}"
+                                           TextTrimming="None"
+                                           TextWrapping="Wrap" />
                                 <!--  战斗时间  -->
                                 <StackPanel Grid.Row="1"
                                             HorizontalAlignment="Left"
@@ -203,7 +206,7 @@
                                             Spacing="12">
                                     <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="{x:Bind lang:Lang.StygianOnslaughtPage_BattleTime}" />
                                     <TextBlock Grid.Row="1" Foreground="{ThemeResource TextFillColorSecondaryBrush}">
-                                        <Run Text="{x:Bind Second}" /><Run Text="s" />
+                                        <Run Text="{x:Bind Second}" /><Run Text="{x:Bind lang:LocalizedTimeFormatter.SecondUnit}" />
                                     </TextBlock>
                                 </StackPanel>
 

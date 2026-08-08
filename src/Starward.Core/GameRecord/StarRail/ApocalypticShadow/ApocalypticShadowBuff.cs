@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Starward.Core.GameRecord.StarRail.ApocalypticShadow;
 
@@ -11,6 +11,9 @@ public class ApocalypticShadowBuff
     [JsonPropertyName("name_mi18n")]
     public string Name { get; set; }
 
+    [JsonPropertyName("desc_mi18n")]
+    public string? Desc { get; set; }
+
     [JsonPropertyName("icon")]
     public string Icon { get; set; }
 
@@ -19,6 +22,3 @@ public class ApocalypticShadowBuff
     public Dictionary<string, object>? ExtensionData { get; set; }
 
 }
-
-
-

@@ -38,6 +38,7 @@ public sealed partial class SettingPage : PageBase
                 nameof(ToolboxSetting) => typeof(ToolboxSetting),
                 nameof(HotkeySetting) => typeof(HotkeySetting),
                 nameof(GamepadControlSetting) => typeof(GamepadControlSetting),
+                nameof(HoyolabToolboxAutoRefreshSetting) => typeof(HoyolabToolboxAutoRefreshSetting),
                 _ => null,
             };
             if (type is not null)
