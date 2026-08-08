@@ -342,9 +342,6 @@
   <data name="GachaLogPage_ExportAs" xml:space="preserve">
     <value>ส่งออกประวัติการสุ่ม</value>
   </data>
-  <data name="GachaLogPage_ImportFromJson" xml:space="preserve">
-    <value>นำเข้าจาก JSON</value>
-  </data>
   <data name="GachaLogPage_ShowNoviceGachaType" xml:space="preserve">
     <value>ชนิดการแสดงตู้สุ่มมือใหม่</value>
   </data>
@@ -2734,5 +2731,11 @@
   </data>
   <data name="DailyNoteButton_StarRail_AccumulatedPoints" xml:space="preserve">
     <value>คะแนนสะสม</value>
+  </data>
+  <data name="DeadlyAssaultPage_TrialMode" xml:space="preserve">
+    <value>โหมดทดลอง</value>
+  </data>
+  <data name="DeadlyAssaultPage_AdversityMode" xml:space="preserve">
+    <value>โหมดวิกฤต</value>
   </data>
 </root>

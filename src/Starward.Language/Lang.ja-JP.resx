@@ -343,9 +343,6 @@
   <data name="GachaLogPage_ExportAs" xml:space="preserve">
     <value>エクスポート</value>
   </data>
-  <data name="GachaLogPage_ImportFromJson" xml:space="preserve">
-    <value>JSONからインポート</value>
-  </data>
   <data name="GachaLogPage_ShowNoviceGachaType" xml:space="preserve">
     <value>初心者向けガチャの種類を表示</value>
   </data>
@@ -2739,5 +2736,11 @@
   </data>
   <data name="DailyNoteButton_StarRail_AccumulatedPoints" xml:space="preserve">
     <value>累積ポイント</value>
+  </data>
+  <data name="DeadlyAssaultPage_TrialMode" xml:space="preserve">
+    <value>試練モード</value>
+  </data>
+  <data name="DeadlyAssaultPage_AdversityMode" xml:space="preserve">
+    <value>逆境モード</value>
   </data>
 </root>

@@ -193,8 +193,7 @@ public sealed partial class ImaginariumTheaterPage : PageBase
 
     public static string PerformancesTime(int second)
     {
-        var ts = TimeSpan.FromSeconds(second);
-        return $"{ts.Minutes}m {ts.Seconds}s";
+        return Starward.Language.LocalizedTimeFormatter.FormatMinutesSeconds(TimeSpan.FromSeconds(second));
     }
 
 
@@ -203,6 +202,7 @@ public sealed partial class ImaginariumTheaterPage : PageBase
     {
         return value == 0 ? Visibility.Collapsed : Visibility.Visible;
     }
+
 
 
 
@@ -238,6 +238,7 @@ public sealed partial class ImaginariumTheaterPage : PageBase
 
 
 
+
     public static Visibility IsBrilliantBlessingVisibility(int? level)
     {
         return level switch
@@ -246,6 +247,7 @@ public sealed partial class ImaginariumTheaterPage : PageBase
             _ => Visibility.Visible,
         };
     }
+
 
 
 
@@ -276,6 +278,3 @@ public partial class TheaterStarIconVisibilityConverter : IValueConverter
         throw new NotImplementedException();
     }
 }
-
-
-

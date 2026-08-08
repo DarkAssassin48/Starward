@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using Starward.Core;
 using Starward.Core.GameRecord;
@@ -132,6 +133,7 @@ public sealed partial class ShiyuDefensePage : PageBase
 
 
 
+
     private void ListView_ShiyuDefense_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         try
@@ -161,8 +163,9 @@ public sealed partial class ShiyuDefensePage : PageBase
 
     public static string PerformancesTime(int second)
     {
-        var ts = TimeSpan.FromSeconds(second);
-        return $"{ts.Minutes}m {ts.Seconds:D2}s";
+        return Starward.Language.LocalizedTimeFormatter.FormatMinutesSeconds(
+            TimeSpan.FromSeconds(second),
+            padSeconds: true);
     }
 
 
@@ -185,6 +188,7 @@ public sealed partial class ShiyuDefensePage : PageBase
     }
 
 
+
     public static string RankPercentText(int value)
     {
         int d = value / 100;
@@ -193,10 +197,28 @@ public sealed partial class ShiyuDefensePage : PageBase
     }
 
 
+    /// <summary>
+    /// 排名百分比背景图片，value 为以 0.01% 为单位的排名
+    /// </summary>
+    public static BitmapImage RankBackground(int value)
+    {
+        var img = value switch
+        {
+            <= 100 => "ms-appx:///Assets/Image/rank-bg-1.6a51d893.png",
+            <= 200 => "ms-appx:///Assets/Image/rank-bg-2.7522d7bb.png",
+            <= 500 => "ms-appx:///Assets/Image/rank-bg-3.370b7f26.png",
+            <= 3000 => "ms-appx:///Assets/Image/rank-bg-4.1b293bb1.png",
+            _ => "ms-appx:///Assets/Image/rank-bg-5.cf630a83.png",
+        };
+        return new BitmapImage(new Uri(img));
+    }
+
+
     public static Visibility ChallengeTimeVisibility(DateTime dateTime)
     {
         return dateTime == DateTime.MinValue ? Visibility.Collapsed : Visibility.Visible;
     }
+
 
 
     public string GetFourthLayerChallengeTime(ShiyuDefenseInfoV2 info)

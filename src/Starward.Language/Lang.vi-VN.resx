@@ -343,9 +343,6 @@ việc đóng ứng dụng trong khi giải nén sẽ gây ra hư hỏng tập t
   <data name="GachaLogPage_ExportAs" xml:space="preserve">
     <value>Xuất như</value>
   </data>
-  <data name="GachaLogPage_ImportFromJson" xml:space="preserve">
-    <value>Nhập từ file JSON</value>
-  </data>
   <data name="GachaLogPage_ShowNoviceGachaType" xml:space="preserve">
     <value>Hiển thị Gacha người mới</value>
   </data>
@@ -2737,5 +2734,11 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   </data>
   <data name="DailyNoteButton_StarRail_AccumulatedPoints" xml:space="preserve">
     <value>Điểm tích lũy</value>
+  </data>
+  <data name="DeadlyAssaultPage_TrialMode" xml:space="preserve">
+    <value>Chế độ thử nghiệm</value>
+  </data>
+  <data name="DeadlyAssaultPage_AdversityMode" xml:space="preserve">
+    <value>Chế độ nghịch cảnh</value>
   </data>
 </root>

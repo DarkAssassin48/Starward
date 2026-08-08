@@ -98,15 +98,27 @@
                    Text="{x:Bind WarpTypeStats.Pity_5}" />-->
 
         <!--  5★ 平均  -->
-        <TextBlock Grid.Row="3" Foreground="{ThemeResource Rarity2ForegroundBrush}">
-            <Run Text="5★" />
-            <Run Text="{x:Bind lang:Lang.GachaStatsCard_Average}" /><Run Text="{x:Bind WarpTypeStats.Avarage_5_Desc_Text}" />
-        </TextBlock>
-        <TextBlock Grid.Row="3"
-                   HorizontalAlignment="Right"
-                   Foreground="{ThemeResource Rarity2ForegroundBrush}">
-            <Run Text="{x:Bind WarpTypeStats.Average_5.ToString('F2', x:Null)}" /><Run Text="{x:Bind WarpTypeStats.Avarage_5_Up_Text}" />
-        </TextBlock>
+        <Grid Grid.Row="3" ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" MaxWidth="128" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0"
+                       Foreground="{ThemeResource Rarity2ForegroundBrush}"
+                       TextTrimming="None"
+                       TextWrapping="Wrap">
+                <Run Text="5★" />
+                <Run Text="{x:Bind lang:Lang.GachaStatsCard_Average}" /><Run Text="{x:Bind WarpTypeStats.Avarage_5_Desc_Text}" />
+            </TextBlock>
+            <TextBlock Grid.Column="1"
+                       HorizontalAlignment="Right"
+                       Foreground="{ThemeResource Rarity2ForegroundBrush}"
+                       HorizontalTextAlignment="Right"
+                       TextTrimming="None"
+                       TextWrapping="Wrap">
+                <Run Text="{x:Bind WarpTypeStats.Average_5.ToString('F2', x:Null)}" /><Run Text="{x:Bind WarpTypeStats.Avarage_5_Up_Text}" />
+            </TextBlock>
+        </Grid>
 
         <!--<MenuFlyoutSeparator Grid.Row="6" />-->
 

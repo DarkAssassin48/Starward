@@ -6,6 +6,7 @@ using Starward.Core;
 using Starward.Core.HoYoPlay;
 using Starward.Features.GameLauncher;
 using Starward.Features.GamepadControl;
+using Starward.Features.GameRecord;
 using Starward.Features.UrlProtocol;
 using Starward.Features.ViewHost;
 using Starward.RPC;
@@ -100,6 +101,8 @@ public partial class App : Application
             m_MainWindow = new MainWindow();
             m_MainWindow.Activate();
         }
+
+        AppConfig.GetService<GameRecordAutoRefreshService>().Start();
     }
 
 
@@ -193,6 +196,7 @@ public partial class App : Application
 
     public new void Exit()
     {
+        AppConfig.GetService<GameRecordAutoRefreshService>().Stop();
         GamepadController.RestoreGamepadGuideButtonForGameBar();
         m_MainWindow?.Close();
         m_SystemTrayWindow?.Close();

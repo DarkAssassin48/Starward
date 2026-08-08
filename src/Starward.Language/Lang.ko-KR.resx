@@ -343,9 +343,6 @@
   <data name="GachaLogPage_ExportAs" xml:space="preserve">
     <value>내보내기</value>
   </data>
-  <data name="GachaLogPage_ImportFromJson" xml:space="preserve">
-    <value>JSON 에서 불러오기</value>
-  </data>
   <data name="GachaLogPage_ShowNoviceGachaType" xml:space="preserve">
     <value>초보자 뽑기 표시</value>
   </data>
@@ -2740,5 +2737,11 @@
   </data>
   <data name="DailyNoteButton_StarRail_AccumulatedPoints" xml:space="preserve">
     <value>누적 포인트</value>
+  </data>
+  <data name="DeadlyAssaultPage_TrialMode" xml:space="preserve">
+    <value>트라이얼 모드</value>
+  </data>
+  <data name="DeadlyAssaultPage_AdversityMode" xml:space="preserve">
+    <value>역경 모드</value>
   </data>
 </root>

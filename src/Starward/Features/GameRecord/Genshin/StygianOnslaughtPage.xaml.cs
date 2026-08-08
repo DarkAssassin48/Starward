@@ -33,7 +33,9 @@ public sealed partial class StygianOnslaughtPage : PageBase
     }
 
 
+
     private GameRecordRole gameRole;
+
 
 
     protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -70,10 +72,13 @@ public sealed partial class StygianOnslaughtPage : PageBase
     public List<StygianOnslaughtInfo> SOList { get; set => SetProperty(ref field, value); }
 
 
+
     public StygianOnslaughtInfo? CurrentInfo { get => field; set => SetProperty(ref field, value); }
 
 
+
     public StygianOnslaughtBattle? CurrentSelectedBattle { get => field; set => SetProperty(ref field, value); }
+
 
 
     private void InitializeAbyssData()
@@ -181,6 +186,7 @@ public sealed partial class StygianOnslaughtPage : PageBase
 
 
 
+
     public static Visibility RankToVisibility(int rank)
     {
         return rank > 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -188,15 +194,17 @@ public sealed partial class StygianOnslaughtPage : PageBase
 
 
 
+
     public static string BestTypeToString(int type)
     {
-        return type switch
+        return (type switch
         {
             1 => Lang.SpiralAbyssPage_StrongestSingleStrike,
             2 => Lang.StygianOnslaughtPage_HighestTotalDamageDealt,
             _ => "",
-        };
+        }).Trim();
     }
+
 
 
     public static string DifficultyToImage(int difficulty)
