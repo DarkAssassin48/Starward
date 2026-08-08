@@ -1,0 +1,110 @@
+name: Bootstrap Starward 0.18.1 mod port
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+env:
+  TARGET_BRANCH: mod/0.18.1
+  UPSTREAM_BRANCH: upstream-0.18.1
+  MOD_BRANCH: maintenance/starward-mod
+  DEBUG_BRANCH: port-debug-0.18.1
+
+jobs:
+  port:
+    if: ${{ !startsWith(github.event.head_commit.message, '[port-cleanup]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Configure and fetch
+        shell: bash
+        run: |
+          git config user.name "Starward Port Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git fetch origin "$UPSTREAM_BRANCH" "$MOD_BRANCH" "$TARGET_BRANCH" || true
+
+      - name: Build three-way port
+        id: merge
+        shell: bash
+        run: |
+          set +e
+          git checkout -B "$TARGET_BRANCH" "origin/$UPSTREAM_BRANCH"
+          git merge --no-ff --no-commit "origin/$MOD_BRANCH"
+          echo "merge_exit=$?" >> "$GITHUB_OUTPUT"
+          set -e
+
+      - name: Resolve additive RESX localization changes
+        shell: python
+        run: |
+          import pathlib, re, subprocess
+
+          def show(spec):
+              p = subprocess.run(["git", "show", spec], text=True, capture_output=True)
+              return p.stdout if p.returncode == 0 else ""
+
+          unmerged = subprocess.run(
+              ["git", "diff", "--name-only", "--diff-filter=U"],
+              text=True, capture_output=True, check=True
+          ).stdout.splitlines()
+
+          data_re = re.compile(r'(?ms)^  <data name="([^"]+)" xml:space="preserve">.*?^  </data>\n?')
+
+          for path in unmerged:
+              if not (path.startswith("src/Starward.Language/Lang") and path.endswith(".resx")):
+                  continue
+              base, ours, theirs = show(f":1:{path}"), show(f":2:{path}"), show(f":3:{path}")
+              base_blocks = {m.group(1): m.group(0) for m in data_re.finditer(base)}
+              ours_blocks = {m.group(1): m.group(0) for m in data_re.finditer(ours)}
+              theirs_blocks = {m.group(1): m.group(0) for m in data_re.finditer(theirs)}
+              merged = ours
+              added = []
+              for key, block in theirs_blocks.items():
+                  if key not in base_blocks and key not in ours_blocks:
+                      merged = merged.replace("</root>", block.rstrip("\n") + "\n</root>")
+                      added.append(key)
+              pathlib.Path(path).write_text(merged, encoding="utf-8", newline="")
+              subprocess.run(["git", "add", path], check=True)
+              print(f"{path}: preserved upstream + {len(added)} mod-only keys")
+
+      - name: Finish or preserve unresolved conflicts
+        id: finish
+        shell: bash
+        run: |
+          conflicts="$(git diff --name-only --diff-filter=U)"
+          if [ -z "$conflicts" ]; then
+            git rm -f .github/workflows/port-mod-0.18.1.yml 2>/dev/null || true
+            git add -A
+            git commit -m "[port-bot] Port fix mod to Starward 0.18.1"
+            git push origin HEAD:"$TARGET_BRANCH" --force
+            echo "result=success" >> "$GITHUB_OUTPUT"
+          else
+            echo "Unresolved conflicts:"
+            echo "$conflicts"
+            # Save conflict-marker versions for manual inspection in a dedicated branch.
+            while IFS= read -r f; do
+              [ -z "$f" ] && continue
+              git checkout --conflict=merge -- "$f" || true
+              git add "$f" || true
+            done <<< "$conflicts"
+            git add -A
+            git commit -m "[port-debug] Starward 0.18.1 unresolved merge conflicts"
+            git push origin HEAD:"$DEBUG_BRANCH" --force
+            echo "result=conflicts" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Cleanup bootstrap workflow from main
+        if: always()
+        shell: bash
+        run: |
+          git fetch origin main
+          git checkout -B main origin/main
+          git rm -f .github/workflows/port-starward-0181-bootstrap.yml || exit 0
+          git commit -m "[port-cleanup] Remove temporary 0.18.1 port workflow"
+          git push origin HEAD:main
