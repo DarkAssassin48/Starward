@@ -1,0 +1,181 @@
+{
+  "schema_version": 1,
+  "mod_name": "Starward fix mod",
+  "release_name": "Starward 0.18.0 fix mod",
+  "upstream": {
+    "repository": "Scighost/Starward",
+    "baseline_version": "0.18.0",
+    "baseline_commit": "433dc28a7a798a79a92e81c89f702f9f13b18f9d"
+  },
+  "snapshot": {
+    "repository": "DarkAssassin48/Starward",
+    "canonical_branch": "maintenance/starward-mod",
+    "source_branch": "fix/localized-time-units-0.18.0"
+  },
+  "features": [
+    {
+      "id": "hoyolab-auto-refresh",
+      "priority": "critical",
+      "description": "Background and manual HoYoLAB game-record refresh for Genshin Impact, Honkai: Star Rail and Zenless Zone Zero with per-game schedules, retry cooldown and UI status.",
+      "files": [
+        "src/Starward/Features/GameRecord/GameRecordAutoRefreshCompletedMessage.cs",
+        "src/Starward/Features/GameRecord/GameRecordAutoRefreshInterval.cs",
+        "src/Starward/Features/GameRecord/GameRecordAutoRefreshResult.cs",
+        "src/Starward/Features/GameRecord/GameRecordAutoRefreshService.cs",
+        "src/Starward/Features/GameRecord/GameRecordPage.xaml.cs",
+        "src/Starward/Features/GameRecord/GameRecordService.cs",
+        "src/Starward/Features/Setting/HoyolabToolboxAutoRefreshSetting.xaml",
+        "src/Starward/Features/Setting/HoyolabToolboxAutoRefreshSetting.xaml.cs",
+        "src/Starward/Features/Setting/SettingPage.xaml",
+        "src/Starward/Features/Setting/SettingPage.xaml.cs",
+        "src/Starward/App.xaml.cs",
+        "src/Starward/AppConfig.ServiceProvider.cs",
+        "src/Starward/AppConfig.Setting.cs"
+      ]
+    },
+    {
+      "id": "hoyolab-auto-refresh-localization",
+      "priority": "critical",
+      "files": [
+        "src/Starward.Language/HoYoLabAutoRefreshText.cs",
+        "src/Starward.Language/Lang.resx",
+        "src/Starward.Language/Lang.ru-RU.resx",
+        "src/Starward.Language/Lang.de-DE.resx",
+        "src/Starward.Language/Lang.es-ES.resx",
+        "src/Starward.Language/Lang.it-IT.resx",
+        "src/Starward.Language/Lang.ja-JP.resx",
+        "src/Starward.Language/Lang.ko-KR.resx",
+        "src/Starward.Language/Lang.th-TH.resx",
+        "src/Starward.Language/Lang.vi-VN.resx",
+        "src/Starward.Language/Lang.zh-CN.resx",
+        "src/Starward.Language/Lang.zh-HK.resx",
+        "src/Starward.Language/Lang.zh-TW.resx"
+      ]
+    },
+    {
+      "id": "localized-time-units",
+      "priority": "high",
+      "files": [
+        "src/Starward.Language/LocalizedTimeFormatter.cs",
+        "src/Starward/Converters/TimeSpanToStringConverter.cs",
+        "src/Starward/Features/PlayTime/PlayTimeButton.xaml.cs",
+        "src/Starward/Features/GameRecord/Genshin/ImaginariumTheaterPage.xaml.cs",
+        "src/Starward/Features/GameRecord/Genshin/StygianOnslaughtPage.xaml",
+        "src/Starward/Features/GameRecord/Genshin/StygianOnslaughtPage.xaml.cs",
+        "src/Starward/Features/GameRecord/ZZZ/ShiyuDefensePage.xaml.cs"
+      ]
+    },
+    {
+      "id": "starrail-record-ui",
+      "priority": "high",
+      "files": [
+        "src/Starward.Core/GameRecord/StarRail/ApocalypticShadow/ApocalypticShadowBuff.cs",
+        "src/Starward.Core/GameRecord/StarRail/PureFiction/PureFictionBuff.cs",
+        "src/Starward/Features/GameRecord/StarRail/ApocalypticShadowPage.xaml",
+        "src/Starward/Features/GameRecord/StarRail/ChallengePeakPage.xaml",
+        "src/Starward/Features/GameRecord/StarRail/ForgottenHallPage.xaml",
+        "src/Starward/Features/GameRecord/StarRail/HoYoLabMechanismBuffLabels.cs",
+        "src/Starward/Features/GameRecord/StarRail/PureFictionPage.xaml",
+        "src/Starward/Features/GameRecord/StarRail/StarRailBuffButton.xaml",
+        "src/Starward/Features/GameRecord/StarRail/StarRailBuffButton.xaml.cs",
+        "src/Starward/Features/GameRecord/StarRail/StarRailRecordTextHelper.cs"
+      ]
+    },
+    {
+      "id": "genshin-self-query-url",
+      "priority": "high",
+      "files": [
+        "src/Starward.Core/SelfQuery/SelfQueryClient.cs"
+      ]
+    },
+    {
+      "id": "gacha-layout",
+      "priority": "medium",
+      "files": [
+        "src/Starward/Features/Gacha/GachaStatsCard.xaml",
+        "src/Starward/Features/Gacha/GachaTypeStats.cs"
+      ]
+    }
+  ],
+  "all_changed_paths_vs_0_18_0": [
+    ".github/scripts/use_autorefresh_text_facade.py",
+    ".github/workflows/build.yml",
+    ".github/workflows/diagnose-hoyolab-autorefresh.yml",
+    ".github/workflows/use-autorefresh-text-facade.yml",
+    "RELEASE_NOTES.md",
+    "RELEASE_NOTES_EN.md",
+    "RELEASE_NOTES_RU.md",
+    "src/Starward.Core/GameRecord/StarRail/ApocalypticShadow/ApocalypticShadowBuff.cs",
+    "src/Starward.Core/GameRecord/StarRail/PureFiction/PureFictionBuff.cs",
+    "src/Starward.Core/SelfQuery/SelfQueryClient.cs",
+    "src/Starward.Language/HoYoLabAutoRefreshText.cs",
+    "src/Starward.Language/Lang.de-DE.resx",
+    "src/Starward.Language/Lang.es-ES.resx",
+    "src/Starward.Language/Lang.it-IT.resx",
+    "src/Starward.Language/Lang.ja-JP.resx",
+    "src/Starward.Language/Lang.ko-KR.resx",
+    "src/Starward.Language/Lang.resx",
+    "src/Starward.Language/Lang.ru-RU.resx",
+    "src/Starward.Language/Lang.th-TH.resx",
+    "src/Starward.Language/Lang.vi-VN.resx",
+    "src/Starward.Language/Lang.zh-CN.resx",
+    "src/Starward.Language/Lang.zh-HK.resx",
+    "src/Starward.Language/Lang.zh-TW.resx",
+    "src/Starward.Language/LocalizedTimeFormatter.cs",
+    "src/Starward/App.xaml.cs",
+    "src/Starward/AppConfig.ServiceProvider.cs",
+    "src/Starward/AppConfig.Setting.cs",
+    "src/Starward/Converters/TimeSpanToStringConverter.cs",
+    "src/Starward/Features/Gacha/GachaStatsCard.xaml",
+    "src/Starward/Features/Gacha/GachaTypeStats.cs",
+    "src/Starward/Features/GameRecord/GameRecordAutoRefreshCompletedMessage.cs",
+    "src/Starward/Features/GameRecord/GameRecordAutoRefreshInterval.cs",
+    "src/Starward/Features/GameRecord/GameRecordAutoRefreshResult.cs",
+    "src/Starward/Features/GameRecord/GameRecordAutoRefreshService.cs",
+    "src/Starward/Features/GameRecord/GameRecordPage.xaml.cs",
+    "src/Starward/Features/GameRecord/GameRecordService.cs",
+    "src/Starward/Features/GameRecord/Genshin/ImaginariumTheaterPage.xaml.cs",
+    "src/Starward/Features/GameRecord/Genshin/StygianOnslaughtPage.xaml",
+    "src/Starward/Features/GameRecord/Genshin/StygianOnslaughtPage.xaml.cs",
+    "src/Starward/Features/GameRecord/StarRail/ApocalypticShadowPage.xaml",
+    "src/Starward/Features/GameRecord/StarRail/ChallengePeakPage.xaml",
+    "src/Starward/Features/GameRecord/StarRail/ForgottenHallPage.xaml",
+    "src/Starward/Features/GameRecord/StarRail/HoYoLabMechanismBuffLabels.cs",
+    "src/Starward/Features/GameRecord/StarRail/PureFictionPage.xaml",
+    "src/Starward/Features/GameRecord/StarRail/StarRailBuffButton.xaml",
+    "src/Starward/Features/GameRecord/StarRail/StarRailBuffButton.xaml.cs",
+    "src/Starward/Features/GameRecord/StarRail/StarRailRecordTextHelper.cs",
+    "src/Starward/Features/GameRecord/ZZZ/ShiyuDefensePage.xaml.cs",
+    "src/Starward/Features/PlayTime/PlayTimeButton.xaml.cs",
+    "src/Starward/Features/Setting/HoyolabToolboxAutoRefreshSetting.xaml",
+    "src/Starward/Features/Setting/HoyolabToolboxAutoRefreshSetting.xaml.cs",
+    "src/Starward/Features/Setting/SettingPage.xaml",
+    "src/Starward/Features/Setting/SettingPage.xaml.cs"
+  ],
+  "upgrade_policy": {
+    "add_only": "Copy custom-added files first, then adapt APIs/namespaces if needed.",
+    "small_hooks": "Manually merge into the current upstream file.",
+    "high_conflict": "Never overwrite the upstream file; port intent onto the new upstream implementation."
+  },
+  "known_current_upstream": {
+    "checked_at": "2026-08-08",
+    "version": "0.18.1",
+    "commit": "346e924d25ccaa0df9e53a71492814a96b418c49",
+    "overlap_conflicts": [
+      "src/Starward/Features/GameRecord/GameRecordService.cs",
+      "src/Starward/Features/GameRecord/ZZZ/ShiyuDefensePage.xaml.cs",
+      "src/Starward.Language/Lang.resx",
+      "src/Starward.Language/Lang.ru-RU.resx",
+      "src/Starward.Language/Lang.de-DE.resx",
+      "src/Starward.Language/Lang.es-ES.resx",
+      "src/Starward.Language/Lang.it-IT.resx",
+      "src/Starward.Language/Lang.ja-JP.resx",
+      "src/Starward.Language/Lang.ko-KR.resx",
+      "src/Starward.Language/Lang.th-TH.resx",
+      "src/Starward.Language/Lang.vi-VN.resx",
+      "src/Starward.Language/Lang.zh-CN.resx",
+      "src/Starward.Language/Lang.zh-HK.resx",
+      "src/Starward.Language/Lang.zh-TW.resx"
+    ]
+  }
+}
