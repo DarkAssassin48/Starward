@@ -1,0 +1,79 @@
+name: Apply auto-refresh account notifications
+
+on:
+  push:
+    branches:
+      - feature/autorefresh-account-notifications
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: "!contains(github.event.head_commit.message, '[notify-patch]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/autorefresh-account-notifications
+          fetch-depth: 0
+
+      - name: Patch auto-refresh notifications
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          service_path = Path('src/Starward/Features/GameRecord/GameRecordAutoRefreshService.cs')
+          text = service_path.read_text(encoding='utf-8')
+
+          old = '''using Starward.Core.GameRecord;\nusing System;'''
+          new = '''using Starward.Core.GameRecord;\nusing Starward.Helpers;\nusing Starward.Language;\nusing System;'''
+          assert old in text
+          text = text.replace(old, new, 1)
+
+          old = '''            int successfulOperations = 0;\n            int failedOperations = 0;\n\n            foreach (GameRecordRole role in roles)'''
+          new = '''            int successfulOperations = 0;\n            int failedOperations = 0;\n            var accountResults = new List<AutoRefreshAccountNotification>();\n\n            foreach (GameRecordRole role in roles)'''
+          assert old in text
+          text = text.replace(old, new, 1)
+
+          old = '''                else\n                {\n                    failedRoles++;\n                }\n            }\n\n            var result = new GameRecordAutoRefreshResult('''
+          new = '''                else\n                {\n                    failedRoles++;\n                }\n\n                accountResults.Add(new AutoRefreshAccountNotification(\n                    role.Uid,\n                    role.Nickname,\n                    roleSuccess,\n                    roleFailure));\n            }\n\n            var result = new GameRecordAutoRefreshResult('''
+          assert old in text
+          text = text.replace(old, new, 1)
+
+          old = '''            if (result.HasAnySuccess)\n            {\n                WeakReferenceMessenger.Default.Send(new GameRecordAutoRefreshCompletedMessage(game));\n            }\n\n            return result;'''
+          new = '''            if (result.HasAnySuccess)\n            {\n                WeakReferenceMessenger.Default.Send(new GameRecordAutoRefreshCompletedMessage(game));\n            }\n\n            if (!force && accountResults.Count > 0)\n            {\n                ShowAutomaticRefreshNotification(game, accountResults);\n            }\n\n            return result;'''
+          assert old in text
+          text = text.replace(old, new, 1)
+
+          marker = '''\n\n    private static bool IsRoleDue(\n'''
+          insert = '''\n\n    private static void ShowAutomaticRefreshNotification(\n        GameBiz game,\n        IReadOnlyList<AutoRefreshAccountNotification> accounts)\n    {\n        string title = $"{HoYoLabAutoRefreshText.AutomaticRefreshTitle} — {game.ToGameName()}";\n        string message = string.Join(\n            Environment.NewLine,\n            accounts.Select(FormatAccountNotification));\n\n        bool anySuccess = accounts.Any(x => x.SuccessfulOperations > 0);\n        bool anyFailure = accounts.Any(x => x.FailedOperations > 0 || x.SuccessfulOperations == 0);\n\n        if (!anySuccess)\n        {\n            InAppToast.MainWindow?.Error(title, message, duration: 10000);\n        }\n        else if (anyFailure)\n        {\n            InAppToast.MainWindow?.Warning(title, message, duration: 10000);\n        }\n        else\n        {\n            InAppToast.MainWindow?.Success(title, message, duration: 10000);\n        }\n    }\n\n\n    private static string FormatAccountNotification(AutoRefreshAccountNotification account)\n    {\n        string nickname = string.IsNullOrWhiteSpace(account.Nickname)\n            ? account.Uid.ToString(CultureInfo.InvariantCulture)\n            : account.Nickname;\n\n        if (account.SuccessfulOperations > 0 && account.FailedOperations == 0)\n        {\n            return $"✅ {nickname} (UID {account.Uid}) — " +\n                   string.Format(\n                       CultureInfo.CurrentCulture,\n                       HoYoLabAutoRefreshText.AccountUpdateSuccessFormat,\n                       account.SuccessfulOperations);\n        }\n\n        if (account.SuccessfulOperations > 0)\n        {\n            return $"⚠ {nickname} (UID {account.Uid}) — " +\n                   string.Format(\n                       CultureInfo.CurrentCulture,\n                       HoYoLabAutoRefreshText.AccountUpdatePartialFormat,\n                       account.SuccessfulOperations,\n                       account.FailedOperations);\n        }\n\n        return $"❌ {nickname} (UID {account.Uid}) — " +\n               string.Format(\n                   CultureInfo.CurrentCulture,\n                   HoYoLabAutoRefreshText.AccountUpdateFailedFormat,\n                   account.FailedOperations);\n    }\n\n\n    private sealed record AutoRefreshAccountNotification(\n        long Uid,\n        string Nickname,\n        int SuccessfulOperations,\n        int FailedOperations);\n'''
+          assert marker in text
+          text = text.replace(marker, insert + marker, 1)
+          service_path.write_text(text, encoding='utf-8')
+
+          lang_path = Path('src/Starward.Language/HoYoLabAutoRefreshText.cs')
+          text = lang_path.read_text(encoding='utf-8')
+
+          old = '''    public static string RefreshCompleted => Get("HoyolabAutoRefresh_RefreshCompleted", "Refresh completed");\n\n    public static string ResultFormat'''
+          new = '''    public static string RefreshCompleted => Get("HoyolabAutoRefresh_RefreshCompleted", "Refresh completed");\n\n    public static string AutomaticRefreshTitle => Get("HoyolabAutoRefresh_AutomaticRefreshTitle", "HoYoLAB automatic refresh");\n\n    public static string AccountUpdateSuccessFormat => Get("HoyolabAutoRefresh_AccountUpdateSuccessFormat", "successful: {0} operations");\n\n    public static string AccountUpdatePartialFormat => Get("HoyolabAutoRefresh_AccountUpdatePartialFormat", "partially successful: {0} successful, {1} errors");\n\n    public static string AccountUpdateFailedFormat => Get("HoyolabAutoRefresh_AccountUpdateFailedFormat", "failed: {0} errors");\n\n    public static string ResultFormat'''
+          assert old in text
+          text = text.replace(old, new, 1)
+
+          old = '''                "HoyolabAutoRefresh_RefreshCompleted" => "Обновление завершено",\n                "HoyolabAutoRefresh_ResultFormat"'''
+          new = '''                "HoyolabAutoRefresh_RefreshCompleted" => "Обновление завершено",\n                "HoyolabAutoRefresh_AutomaticRefreshTitle" => "Автообновление HoYoLAB",\n                "HoyolabAutoRefresh_AccountUpdateSuccessFormat" => "успешно: {0} операций",\n                "HoyolabAutoRefresh_AccountUpdatePartialFormat" => "частично: {0} успешно, ошибок: {1}",\n                "HoyolabAutoRefresh_AccountUpdateFailedFormat" => "ошибка: {0} ошибок",\n                "HoyolabAutoRefresh_ResultFormat"'''
+          assert old in text
+          text = text.replace(old, new, 1)
+          lang_path.write_text(text, encoding='utf-8')
+          PY
+
+      - name: Commit patch
+        shell: bash
+        run: |
+          git config user.name "DarkAssassin48 automation"
+          git config user.email "actions@users.noreply.github.com"
+          git add src/Starward/Features/GameRecord/GameRecordAutoRefreshService.cs src/Starward.Language/HoYoLabAutoRefreshText.cs
+          git rm .github/workflows/apply-autorefresh-account-notifications.yml
+          git commit -m "feat: show account details in automatic refresh notifications [notify-patch]"
+          git push origin HEAD:feature/autorefresh-account-notifications
