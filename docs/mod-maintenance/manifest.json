@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "mod_name": "Starward fix mod",
   "release_name": "Starward 0.18.1 fix mod",
   "upstream": {
@@ -20,9 +20,34 @@
       "release_arm64": "passed"
     }
   },
+  "post_port_enhancements": [
+    {
+      "name": "automatic-refresh-account-notifications",
+      "branch": "feature/autorefresh-account-notifications",
+      "commit": "9eaee96ef99cf15f19620c1fe6bce35beac8b7d4",
+      "main_merge_commit": "150aaf18725d4d6ae2a5a576662dca92af80ba77",
+      "ci_run_id": 31259855156,
+      "builds": {
+        "debug_x64": "passed",
+        "release_x64": "passed",
+        "debug_arm64": "passed",
+        "release_arm64": "passed"
+      },
+      "behavior": [
+        "show a separate in-app notification for each automatically refreshed game",
+        "show nickname and UID for every account that was actually processed",
+        "show successful operation count for fully successful accounts",
+        "show successful and failed operation counts for partially successful accounts",
+        "show failed operation count for failed accounts",
+        "use success, warning, or error notification severity based on the aggregate account results",
+        "do not duplicate the existing manual refresh notification"
+      ]
+    }
+  ],
   "canonical_branch": "maintenance/starward-mod",
   "features": [
     "hoyolab-auto-refresh",
+    "automatic-refresh-account-notifications",
     "role-safe-game-record-client-selection",
     "localized-time-formatting",
     "starrail-record-ui-and-buff-details",
