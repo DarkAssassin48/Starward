@@ -50,6 +50,14 @@ public static class HoYoLabAutoRefreshText
 
     public static string RefreshCompleted => Get("HoyolabAutoRefresh_RefreshCompleted", "Refresh completed");
 
+    public static string AutomaticRefreshTitle => Get("HoyolabAutoRefresh_AutomaticRefreshTitle", "HoYoLAB automatic refresh");
+
+    public static string AccountUpdateSuccessFormat => Get("HoyolabAutoRefresh_AccountUpdateSuccessFormat", "successful: {0} operations");
+
+    public static string AccountUpdatePartialFormat => Get("HoyolabAutoRefresh_AccountUpdatePartialFormat", "partially successful: {0} successful, {1} errors");
+
+    public static string AccountUpdateFailedFormat => Get("HoyolabAutoRefresh_AccountUpdateFailedFormat", "failed: {0} errors");
+
     public static string ResultFormat => Get("HoyolabAutoRefresh_ResultFormat", "Roles refreshed: {0}. Successful operations: {1}, errors: {2}");
 
     public static string NothingRefreshed => Get("HoyolabAutoRefresh_NothingRefreshed", "Nothing was refreshed");
@@ -97,6 +105,10 @@ public static class HoYoLabAutoRefreshText
                 "HoyolabAutoRefresh_SettingsSaved" => "Настройки автообновления сохранены",
                 "HoyolabAutoRefresh_AllGamesCompleted" => "Обновление всех игр завершено",
                 "HoyolabAutoRefresh_RefreshCompleted" => "Обновление завершено",
+                "HoyolabAutoRefresh_AutomaticRefreshTitle" => "Автообновление HoYoLAB",
+                "HoyolabAutoRefresh_AccountUpdateSuccessFormat" => "успешно: {0} операций",
+                "HoyolabAutoRefresh_AccountUpdatePartialFormat" => "частично: {0} успешно, ошибок: {1}",
+                "HoyolabAutoRefresh_AccountUpdateFailedFormat" => "ошибка: {0} ошибок",
                 "HoyolabAutoRefresh_ResultFormat" => "Аккаунтов обновлено: {0}. Успешных операций: {1}, ошибок: {2}",
                 "HoyolabAutoRefresh_NothingRefreshed" => "Нет данных для обновления",
                 "HoyolabAutoRefresh_CheckAccountCookie" => "Проверьте, что аккаунт добавлен и Cookie действителен",

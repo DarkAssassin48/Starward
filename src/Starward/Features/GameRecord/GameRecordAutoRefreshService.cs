@@ -2,6 +2,8 @@ using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
 using Starward.Core;
 using Starward.Core.GameRecord;
+using Starward.Helpers;
+using Starward.Language;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -315,6 +317,7 @@ internal sealed class GameRecordAutoRefreshService : IDisposable
             int failedRoles = 0;
             int successfulOperations = 0;
             int failedOperations = 0;
+            var accountResults = new List<AutoRefreshAccountNotification>();
 
             foreach (GameRecordRole role in roles)
             {
@@ -348,6 +351,12 @@ internal sealed class GameRecordAutoRefreshService : IDisposable
                 {
                     failedRoles++;
                 }
+
+                accountResults.Add(new AutoRefreshAccountNotification(
+                    role.Uid,
+                    role.Nickname,
+                    roleSuccess,
+                    roleFailure));
             }
 
             var result = new GameRecordAutoRefreshResult(
@@ -370,6 +379,11 @@ internal sealed class GameRecordAutoRefreshService : IDisposable
                 WeakReferenceMessenger.Default.Send(new GameRecordAutoRefreshCompletedMessage(game));
             }
 
+            if (!force && accountResults.Count > 0)
+            {
+                ShowAutomaticRefreshNotification(game, accountResults);
+            }
+
             return result;
         }
         finally
@@ -377,6 +391,73 @@ internal sealed class GameRecordAutoRefreshService : IDisposable
             _refreshSemaphore.Release();
         }
     }
+
+
+    private static void ShowAutomaticRefreshNotification(
+        GameBiz game,
+        IReadOnlyList<AutoRefreshAccountNotification> accounts)
+    {
+        string title = $"{HoYoLabAutoRefreshText.AutomaticRefreshTitle} — {game.ToGameName()}";
+        string message = string.Join(
+            Environment.NewLine,
+            accounts.Select(FormatAccountNotification));
+
+        bool anySuccess = accounts.Any(x => x.SuccessfulOperations > 0);
+        bool anyFailure = accounts.Any(x => x.FailedOperations > 0 || x.SuccessfulOperations == 0);
+
+        if (!anySuccess)
+        {
+            InAppToast.MainWindow?.Error(title, message, duration: 10000);
+        }
+        else if (anyFailure)
+        {
+            InAppToast.MainWindow?.Warning(title, message, duration: 10000);
+        }
+        else
+        {
+            InAppToast.MainWindow?.Success(title, message, duration: 10000);
+        }
+    }
+
+
+    private static string FormatAccountNotification(AutoRefreshAccountNotification account)
+    {
+        string nickname = string.IsNullOrWhiteSpace(account.Nickname)
+            ? account.Uid.ToString(CultureInfo.InvariantCulture)
+            : account.Nickname;
+
+        if (account.SuccessfulOperations > 0 && account.FailedOperations == 0)
+        {
+            return $"✅ {nickname} (UID {account.Uid}) — " +
+                   string.Format(
+                       CultureInfo.CurrentCulture,
+                       HoYoLabAutoRefreshText.AccountUpdateSuccessFormat,
+                       account.SuccessfulOperations);
+        }
+
+        if (account.SuccessfulOperations > 0)
+        {
+            return $"⚠ {nickname} (UID {account.Uid}) — " +
+                   string.Format(
+                       CultureInfo.CurrentCulture,
+                       HoYoLabAutoRefreshText.AccountUpdatePartialFormat,
+                       account.SuccessfulOperations,
+                       account.FailedOperations);
+        }
+
+        return $"❌ {nickname} (UID {account.Uid}) — " +
+               string.Format(
+                   CultureInfo.CurrentCulture,
+                   HoYoLabAutoRefreshText.AccountUpdateFailedFormat,
+                   account.FailedOperations);
+    }
+
+
+    private sealed record AutoRefreshAccountNotification(
+        long Uid,
+        string Nickname,
+        int SuccessfulOperations,
+        int FailedOperations);
 
 
     private static bool IsRoleDue(
