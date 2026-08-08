@@ -34,7 +34,7 @@
           Shadow="{ThemeResource ThemeShadow}"
           Translation="0,0,16">
         <Grid.RowDefinitions>
-            <RowDefinition Height="40" />
+            <RowDefinition Height="42" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="40" />
@@ -61,7 +61,6 @@
                        IsTextTrimmedChanged="TextBlock_GachaTypeText_IsTextTrimmedChanged"
                        MaxLines="2"
                        Text="{x:Bind WarpTypeStats.GachaTypeText}"
-                       TextTrimming="CharacterEllipsis"
                        TextWrapping="Wrap" />
             <TextBlock Grid.Column="1"
                        VerticalAlignment="Top"
