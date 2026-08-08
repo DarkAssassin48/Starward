@@ -16,6 +16,8 @@ public static class HoYoLabAutoRefreshText
 
     public static string SettingPageTitle => Get("SettingPage_HoyolabAutoRefresh", "HoYoLAB Toolbox Auto Refresh");
 
+    public static string SettingMenuTitle => Get("SettingPage_HoyolabAutoRefreshMenu", "HoYoLAB Auto Refresh");
+
     public static string Title => Get("HoyolabAutoRefresh_Title", "HoYoLAB Data Auto Refresh");
 
     public static string Description => Get("HoyolabAutoRefresh_Description", "Choose how often Starward refreshes saved HoYoLAB Toolbox data for each game. Monthly reports include every available month.");
@@ -88,6 +90,7 @@ public static class HoYoLabAutoRefreshText
             return key switch
             {
                 "SettingPage_HoyolabAutoRefresh" => "Автообновление HoYoLAB Toolbox",
+                "SettingPage_HoyolabAutoRefreshMenu" => "Автообновление HoYoLAB",
                 "HoyolabAutoRefresh_Title" => "Автообновление данных HoYoLAB",
                 "HoyolabAutoRefresh_Description" => "Выберите, как часто Starward будет обновлять сохранённые данные HoYoLAB Toolbox для каждой игры. Для ежемесячных отчётов загружаются все доступные месяцы.",
                 "HoyolabAutoRefresh_GenshinDescription" => "Витая Бездна, Театр Воображариум, Мрачный натиск и Заметки Путешественника.",
