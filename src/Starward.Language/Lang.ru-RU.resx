@@ -2773,4 +2773,91 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="DeadlyAssaultPage_AdversityMode" xml:space="preserve">
     <value>Режим невзгод</value>
   </data>
+  <data name="Common_HourShort" xml:space="preserve">
+    <value>ч</value>
+  </data>
+  <data name="Common_MinuteShort" xml:space="preserve">
+    <value>м</value>
+  </data>
+  <data name="Common_SecondShort" xml:space="preserve">
+    <value>с</value>
+  </data>
+  <data name="SettingPage_HoyolabAutoRefresh" xml:space="preserve">
+    <value>Автообновление HoYoLAB Toolbox</value>
+  </data>
+  <data name="HoyolabAutoRefresh_Title" xml:space="preserve">
+    <value>Автообновление данных HoYoLAB</value>
+  </data>
+  <data name="HoyolabAutoRefresh_Description" xml:space="preserve">
+    <value>Выберите, как часто Starward будет обновлять сохранённые данные HoYoLAB Toolbox для каждой игры. Для ежемесячных отчётов загружаются все доступные месяцы.</value>
+  </data>
+  <data name="HoyolabAutoRefresh_GenshinDescription" xml:space="preserve">
+    <value>Витая Бездна, Театр Воображариум, Мрачный натиск и Заметки Путешественника.</value>
+  </data>
+  <data name="HoyolabAutoRefresh_StarRailDescription" xml:space="preserve">
+    <value>Календарь Освоения, Виртуальная вселенная, Зал забвения, Чистый вымысел, Иллюзия конца и Арбитраж аномалий.</value>
+  </data>
+  <data name="HoyolabAutoRefresh_ZZZDescription" xml:space="preserve">
+    <value>Ежемесячный отчёт Интернота, Оборона Шиюй и Смертельный штурм.</value>
+  </data>
+  <data name="HoyolabAutoRefresh_RefreshNow" xml:space="preserve">
+    <value>Обновить сейчас</value>
+  </data>
+  <data name="HoyolabAutoRefresh_RefreshAll" xml:space="preserve">
+    <value>Обновить все игры сейчас</value>
+  </data>
+  <data name="HoyolabAutoRefresh_Save" xml:space="preserve">
+    <value>Сохранить</value>
+  </data>
+  <data name="HoyolabAutoRefresh_ScheduleNote" xml:space="preserve">
+    <value>Обновление по расписанию выполняется, пока Starward открыт. Если срок наступил при закрытом клиенте, пропущенное обновление выполнится после следующего запуска.</value>
+  </data>
+  <data name="HoyolabAutoRefresh_IntervalDisabled" xml:space="preserve">
+    <value>Отключено</value>
+  </data>
+  <data name="HoyolabAutoRefresh_IntervalOnStartup" xml:space="preserve">
+    <value>При каждом запуске клиента</value>
+  </data>
+  <data name="HoyolabAutoRefresh_IntervalDaily" xml:space="preserve">
+    <value>Раз в день</value>
+  </data>
+  <data name="HoyolabAutoRefresh_IntervalWeekly" xml:space="preserve">
+    <value>Раз в неделю</value>
+  </data>
+  <data name="HoyolabAutoRefresh_IntervalMonthly" xml:space="preserve">
+    <value>Раз в месяц</value>
+  </data>
+  <data name="HoyolabAutoRefresh_SettingsSaved" xml:space="preserve">
+    <value>Настройки автообновления сохранены</value>
+  </data>
+  <data name="HoyolabAutoRefresh_AllGamesCompleted" xml:space="preserve">
+    <value>Обновление всех игр завершено</value>
+  </data>
+  <data name="HoyolabAutoRefresh_RefreshCompleted" xml:space="preserve">
+    <value>Обновление завершено</value>
+  </data>
+  <data name="HoyolabAutoRefresh_ResultFormat" xml:space="preserve">
+    <value>Аккаунтов обновлено: {0}. Успешных операций: {1}, ошибок: {2}</value>
+  </data>
+  <data name="HoyolabAutoRefresh_NothingRefreshed" xml:space="preserve">
+    <value>Нет данных для обновления</value>
+  </data>
+  <data name="HoyolabAutoRefresh_CheckAccountCookie" xml:space="preserve">
+    <value>Проверьте, что аккаунт добавлен и Cookie действителен</value>
+  </data>
+  <data name="HoyolabAutoRefresh_NotPerformedYet" xml:space="preserve">
+    <value>Ещё не выполнялось</value>
+  </data>
+  <data name="HoyolabAutoRefresh_NotScheduled" xml:space="preserve">
+    <value>Не запланировано</value>
+  </data>
+  <data name="HoyolabAutoRefresh_NextApplicationStartup" xml:space="preserve">
+    <value>При следующем запуске клиента</value>
+  </data>
+  <data name="HoyolabAutoRefresh_LastSuccessfulRefresh" xml:space="preserve">
+    <value>Последнее успешное обновление</value>
+  </data>
+  <data name="HoyolabAutoRefresh_NextScheduledRefresh" xml:space="preserve">
+    <value>Следующее обновление</value>
+  </data>
 </root>

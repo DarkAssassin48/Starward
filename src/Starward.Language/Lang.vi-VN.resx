@@ -2741,4 +2741,13 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="DeadlyAssaultPage_AdversityMode" xml:space="preserve">
     <value>Chế độ nghịch cảnh</value>
   </data>
+  <data name="Common_HourShort" xml:space="preserve">
+    <value>g</value>
+  </data>
+  <data name="Common_MinuteShort" xml:space="preserve">
+    <value>p</value>
+  </data>
+  <data name="Common_SecondShort" xml:space="preserve">
+    <value>s</value>
+  </data>
 </root>

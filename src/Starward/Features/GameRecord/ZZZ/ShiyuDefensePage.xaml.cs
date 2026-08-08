@@ -133,6 +133,7 @@ public sealed partial class ShiyuDefensePage : PageBase
 
 
 
+
     private void ListView_ShiyuDefense_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         try
@@ -162,8 +163,9 @@ public sealed partial class ShiyuDefensePage : PageBase
 
     public static string PerformancesTime(int second)
     {
-        var ts = TimeSpan.FromSeconds(second);
-        return $"{ts.Minutes}m {ts.Seconds:D2}s";
+        return Starward.Language.LocalizedTimeFormatter.FormatMinutesSeconds(
+            TimeSpan.FromSeconds(second),
+            padSeconds: true);
     }
 
 
@@ -186,6 +188,7 @@ public sealed partial class ShiyuDefensePage : PageBase
     }
 
 
+
     public static string RankPercentText(int value)
     {
         int d = value / 100;
@@ -194,6 +197,7 @@ public sealed partial class ShiyuDefensePage : PageBase
     }
 
 
+<<<<<<< ours
     /// <summary>
     /// 排名百分比背景图片，value 为以 0.01% 为单位的排名
     /// </summary>
@@ -210,11 +214,14 @@ public sealed partial class ShiyuDefensePage : PageBase
         return new BitmapImage(new Uri(img));
     }
 
+=======
+>>>>>>> theirs
 
     public static Visibility ChallengeTimeVisibility(DateTime dateTime)
     {
         return dateTime == DateTime.MinValue ? Visibility.Collapsed : Visibility.Visible;
     }
+
 
 
     public string GetFourthLayerChallengeTime(ShiyuDefenseInfoV2 info)

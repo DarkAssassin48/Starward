@@ -1,0 +1,35 @@
+name: Apply Auto Refresh Text Facade
+
+on:
+  push:
+    branches:
+      - fix/localized-time-units-0.18.0
+    paths:
+      - '.github/scripts/use_autorefresh_text_facade.py'
+      - '.github/workflows/use-autorefresh-text-facade.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: fix/localized-time-units-0.18.0
+          fetch-depth: 2
+
+      - run: python .github/scripts/use_autorefresh_text_facade.py
+
+      - name: Commit changes
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/Starward/Features/Setting
+          git commit -m "Use language facade for HoYoLAB auto refresh text"
+          git push
