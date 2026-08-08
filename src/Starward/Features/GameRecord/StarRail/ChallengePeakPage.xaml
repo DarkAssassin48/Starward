@@ -344,7 +344,7 @@
 
 
                     <StackPanel Grid.Row="1"
-                                Margin="20,4,0,0"
+                                Margin="20,4,0,12"
                                 VerticalAlignment="Top"
                                 Spacing="8"
                                 Visibility="{x:Bind CurrentChallengePeakRecord.BossRecord, Converter={StaticResource ObjectToVisibilityConverter}}">
