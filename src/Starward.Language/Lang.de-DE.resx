@@ -2793,4 +2793,13 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
   <data name="PlayTimeStatsDialog_StatsTip" xml:space="preserve">
     <value>Die Statistiken basieren auf der Laufzeit des Spiels, nicht auf der tatsächlichen Spielzeit, und dienen nur als Orientierung.</value>
   </data>
+  <data name="Common_HourShort" xml:space="preserve">
+    <value>Std.</value>
+  </data>
+  <data name="Common_MinuteShort" xml:space="preserve">
+    <value>Min.</value>
+  </data>
+  <data name="Common_SecondShort" xml:space="preserve">
+    <value>Sek.</value>
+  </data>
 </root>

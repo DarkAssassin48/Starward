@@ -2815,4 +2815,13 @@ ChatGPT может допускать ошибки. Проверьте важн�
   <data name="PlayTimeStatsDialog_StatsTip" xml:space="preserve">
     <value>Статистика основана на времени работы игры, а не на фактическом времени в игре, и приведена только для справки.</value>
   </data>
+  <data name="Common_HourShort" xml:space="preserve">
+    <value>ч</value>
+  </data>
+  <data name="Common_MinuteShort" xml:space="preserve">
+    <value>мин</value>
+  </data>
+  <data name="Common_SecondShort" xml:space="preserve">
+    <value>с</value>
+  </data>
 </root>

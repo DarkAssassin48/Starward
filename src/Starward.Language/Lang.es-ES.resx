@@ -2792,4 +2792,13 @@ Puede enviar los datos exportados al siguiente repositorio:</value>
   <data name="PlayTimeStatsDialog_StatsTip" xml:space="preserve">
     <value>Las estadísticas se basan en el tiempo de ejecución del juego, no en el tiempo de juego real, y solo sirven como referencia.</value>
   </data>
+  <data name="Common_HourShort" xml:space="preserve">
+    <value>h</value>
+  </data>
+  <data name="Common_MinuteShort" xml:space="preserve">
+    <value>min</value>
+  </data>
+  <data name="Common_SecondShort" xml:space="preserve">
+    <value>s</value>
+  </data>
 </root>

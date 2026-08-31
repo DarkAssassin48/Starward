@@ -2794,4 +2794,13 @@
   <data name="PlayTimeStatsDialog_StatsTip" xml:space="preserve">
     <value>統計基於遊戲運行時長，而非實際遊玩時長，僅供參考。</value>
   </data>
+  <data name="Common_HourShort" xml:space="preserve">
+    <value>小時</value>
+  </data>
+  <data name="Common_MinuteShort" xml:space="preserve">
+    <value>分鐘</value>
+  </data>
+  <data name="Common_SecondShort" xml:space="preserve">
+    <value>秒</value>
+  </data>
 </root>

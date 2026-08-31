@@ -2789,4 +2789,13 @@
   <data name="PlayTimeStatsDialog_StatsTip" xml:space="preserve">
     <value>สถิติอ้างอิงจากเวลาที่เกมทำงาน ไม่ใช่เวลาเล่นจริง และใช้เพื่อการอ้างอิงเท่านั้น</value>
   </data>
+  <data name="Common_HourShort" xml:space="preserve">
+    <value>ชม.</value>
+  </data>
+  <data name="Common_MinuteShort" xml:space="preserve">
+    <value>นาที</value>
+  </data>
+  <data name="Common_SecondShort" xml:space="preserve">
+    <value>วินาที</value>
+  </data>
 </root>

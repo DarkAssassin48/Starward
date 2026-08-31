@@ -2,6 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Shapes;
+using Starward.Language;
 using System;
 using System.Collections.Generic;
 using Windows.Foundation;
@@ -82,7 +83,7 @@ public sealed class BarChart : Grid
         Brush secondary = ChartHelpers.GetResource<Brush>("TextFillColorSecondaryBrush");
         Style? caption = Application.Current.Resources.TryGetValue("CaptionTextBlockStyle", out var v) ? v as Style : null;
 
-        // 纵轴标签列宽适配最长文本（如 "226h"），避免换行
+        // 纵轴标签列宽适配最长的本地化文本，避免换行
         string[] labelTexts = new string[3];
         for (int i = 0; i < 3; i++)
         {
@@ -143,7 +144,7 @@ public sealed class BarChart : Grid
         var barsHost = new Grid { VerticalAlignment = VerticalAlignment.Bottom };
         var labelsHost = new Grid();
 
-        // 悬停高亮：贯穿整个绘图区（0h ~ 纵轴最大值）的背景矩形，位于柱体后面。
+        // 悬停高亮：贯穿整个绘图区（0 ~ 纵轴最大值）的背景矩形，位于柱体后面。
         var hoverHighlight = new Rectangle
         {
             Width = barWidth,
@@ -226,12 +227,11 @@ public sealed class BarChart : Grid
 
 
     /// <summary>
-    /// 把分钟数格式化为小时文本（如 0h、1.5h、3h）
+    /// 把分钟数格式化为本地化的小时文本
     /// </summary>
     private static string FormatHours(double minutes)
     {
-        double hours = minutes / 60.0;
-        return $"{hours:0.#}h";
+        return LocalizedTimeFormatter.FormatHours(minutes);
     }
 
 }

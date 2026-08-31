@@ -6,6 +6,7 @@ using Microsoft.UI.Xaml.Controls;
 using Starward.Core;
 using Starward.Core.HoYoPlay;
 using Starward.Features.Database;
+using Starward.Language;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -481,17 +482,7 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
 
     public static string TimeSpanToString(TimeSpan timeSpan)
     {
-        int totalMinutes = (int)Math.Round(timeSpan.TotalMinutes);
-        if (totalMinutes < 1)
-        {
-            return "0m";
-        }
-        if (totalMinutes < 60)
-        {
-            return $"{totalMinutes}m";
-        }
-        int hours = totalMinutes / 60, minutes = totalMinutes % 60;
-        return minutes == 0 ? $"{hours}h" : $"{hours}h {minutes}m";
+        return LocalizedTimeFormatter.FormatHoursMinutesCompact(timeSpan);
     }
 
 

@@ -2795,4 +2795,13 @@
   <data name="PlayTimeStatsDialog_StatsTip" xml:space="preserve">
     <value>통계는 실제 플레이 시간이 아닌 게임 실행 시간을 기준으로 하며, 참고용으로만 제공됩니다.</value>
   </data>
+  <data name="Common_HourShort" xml:space="preserve">
+    <value>시간</value>
+  </data>
+  <data name="Common_MinuteShort" xml:space="preserve">
+    <value>분</value>
+  </data>
+  <data name="Common_SecondShort" xml:space="preserve">
+    <value>초</value>
+  </data>
 </root>

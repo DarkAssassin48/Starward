@@ -618,6 +618,24 @@ namespace Starward.Language {
                 return ResourceManager.GetString("Common_Hide", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 h 的本地化字符串。
+        /// </summary>
+        public static string Common_HourShort {
+            get {
+                return ResourceManager.GetString("Common_HourShort", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 m 的本地化字符串。
+        /// </summary>
+        public static string Common_MinuteShort {
+            get {
+                return ResourceManager.GetString("Common_MinuteShort", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Network Error 的本地化字符串。
@@ -697,6 +715,15 @@ namespace Starward.Language {
         public static string Common_Save {
             get {
                 return ResourceManager.GetString("Common_Save", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   查找类似 s 的本地化字符串。
+        /// </summary>
+        public static string Common_SecondShort {
+            get {
+                return ResourceManager.GetString("Common_SecondShort", resourceCulture);
             }
         }
         

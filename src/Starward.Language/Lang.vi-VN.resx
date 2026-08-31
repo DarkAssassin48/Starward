@@ -2792,4 +2792,13 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="PlayTimeStatsDialog_StatsTip" xml:space="preserve">
     <value>Thống kê dựa trên thời gian chạy của trò chơi, không phải thời gian chơi thực tế, và chỉ mang tính chất tham khảo.</value>
   </data>
+  <data name="Common_HourShort" xml:space="preserve">
+    <value>giờ</value>
+  </data>
+  <data name="Common_MinuteShort" xml:space="preserve">
+    <value>phút</value>
+  </data>
+  <data name="Common_SecondShort" xml:space="preserve">
+    <value>giây</value>
+  </data>
 </root>
