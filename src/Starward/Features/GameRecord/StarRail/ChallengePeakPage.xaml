@@ -245,14 +245,14 @@
                 <!--  王棋通关战绩  -->
                 <TextBlock Margin="0,8,0,0" Text="{x:Bind lang:Lang.ChallengePeakPage_KingInCheckStageRecords}" />
 
-                <Grid Height="192"
+                <Grid MinHeight="192"
                       Background="{ThemeResource CustomOverlayAcrylicBrush}"
                       CornerRadius="8"
                       Shadow="{ThemeResource ThemeShadow}"
                       Translation="0,0,16">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
-                        <RowDefinition />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -262,7 +262,9 @@
                     <!--  BOSS 图  -->
                     <sc:CachedImage Grid.RowSpan="2"
                                     Grid.ColumnSpan="2"
+                                    Height="192"
                                     HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
                                     Source="{x:Bind CurrentChallengePeakRecord.BossInfo.Icon}"
                                     Stretch="Uniform" />
 
@@ -342,7 +344,7 @@
 
 
                     <StackPanel Grid.Row="1"
-                                Margin="20,4,0,0"
+                                Margin="20,4,0,12"
                                 VerticalAlignment="Top"
                                 Spacing="8"
                                 Visibility="{x:Bind CurrentChallengePeakRecord.BossRecord, Converter={StaticResource ObjectToVisibilityConverter}}">
@@ -364,7 +366,7 @@
 
                     <StackPanel Grid.Row="1"
                                 Grid.Column="1"
-                                Margin="12,0,12,0"
+                                Margin="12,0,12,12"
                                 Visibility="{x:Bind CurrentChallengePeakRecord.BossRecord, Converter={StaticResource ObjectToVisibilityConverter}}">
                         <!--  Buff  -->
                         <StackPanel Orientation="Horizontal">

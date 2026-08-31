@@ -24,6 +24,7 @@ using Starward.Core.GameRecord.ZZZ.ShiyuDefense;
 using Starward.Features.Database;
 using Starward.Features.GameRecord.StarRail;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -45,6 +46,8 @@ internal class GameRecordService
     private GameRecordClient _gameRecordClient;
 
     private readonly IMemoryCache _memoryCache;
+
+    private readonly ConcurrentDictionary<string, SemaphoreSlim> _hoyolabCookieRefreshLocks = new(StringComparer.Ordinal);
 
 
     public string Language { get => _hoyolabClient.Language; set => _hoyolabClient.Language = value; }
@@ -86,6 +89,134 @@ internal class GameRecordService
     private GameRecordClient GetClient(GameRecordRole role)
     {
         return new GameBiz(role.GameBiz).IsGlobalServer() ? _hoyolabClient : _hyperionClient;
+    }
+
+
+    private async Task<T> ExecuteWithHoyolabCookieRefreshAsync<T>(
+        GameRecordRole role,
+        Func<Task<T>> action,
+        CancellationToken cancellationToken = default)
+    {
+        string requestCookie = role.Cookie ?? "";
+        try
+        {
+            return await action();
+        }
+        catch (miHoYoApiException ex) when (ex.ReturnCode == -100 && new GameBiz(role.GameBiz).IsGlobalServer())
+        {
+            if (await TryRefreshHoyolabCookieTokenAsync(role, requestCookie, cancellationToken))
+            {
+                return await action();
+            }
+            throw;
+        }
+    }
+
+
+    private async Task<bool> TryRefreshHoyolabCookieTokenAsync(
+        GameRecordRole role,
+        string requestCookie,
+        CancellationToken cancellationToken)
+    {
+        var originalValues = GameRecordCookie.Parse(requestCookie);
+        string accountKey = GameRecordCookie.GetAccountKey(originalValues);
+        if (string.IsNullOrWhiteSpace(accountKey)
+            || !GameRecordCookie.TryGetRefreshCredentials(originalValues, out _, out _))
+        {
+            _logger.LogInformation("HoYoLAB cookie cannot be refreshed because no SToken is saved ({gameBiz}, {uid}).", role.GameBiz, role.Uid);
+            return false;
+        }
+
+        SemaphoreSlim gate = _hoyolabCookieRefreshLocks.GetOrAdd(accountKey, static _ => new SemaphoreSlim(1, 1));
+        await gate.WaitAsync(cancellationToken);
+        try
+        {
+            string latestCookie = GetStoredGameRecordRoleCookie(role) ?? requestCookie;
+            var latestValues = GameRecordCookie.Parse(latestCookie);
+            string? originalToken = GameRecordCookie.GetCookieTokenV2(originalValues);
+            string? latestToken = GameRecordCookie.GetCookieTokenV2(latestValues);
+            if (!string.IsNullOrWhiteSpace(latestToken)
+                && !string.Equals(originalToken, latestToken, StringComparison.Ordinal))
+            {
+                role.Cookie = latestCookie;
+                return true;
+            }
+
+            if (!GameRecordCookie.TryGetRefreshCredentials(latestValues, out string stokenV2, out string mid))
+            {
+                return false;
+            }
+
+            HoyolabTokenRefreshResult result = await _hoyolabClient.RefreshTokenV2Async(stokenV2, mid, cancellationToken);
+            if (string.IsNullOrWhiteSpace(result.GetToken(4)))
+            {
+                throw new miHoYoApiException(-1, "HoYoLAB did not return cookie_token_v2.");
+            }
+
+            UpdateStoredHoyolabCookies(accountKey, result);
+            role.Cookie = GameRecordCookie.MergeRefreshedTokens(latestCookie, result);
+            _logger.LogInformation("Refreshed HoYoLAB cookie token ({gameBiz}, {uid}).", role.GameBiz, role.Uid);
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to refresh HoYoLAB cookie token ({gameBiz}, {uid}).", role.GameBiz, role.Uid);
+            return false;
+        }
+        finally
+        {
+            gate.Release();
+        }
+    }
+
+
+    private static string? GetStoredGameRecordRoleCookie(GameRecordRole role)
+    {
+        using var dapper = DatabaseService.CreateConnection();
+        return dapper.QueryFirstOrDefault<string>(
+            "SELECT Cookie FROM GameRecordRole WHERE Uid = @Uid AND GameBiz = @GameBiz LIMIT 1;",
+            new { role.Uid, role.GameBiz });
+    }
+
+
+    private static void UpdateStoredHoyolabCookies(string accountKey, HoyolabTokenRefreshResult result)
+    {
+        using var dapper = DatabaseService.CreateConnection();
+        using var transaction = dapper.BeginTransaction();
+
+        var roles = dapper.Query<GameRecordRole>(
+            "SELECT Uid, GameBiz, Cookie FROM GameRecordRole WHERE GameBiz LIKE '%_global' AND Cookie IS NOT NULL;",
+            transaction: transaction);
+        foreach (GameRecordRole item in roles)
+        {
+            if (GameRecordCookie.GetAccountKey(GameRecordCookie.Parse(item.Cookie)) == accountKey)
+            {
+                string cookie = GameRecordCookie.MergeRefreshedTokens(item.Cookie ?? "", result);
+                dapper.Execute(
+                    "UPDATE GameRecordRole SET Cookie = @cookie WHERE Uid = @Uid AND GameBiz = @GameBiz;",
+                    new { cookie, item.Uid, item.GameBiz }, transaction);
+            }
+        }
+
+        var users = dapper.Query<GameRecordUser>(
+            "SELECT Uid, IsHoyolab, Cookie FROM GameRecordUser WHERE IsHoyolab = 1 AND Cookie IS NOT NULL;",
+            transaction: transaction);
+        foreach (GameRecordUser item in users)
+        {
+            if (GameRecordCookie.GetAccountKey(GameRecordCookie.Parse(item.Cookie)) == accountKey)
+            {
+                string cookie = GameRecordCookie.MergeRefreshedTokens(item.Cookie ?? "", result);
+                dapper.Execute(
+                    "UPDATE GameRecordUser SET Cookie = @cookie WHERE Uid = @Uid AND IsHoyolab = 1;",
+                    new { cookie, item.Uid }, transaction);
+            }
+        }
+
+        transaction.Commit();
     }
 
 
@@ -875,7 +1006,9 @@ internal class GameRecordService
 
     public async Task<TrailblazeCalendarSummary> GetTrailblazeCalendarSummaryAsync(GameRecordRole role, string month = "")
     {
-        var summary = await GetClient(role).GetTrailblazeCalendarSummaryAsync(role, month);
+        var summary = await ExecuteWithHoyolabCookieRefreshAsync(
+            role,
+            () => GetClient(role).GetTrailblazeCalendarSummaryAsync(role, month));
         if (summary.MonthData is null)
         {
             return summary;
@@ -904,7 +1037,9 @@ internal class GameRecordService
 
     public async Task<int> GetTrailblazeCalendarDetailAsync(GameRecordRole role, string month, int type)
     {
-        int total = (await GetClient(role).GetTrailblazeCalendarDetailByPageAsync(role, month, type, 1, 1)).Total;
+        int total = (await ExecuteWithHoyolabCookieRefreshAsync(
+            role,
+            () => GetClient(role).GetTrailblazeCalendarDetailByPageAsync(role, month, type, 1, 1))).Total;
         if (total == 0)
         {
             return 0;
@@ -915,7 +1050,9 @@ internal class GameRecordService
         {
             return 0;
         }
-        var detail = await GetClient(role).GetTrailblazeCalendarDetailAsync(role, month, type);
+        var detail = await ExecuteWithHoyolabCookieRefreshAsync(
+            role,
+            () => GetClient(role).GetTrailblazeCalendarDetailAsync(role, month, type));
         var list = detail.List;
         using var t = dapper.BeginTransaction();
         dapper.Execute($"DELETE FROM StarRailTrailblazeCalendarDetailItem WHERE Uid = @Uid AND Month = @Month AND Type = @Type;", list.FirstOrDefault(), t);

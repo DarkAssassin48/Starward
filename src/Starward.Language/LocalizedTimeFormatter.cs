@@ -4,9 +4,7 @@ namespace Starward.Language;
 
 
 /// <summary>
-/// Formats user-visible durations with localized one-character time-unit labels.
-/// Starward resources are preferred when present; fallbacks keep this feature
-/// independent from upstream Crowdin resource-file changes.
+/// Formats user-visible durations with time-unit labels from the active language resources.
 /// </summary>
 public static class LocalizedTimeFormatter
 {
@@ -14,7 +12,14 @@ public static class LocalizedTimeFormatter
     private static CultureInfo CurrentCulture => Lang.Culture ?? CultureInfo.CurrentUICulture;
 
 
-    public static string SecondUnit => $" {GetUnit("Common_SecondShort", "s")}";
+    private static string HourUnit => Lang.Common_HourShort;
+
+    private static string MinuteUnit => Lang.Common_MinuteShort;
+
+    private static string SecondUnitText => Lang.Common_SecondShort;
+
+
+    public static string SecondUnit => $" {SecondUnitText}";
 
 
     public static string FormatHoursMinutes(TimeSpan value)
@@ -22,8 +27,31 @@ public static class LocalizedTimeFormatter
         value = Normalize(value);
         long hours = (long)Math.Floor(value.TotalHours);
         return Join(
-            hours.ToString(CurrentCulture), GetUnit("Common_HourShort", "h"),
-            value.Minutes.ToString(CurrentCulture), GetUnit("Common_MinuteShort", "m"));
+            hours.ToString(CurrentCulture), HourUnit,
+            value.Minutes.ToString(CurrentCulture), MinuteUnit);
+    }
+
+
+    public static string FormatHoursMinutesCompact(TimeSpan value)
+    {
+        value = Normalize(value);
+        long totalMinutes = (long)Math.Round(value.TotalMinutes);
+        if (totalMinutes < 1)
+        {
+            return Join("0", MinuteUnit);
+        }
+        if (totalMinutes < 60)
+        {
+            return Join(totalMinutes.ToString(CurrentCulture), MinuteUnit);
+        }
+
+        long hours = totalMinutes / 60;
+        long minutes = totalMinutes % 60;
+        return minutes == 0
+            ? Join(hours.ToString(CurrentCulture), HourUnit)
+            : Join(
+                hours.ToString(CurrentCulture), HourUnit,
+                minutes.ToString(CurrentCulture), MinuteUnit);
     }
 
 
@@ -35,8 +63,8 @@ public static class LocalizedTimeFormatter
             ? value.Seconds.ToString("D2", CurrentCulture)
             : value.Seconds.ToString(CurrentCulture);
         return Join(
-            minutes.ToString(CurrentCulture), GetUnit("Common_MinuteShort", "m"),
-            seconds, GetUnit("Common_SecondShort", "s"));
+            minutes.ToString(CurrentCulture), MinuteUnit,
+            seconds, SecondUnitText);
     }
 
 
@@ -51,38 +79,26 @@ public static class LocalizedTimeFormatter
             ? value.Seconds.ToString("D2", CurrentCulture)
             : value.Seconds.ToString(CurrentCulture);
         return Join(
-            hours.ToString(CurrentCulture), GetUnit("Common_HourShort", "h"),
-            minutes, GetUnit("Common_MinuteShort", "m"),
-            seconds, GetUnit("Common_SecondShort", "s"));
+            hours.ToString(CurrentCulture), HourUnit,
+            minutes, MinuteUnit,
+            seconds, SecondUnitText);
+    }
+
+
+    public static string FormatHours(double minutes)
+    {
+        if (double.IsNaN(minutes) || double.IsInfinity(minutes) || minutes < 0)
+        {
+            minutes = 0;
+        }
+
+        return Join((minutes / 60d).ToString("0.#", CurrentCulture), HourUnit);
     }
 
 
     private static TimeSpan Normalize(TimeSpan value)
     {
         return value < TimeSpan.Zero ? TimeSpan.Zero : value;
-    }
-
-
-    private static string GetUnit(string name, string fallback)
-    {
-        string? resource = Lang.ResourceManager.GetString(name, CurrentCulture);
-        if (!string.IsNullOrWhiteSpace(resource))
-        {
-            return resource;
-        }
-
-        if (string.Equals(CurrentCulture.TwoLetterISOLanguageName, "ru", StringComparison.OrdinalIgnoreCase))
-        {
-            return name switch
-            {
-                "Common_HourShort" => "ч",
-                "Common_MinuteShort" => "м",
-                "Common_SecondShort" => "с",
-                _ => fallback,
-            };
-        }
-
-        return fallback;
     }
 
 
