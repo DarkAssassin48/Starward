@@ -475,7 +475,9 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
             items.Add(new HeatmapDayItem
             {
                 Date = DateOnly.FromDateTime(d),
-                Value = isFuture ? -1 : Math.Max(0, ms / 60_000.0),
+                // 未来日期仍显示为普通的空白灰色方格，但不设置 Tooltip，
+                // CalendarHeatmap 因此不会为其绑定悬浮卡。
+                Value = isFuture ? 0 : Math.Max(0, ms / 60_000.0),
                 Tooltip = isFuture ? null : $"{d:yyyy-MM-dd}\n{TimeSpanToString(TimeSpan.FromMilliseconds(ms))}",
             });
         }
