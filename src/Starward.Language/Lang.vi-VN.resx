@@ -2801,4 +2801,7 @@ Bạn có chấp nhận rủi ro và tiếp tục?</value>
   <data name="Common_SecondShort" xml:space="preserve">
     <value>giây</value>
   </data>
+  <data name="PlayTimeStatsDialog_Year" xml:space="preserve">
+    <value>Năm</value>
+  </data>
 </root>

@@ -5549,6 +5549,15 @@ namespace Starward.Language {
                 return ResourceManager.GetString("PlayTimeStatsDialog_TotalPlaytime", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   查找类似 Year 的本地化字符串。
+        /// </summary>
+        public static string PlayTimeStatsDialog_Year {
+            get {
+                return ResourceManager.GetString("PlayTimeStatsDialog_Year", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Pre-Install Finished 的本地化字符串。

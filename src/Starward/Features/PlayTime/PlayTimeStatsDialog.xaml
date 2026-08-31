@@ -22,7 +22,7 @@
     </ContentDialog.Resources>
 
 
-    <Grid Width="1008" Height="564">
+    <Grid Width="1008" Height="596">
 
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -173,7 +173,33 @@
                             PlotHeight="132" />
 
 
-            <local:CalendarHeatmap x:Name="PlayTimeHeatmap" Margin="0,24,0,0" />
+            <Grid x:Name="Grid_Heatmap" Margin="0,24,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <local:CalendarHeatmap x:Name="PlayTimeHeatmap" />
+
+                <StackPanel Grid.Row="1"
+                            Margin="0,4,0,0"
+                            HorizontalAlignment="Right"
+                            Orientation="Horizontal"
+                            Spacing="8">
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="12"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               IsTextScaleFactorEnabled="False"
+                               Text="{x:Bind lang:Lang.PlayTimeStatsDialog_Year}" />
+                    <ComboBox x:Name="ComboBox_HeatmapYear"
+                              Width="96"
+                              Height="28"
+                              AutomationProperties.Name="{x:Bind lang:Lang.PlayTimeStatsDialog_Year}"
+                              ItemsSource="{x:Bind HeatmapYears}"
+                              SelectedItem="{x:Bind SelectedHeatmapYear, Mode=TwoWay}"
+                              SelectionChanged="ComboBox_HeatmapYear_SelectionChanged" />
+                </StackPanel>
+            </Grid>
 
 
 

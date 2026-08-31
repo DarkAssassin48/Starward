@@ -2804,4 +2804,7 @@ You are welcome to submit the exported data to the following repository:</value>
   <data name="Common_SecondShort" xml:space="preserve">
     <value>s</value>
   </data>
+  <data name="PlayTimeStatsDialog_Year" xml:space="preserve">
+    <value>Year</value>
+  </data>
 </root>

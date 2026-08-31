@@ -145,6 +145,18 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
     public IReadOnlyList<StatCardItem> StatCards { get; set => SetProperty(ref field, value); }
 
 
+    /// <summary>
+    /// 可供日历热力图选择的年份（降序）
+    /// </summary>
+    public IReadOnlyList<int> HeatmapYears { get; set => SetProperty(ref field, value); } = [];
+
+
+    /// <summary>
+    /// 日历热力图当前显示的年份
+    /// </summary>
+    public int SelectedHeatmapYear { get; set => SetProperty(ref field, value); }
+
+
 
     [RelayCommand]
     private void Close()
@@ -213,6 +225,15 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
             }
 
             _playTimePerDay = timePerDay;
+
+            int currentYear = DateTime.Today.Year;
+            HeatmapYears = timePerDay.Keys
+                .Select(x => x.Year)
+                .Append(currentYear)
+                .Distinct()
+                .OrderByDescending(x => x)
+                .ToArray();
+            SelectedHeatmapYear = currentYear;
 
             TotalTimeText = TimeSpanToString(TimeSpan.FromMilliseconds(totalMs));
             StartUpCountText = totalMs > 0 ? string.Format(Lang.PlayTimeStatsDialog_Started0Times, sessions.Count) : "";
@@ -340,7 +361,7 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
         {
             UniformGridLayout_StatCards.MinItemHeight = 98;
             Grid_BarChartSwitcher.Margin = new Thickness(4, 16, 4, 0);
-            PlayTimeHeatmap.Margin = new Thickness(0, 20, 0, 0);
+            Grid_Heatmap.Margin = new Thickness(0, 20, 0, 0);
         }
 
     }
@@ -440,28 +461,44 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
 
     private void BuildHeatmap()
     {
-        // 最近一年，52个自然周
         var today = DateTime.Today;
-        // 先回溯到本周周一（周一 = 0），再往前 51 周，保证首日一定是周一。
-        // 注意不能用 ((int)DayOfWeek - 1) % 6：C# 取余保留被除数符号，周日会得到 -1 而反向偏移一天。
-        int sinceMonday = ((int)today.DayOfWeek + 6) % 7;
-        var firstDay = today.AddDays(-sinceMonday - 51 * 7);
-        int totalDays = (today - firstDay).Days + 1;
+        int year = SelectedHeatmapYear > 0 ? SelectedHeatmapYear : today.Year;
+        var firstDay = new DateTime(year, 1, 1);
+        var lastDay = new DateTime(year, 12, 31);
+        int totalDays = (lastDay - firstDay).Days + 1;
         var items = new List<HeatmapDayItem>(totalDays);
-        long total = 0;
         for (int i = 0; i < totalDays; i++)
         {
             var d = firstDay.AddDays(i);
+            bool isFuture = d > today;
             long ms = _playTimePerDay.GetValueOrDefault(DateOnly.FromDateTime(d));
-            total += ms;
             items.Add(new HeatmapDayItem
             {
                 Date = DateOnly.FromDateTime(d),
-                Value = Math.Max(0, ms / 60_000.0),
-                Tooltip = $"{d:yyyy-MM-dd}\n{TimeSpanToString(TimeSpan.FromMilliseconds(ms))}",
+                Value = isFuture ? -1 : Math.Max(0, ms / 60_000.0),
+                Tooltip = isFuture ? null : $"{d:yyyy-MM-dd}\n{TimeSpanToString(TimeSpan.FromMilliseconds(ms))}",
             });
         }
         PlayTimeHeatmap.Days = items;
+    }
+
+
+    private void ComboBox_HeatmapYear_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (!_playTimeLoaded || ComboBox_HeatmapYear.SelectedItem is not int year)
+        {
+            return;
+        }
+
+        SelectedHeatmapYear = year;
+        try
+        {
+            BuildHeatmap();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Rebuild heatmap: GameBiz {biz}, year {year}", CurrentGameBiz, year);
+        }
     }
 
 
