@@ -1,7 +1,7 @@
 using Starward.RegressionTests;
 
 int failed = 0;
-var tests = CalendarTests.Cases().Concat(ScheduleTests.Cases()).ToArray();
+var tests = CalendarTests.Cases().Concat(ScheduleTests.Cases()).Concat(HoYoPlayTests.Cases()).ToArray();
 foreach (var (name, run) in tests)
 {
     try

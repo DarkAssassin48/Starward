@@ -90,12 +90,12 @@ internal partial class GamePackageService
         }
         else
         {
-            GamePackage package = await _hoYoPlayService.GetGamePackageAsync(gameId);
-            if (package.PreDownload.Major is null)
+            GamePackage? package = await _hoYoPlayService.GetGamePackageAsync(gameId);
+            if (package?.PreDownload?.Major is not GamePackageResource predownload)
             {
                 return false;
             }
-            predownloadVersion = package.PreDownload.Major.Version;
+            predownloadVersion = predownload.Version;
         }
 
         var config = Path.Join(installPath, "config.ini");

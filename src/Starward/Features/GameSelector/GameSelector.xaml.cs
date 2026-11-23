@@ -641,10 +641,20 @@ public sealed partial class GameSelector : UserControl
                 {
                     icon.UpdateInfo();
                 }
-                else
+                else if (gameInfos.FirstOrDefault(x => x.GameBiz == icon.GameBiz) is GameInfo info)
                 {
-                    GameInfo info = await _hoyoplayService.GetGameInfoAsync(icon.GameId);
                     icon.UpdateInfo(info);
+                }
+            }
+            // The selected catalog entry can also be an unpinned game.
+            if (CurrentGameBizIcon is GameBizIcon selected && !selected.GameBiz.IsKnown()
+                && gameInfos.FirstOrDefault(x => x.GameBiz == selected.GameBiz) is GameInfo selectedInfo)
+            {
+                selected.UpdateInfo(selectedInfo);
+                if (CurrentGameId != selected.GameId)
+                {
+                    CurrentGameId = selected.GameId;
+                    CurrentGameChanged?.Invoke(this, (selected.GameId, false));
                 }
             }
             await InitializeInstalledGamesCommand.ExecuteAsync(null);
@@ -725,6 +735,8 @@ public sealed partial class GameSelector : UserControl
                 else
                 {
                     CurrentGameBizIcon = server;
+                    CurrentGameBiz = server.GameBiz;
+                    CurrentGameId = server.GameId;
                     server.IsSelected = true;
                 }
 

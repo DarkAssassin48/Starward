@@ -1407,6 +1407,9 @@
   <data name="GameResourcePage_FullPackages" xml:space="preserve">
     <value>Полный Пакет</value>
   </data>
+  <data name="GameResourcePage_NoArchivePackages" xml:space="preserve">
+    <value>Для этой версии нет архивных пакетов.</value>
+  </data>
   <data name="GameResourcePage_DiffPackages" xml:space="preserve">
     <value>Различные Пакеты</value>
   </data>

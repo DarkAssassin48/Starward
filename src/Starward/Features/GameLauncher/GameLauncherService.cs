@@ -191,9 +191,9 @@ internal partial class GameLauncherService
         }
         else
         {
-            GamePackage package = await _hoYoPlayService.GetGamePackageAsync(gameId);
-            _ = Version.TryParse(package.Main.Major?.Version, out Version? latestVersion);
-            _ = Version.TryParse(package.PreDownload.Major?.Version, out Version? predownloadVersion);
+            GamePackage? package = await _hoYoPlayService.GetGamePackageAsync(gameId);
+            _ = Version.TryParse(package?.Main?.Major?.Version, out Version? latestVersion);
+            _ = Version.TryParse(package?.PreDownload?.Major?.Version, out Version? predownloadVersion);
             return (latestVersion, predownloadVersion);
         }
     }

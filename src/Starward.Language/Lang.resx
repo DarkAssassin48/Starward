@@ -1407,6 +1407,9 @@ Do you accept the risk and continue to use it?</value>
   <data name="GameResourcePage_FullPackages" xml:space="preserve">
     <value>Full Packages</value>
   </data>
+  <data name="GameResourcePage_NoArchivePackages" xml:space="preserve">
+    <value>No archive packages are available for this version.</value>
+  </data>
   <data name="GameResourcePage_DiffPackages" xml:space="preserve">
     <value>Diff Packages</value>
   </data>

@@ -218,15 +218,31 @@ internal class GameInstallService
                 AudioLanguage: {audioLanguage}
                 HardLinkPath: {hardLinkPath}
                 """, context.Operation, context.GameId.Id, context.GameId.GameBiz, context.InstallPath, context.AudioLanguage, context.HardLinkPath);
+            if (context.GameId.Id == LauncherId.NexusAnimaStandaloneGameId
+                && string.Equals(Path.GetFileName(Path.TrimEndingDirectorySeparator(context.InstallPath)),
+                    "NexusAnima_Data", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("Select the game folder containing NexusAnima.exe.");
+            }
+
+            // Legacy repair may cache pkg_version files while preparing the file list.
             Directory.CreateDirectory(context.InstallPath);
             GamePackageService gamePackageService = _serviceProvider.GetRequiredService<GamePackageService>();
-            if (context.AudioLanguage is not AudioLanguage.None)
-            {
-                await gamePackageService.SetAudioLanguageAsync(context.GameId, context.InstallPath, context.AudioLanguage, cancellationToken);
-            }
             if (context.TaskFiles is null)
             {
                 await gamePackageService.PrepareGamePackageAsync(context, cancellationToken);
+            }
+
+            if (context.Operation is GameInstallOperation.Install or GameInstallOperation.Repair
+                && (context.TaskFiles is not { Count: > 0 } || string.IsNullOrWhiteSpace(context.LatestGameVersion)))
+            {
+                context.TaskFiles = null;
+                throw new InvalidOperationException($"No game files are available from the official launcher for {context.GameId.GameBiz}.");
+            }
+
+            if (context.AudioLanguage is not AudioLanguage.None)
+            {
+                await gamePackageService.SetAudioLanguageAsync(context.GameId, context.InstallPath, context.AudioLanguage, cancellationToken);
             }
 
             foreach (string item in Directory.GetFiles(context.InstallPath, "*", SearchOption.AllDirectories))

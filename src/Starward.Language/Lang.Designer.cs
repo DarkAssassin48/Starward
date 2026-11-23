@@ -3114,6 +3114,15 @@ namespace Starward.Language {
                 return ResourceManager.GetString("GameResourcePage_LatestVersion", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to No archive packages are available for this version.
+        /// </summary>
+        public static string GameResourcePage_NoArchivePackages {
+            get {
+                return ResourceManager.GetString("GameResourcePage_NoArchivePackages", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Actual Size of Installed Games 的本地化字符串。

@@ -84,6 +84,10 @@ public partial class GameBizIcon : ObservableObject, IEquatable<GameBizIcon>
 
     public void UpdateInfo(GameInfo gameInfo)
     {
+        if (GameId != gameInfo)
+        {
+            GameId = gameInfo;
+        }
         GameIcon = gameInfo.Display.Icon.Url;
         ServerIcon = GameBizToServerIcon(gameInfo.GameBiz);
         GameName = gameInfo.Display.Name;
