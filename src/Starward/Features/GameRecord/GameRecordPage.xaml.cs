@@ -84,12 +84,15 @@ public sealed partial class GameRecordPage : PageBase
         });
         WeakReferenceMessenger.Default.Register<GameRecordAutoRefreshCompletedMessage>(this, (r, m) =>
         {
-            if (CurrentGameBiz.Game == m.Game.Game &&
-                frame.SourcePageType is Type pageType &&
-                pageType != typeof(LoginPage))
+            DispatcherQueue.TryEnqueue(() =>
             {
-                DispatcherQueue.TryEnqueue(() => NavigateTo(pageType, force_navigate: true));
-            }
+                if (IsLoaded && CurrentGameBiz.Game == m.Game.Game &&
+                    frame.SourcePageType is Type pageType &&
+                    pageType != typeof(LoginPage))
+                {
+                    NavigateTo(pageType, force_navigate: true);
+                }
+            });
         });
         await Task.Delay(16);
         NavigateTo(typeof(BlankPage));

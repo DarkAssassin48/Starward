@@ -50,6 +50,9 @@ internal class GameRecordService
     private readonly ConcurrentDictionary<string, SemaphoreSlim> _hoyolabCookieRefreshLocks = new(StringComparer.Ordinal);
 
 
+    public event EventHandler? GameRolesChanged;
+
+
     public string Language { get => _hoyolabClient.Language; set => _hoyolabClient.Language = value; }
 
 
@@ -303,6 +306,7 @@ internal class GameRecordService
             VALUES (@Uid, @GameBiz, @Nickname, @Level, @Region, @RegionName, @Cookie, @HeadIcon);
             """, list, t);
         t.Commit();
+        GameRolesChanged?.Invoke(this, EventArgs.Empty);
         return list;
     }
 
@@ -444,6 +448,7 @@ internal class GameRecordService
             deletedUser = true;
         }
         t.Commit();
+        GameRolesChanged?.Invoke(this, EventArgs.Empty);
         return deletedUser;
     }
 

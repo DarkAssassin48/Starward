@@ -48,6 +48,7 @@ internal sealed class GameRecordAutoRefreshService : IDisposable
     {
         _logger = logger;
         _gameRecordService = gameRecordService;
+        _gameRecordService.GameRolesChanged += OnGameRolesChanged;
     }
 
 
@@ -106,20 +107,27 @@ internal sealed class GameRecordAutoRefreshService : IDisposable
 
     /// <summary>
     /// Wakes the scheduler after a user changes an interval or a manual refresh
-    /// changes the next due time. The service does not use periodic polling.
+    /// or account change affects the next due time. The service does not use periodic polling.
     /// </summary>
     public void NotifyScheduleChanged()
     {
         try
         {
-            if (_scheduleChangedSemaphore.CurrentCount == 0)
-            {
-                _scheduleChangedSemaphore.Release();
-            }
+            _scheduleChangedSemaphore.Release();
+        }
+        catch (SemaphoreFullException)
+        {
+            // Several concurrent changes only need one pending wake-up.
         }
         catch (ObjectDisposedException)
         {
         }
+    }
+
+
+    private void OnGameRolesChanged(object? sender, EventArgs e)
+    {
+        NotifyScheduleChanged();
     }
 
 
@@ -214,24 +222,8 @@ internal sealed class GameRecordAutoRefreshService : IDisposable
         DateTimeOffset now)
     {
         DateTimeOffset last = AppConfig.GetGameRecordLastAutoRefreshTime(game, role.Uid);
-        DateTimeOffset due = last == default
-            ? now
-            : interval switch
-            {
-                GameRecordAutoRefreshInterval.Daily => new DateTimeOffset(last.LocalDateTime.Date.AddDays(1)),
-                GameRecordAutoRefreshInterval.Weekly => last.AddDays(7),
-                GameRecordAutoRefreshInterval.Monthly => new DateTimeOffset(
-                    new DateTime(last.LocalDateTime.Year, last.LocalDateTime.Month, 1).AddMonths(1)),
-                _ => DateTimeOffset.MaxValue,
-            };
-
         DateTimeOffset lastAttempt = AppConfig.GetGameRecordLastAutoRefreshAttemptTime(game, role.Uid);
-        if (due <= now && lastAttempt != default && now - lastAttempt < TimeSpan.FromHours(2))
-        {
-            due = lastAttempt.AddHours(2);
-        }
-
-        return due;
+        return GameRecordAutoRefreshSchedule.GetNextDueTime(interval, last, lastAttempt, now, TimeZoneInfo.Local);
     }
 
 
@@ -328,14 +320,6 @@ internal sealed class GameRecordAutoRefreshService : IDisposable
                     continue;
                 }
 
-                // Do not retry a failed scheduled update too aggressively.
-                DateTimeOffset lastAttempt = AppConfig.GetGameRecordLastAutoRefreshAttemptTime(game, role.Uid);
-                if (!force && interval is not GameRecordAutoRefreshInterval.OnStartup &&
-                    lastAttempt != default && DateTimeOffset.Now - lastAttempt < TimeSpan.FromHours(2))
-                {
-                    continue;
-                }
-
                 AppConfig.SetGameRecordLastAutoRefreshAttemptTime(game, role.Uid, DateTimeOffset.Now);
 
                 (int roleSuccess, int roleFailure) = await RefreshRoleAsync(game, role, cancellationToken);
@@ -345,7 +329,10 @@ internal sealed class GameRecordAutoRefreshService : IDisposable
                 if (roleSuccess > 0)
                 {
                     refreshedRoles++;
-                    AppConfig.SetGameRecordLastAutoRefreshTime(game, role.Uid, DateTimeOffset.Now);
+                    if (roleFailure == 0)
+                    {
+                        AppConfig.SetGameRecordLastAutoRefreshTime(game, role.Uid, DateTimeOffset.Now);
+                    }
                 }
                 else
                 {
@@ -471,20 +458,8 @@ internal sealed class GameRecordAutoRefreshService : IDisposable
             return isStartup;
         }
 
-        DateTimeOffset last = AppConfig.GetGameRecordLastAutoRefreshTime(game, role.Uid);
-        if (last == default)
-        {
-            return true;
-        }
-
         DateTimeOffset now = DateTimeOffset.Now;
-        return interval switch
-        {
-            GameRecordAutoRefreshInterval.Daily => now.Date > last.Date,
-            GameRecordAutoRefreshInterval.Weekly => now - last >= TimeSpan.FromDays(7),
-            GameRecordAutoRefreshInterval.Monthly => now.Year != last.Year || now.Month != last.Month,
-            _ => false,
-        };
+        return GetRoleNextDueTime(game, role, interval, now) <= now;
     }
 
 
@@ -627,6 +602,7 @@ internal sealed class GameRecordAutoRefreshService : IDisposable
 
     public void Dispose()
     {
+        _gameRecordService.GameRolesChanged -= OnGameRolesChanged;
         Stop();
         _cancellationTokenSource?.Dispose();
         _scheduleChangedSemaphore.Dispose();

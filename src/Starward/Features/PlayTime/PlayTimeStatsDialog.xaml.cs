@@ -203,25 +203,7 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
                     lastSpan = span;
                 }
 
-                DateTimeOffset startTime = DateTimeOffset.FromUnixTimeMilliseconds(session.StartTime);
-                DateTimeOffset endTime = DateTimeOffset.FromUnixTimeMilliseconds(session.EndTime);
-
-                // 计算每日时长，把数据添加到 timePerDay 字典中
-                for (DateTime day = startTime.Date; day <= endTime.Date; day = day.AddDays(1))
-                {
-                    DateTimeOffset dayStart = day == startTime.Date ? startTime : day;
-                    DateTimeOffset dayEnd = day == endTime.Date ? endTime : day.AddDays(1).AddTicks(-1);
-                    var duration = (long)(dayEnd - dayStart).TotalMilliseconds;
-                    var dateOnly = DateOnly.FromDateTime(day);
-                    if (timePerDay.ContainsKey(dateOnly))
-                    {
-                        timePerDay[dateOnly] += duration;
-                    }
-                    else
-                    {
-                        timePerDay[dateOnly] = duration;
-                    }
-                }
+                PlayTimeDailyAggregation.AddSession(timePerDay, session.StartTime, session.EndTime, TimeZoneInfo.Local);
             }
 
             _playTimePerDay = timePerDay;
