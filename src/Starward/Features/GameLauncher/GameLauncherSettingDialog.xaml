@@ -647,15 +647,22 @@
                                 </TextBlock>
                             </PivotItem.Header>
                             <ScrollViewer>
-                                <ItemsControl Margin="0,0,8,0"
-                                              ItemTemplate="{StaticResource PackageGroupsDataTemplate}"
-                                              ItemsSource="{x:Bind LatestPackageGroups}">
-                                    <ItemsControl.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                            <StackPanel Spacing="8" />
-                                        </ItemsPanelTemplate>
-                                    </ItemsControl.ItemsPanel>
-                                </ItemsControl>
+                                <StackPanel>
+                                    <TextBlock Margin="0,8,8,0"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               Text="{x:Bind lang:Lang.GameResourcePage_NoArchivePackages}"
+                                               TextWrapping="Wrap"
+                                               Visibility="{x:Bind NoArchivePackagesVisibility}" />
+                                    <ItemsControl Margin="0,0,8,0"
+                                                  ItemTemplate="{StaticResource PackageGroupsDataTemplate}"
+                                                  ItemsSource="{x:Bind LatestPackageGroups}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Spacing="8" />
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                    </ItemsControl>
+                                </StackPanel>
                             </ScrollViewer>
                         </PivotItem>
 

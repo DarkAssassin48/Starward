@@ -1,18 +1,19 @@
 {
   "schema_version": 3,
   "mod_name": "Starward fix mod",
-  "release_name": "Starward 0.18.1 fix mod",
+  "release_name": "Starward 0.18.2 fix mod",
   "upstream": {
     "repository": "Scighost/Starward",
-    "baseline_version": "0.18.1",
-    "baseline_commit": "346e924d25ccaa0df9e53a71492814a96b418c49"
+    "baseline_version": "0.18.2",
+    "baseline_commit": "ac7c9c495ede338df7d8eb03f098dc901caa74a9"
   },
   "verified_port": {
     "repository": "DarkAssassin48/Starward",
-    "branch": "mod/0.18.1",
-    "commit": "e05eb80e6c08b54dcc15c11174657307f2130dc3",
-    "main_merge_commit": "a654db1f9581594ab47feecd93b3482e9f5271cd",
-    "ci_run_id": 31258462389,
+    "branch": "mod/0.18.2",
+    "commit": "c4b8e367f0e24d28d9226782d974e4c044bbefa5",
+    "main_merge_commit": null,
+    "pull_request": 13,
+    "ci_run_id": 33355533420,
     "builds": {
       "debug_x64": "passed",
       "release_x64": "passed",
@@ -44,9 +45,10 @@
       ]
     }
   ],
-  "canonical_branch": "maintenance/starward-mod",
+  "canonical_branch": "agent/starward-testing",
   "features": [
     "hoyolab-auto-refresh",
+    "hoyolab-cookie-token-refresh",
     "automatic-refresh-account-notifications",
     "role-safe-game-record-client-selection",
     "localized-time-formatting",
@@ -64,12 +66,16 @@
     "strategy": "resource lookup with code fallback",
     "reason": "Preserve upstream Crowdin translations and minimize future conflicts"
   },
-  "upstream_0_18_1_preserved": [
+  "upstream_0_18_2_preserved": [
+    "detailed playtime statistics and charts",
+    "merged official and Bilibili playtime records",
+    "running game elapsed time on the launch button",
+    "Shiyu Defense 0.18.2 layout fix",
     "ZZZ Deadly Assault adversity/hard mode",
     "Deadly Assault HasHard/HardTotalScore/HardTotalStar database support",
     "Shiyu Defense rank background UI",
-    "all official 0.18.1 Crowdin resources",
-    "all other upstream 0.18.1 files not explicitly modified by the mod"
+    "all official 0.18.2 Crowdin resources",
+    "all other upstream 0.18.2 files not explicitly modified by the mod"
   ],
   "high_conflict_paths": [
     "src/Starward/Features/GameRecord/GameRecordService.cs",

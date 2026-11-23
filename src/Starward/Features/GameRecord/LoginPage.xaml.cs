@@ -7,8 +7,12 @@ using Microsoft.Web.WebView2.Core;
 using Starward.Core;
 using Starward.Frameworks;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 
@@ -19,6 +23,7 @@ public sealed partial class LoginPage : PageBase
 
     private const string URL_CN = "https://www.miyoushe.com/";
     private const string URL_OS = "https://www.hoyolab.com/home";
+    private const string URL_OS_ACCOUNT = "https://account.hoyoverse.com/";
 
 
     private const string RefreshIcon = "\uE72C";
@@ -28,6 +33,10 @@ public sealed partial class LoginPage : PageBase
     private readonly ILogger<LoginPage> _logger = AppConfig.GetLogger<LoginPage>();
 
     private readonly GameRecordService _gameRecordService = AppConfig.GetService<GameRecordService>();
+
+    private string? capturedStokenV2;
+
+    private string? capturedMid;
 
 
     public LoginPage()
@@ -59,6 +68,55 @@ public sealed partial class LoginPage : PageBase
     }
 
 
+    private string[] GetCookieUrls()
+    {
+        return CurrentGameBiz.IsGlobalServer()
+            ? [URL_OS, URL_OS_ACCOUNT]
+            : [GetGameBizUrl()];
+    }
+
+
+    private async Task<Dictionary<string, string>> GetLoginCookiesAsync(CoreWebView2CookieManager manager)
+    {
+        var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (string url in GetCookieUrls())
+        {
+            var cookies = await manager.GetCookiesAsync(url);
+            foreach (CoreWebView2Cookie cookie in cookies)
+            {
+                values[cookie.Name] = cookie.Value;
+            }
+        }
+
+        string cookieMid = GetFirstCookieValue(values, "account_mid_v2", "ltmid_v2", "mid");
+        if (!string.IsNullOrWhiteSpace(capturedStokenV2)
+            && !string.IsNullOrWhiteSpace(capturedMid)
+            && (string.IsNullOrWhiteSpace(cookieMid)
+                || string.Equals(capturedMid, cookieMid, StringComparison.Ordinal)))
+        {
+            values["stoken_v2"] = capturedStokenV2;
+            if (!string.IsNullOrWhiteSpace(capturedMid) && string.IsNullOrWhiteSpace(cookieMid))
+            {
+                values["account_mid_v2"] = capturedMid;
+            }
+        }
+        return values;
+    }
+
+
+    private static string GetFirstCookieValue(IReadOnlyDictionary<string, string> values, params string[] names)
+    {
+        foreach (string name in names)
+        {
+            if (values.TryGetValue(name, out string? value) && !string.IsNullOrWhiteSpace(value))
+            {
+                return value;
+            }
+        }
+        return "";
+    }
+
+
 
 
 
@@ -77,22 +135,89 @@ public sealed partial class LoginPage : PageBase
             webview.CoreWebView2.Profile.PreferredColorScheme = CoreWebView2PreferredColorScheme.Dark;
             var manager = webview.CoreWebView2.CookieManager;
             var url = GetGameBizUrl();
-            var cookies = await manager.GetCookiesAsync(url);
-            foreach (var item in cookies)
+            capturedStokenV2 = null;
+            capturedMid = null;
+            foreach (string cookieUrl in GetCookieUrls())
             {
-                manager.DeleteCookie(item);
+                var cookies = await manager.GetCookiesAsync(cookieUrl);
+                foreach (var item in cookies)
+                {
+                    manager.DeleteCookie(item);
+                }
             }
-            webview.CoreWebView2.Navigate(url);
+            webview.CoreWebView2.WebResourceResponseReceived -= CoreWebView2_WebResourceResponseReceived;
+            webview.CoreWebView2.WebResourceResponseReceived += CoreWebView2_WebResourceResponseReceived;
             webview.CoreWebView2.NavigationStarting += CoreWebView2_NavigationStarting;
             webview.CoreWebView2.NavigationCompleted += CoreWebView2_NavigationCompleted;
             webview.CoreWebView2.SourceChanged += CoreWebView2_SourceChanged;
             webview.CoreWebView2.HistoryChanged += CoreWebView2_HistoryChanged;
+            webview.CoreWebView2.Navigate(url);
             FlyoutBase.ShowAttachedFlyout(Button_Finish);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Initialize webview");
         }
+    }
+
+
+    private async void CoreWebView2_WebResourceResponseReceived(CoreWebView2 sender, CoreWebView2WebResourceResponseReceivedEventArgs args)
+    {
+        try
+        {
+            if (!CurrentGameBiz.IsGlobalServer()
+                || args.Response.StatusCode != 200
+                || !Uri.TryCreate(args.Request.Uri, UriKind.Absolute, out Uri? uri)
+                || !uri.AbsolutePath.Contains("/account/ma-passport/", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            var stream = await args.Response.GetContentAsync();
+            if (stream is null)
+            {
+                return;
+            }
+            using JsonDocument document = await JsonDocument.ParseAsync(stream.AsStream());
+            JsonElement root = document.RootElement;
+            if (!root.TryGetProperty("retcode", out JsonElement retcode)
+                || retcode.GetInt32() != 0
+                || !root.TryGetProperty("data", out JsonElement data)
+                || data.ValueKind is not JsonValueKind.Object)
+            {
+                return;
+            }
+
+            capturedStokenV2 = GetJsonString(data, "stoken_v2", "stoken") ?? capturedStokenV2;
+            capturedMid = GetJsonString(data, "mid", "account_mid_v2") ?? capturedMid;
+            if (data.TryGetProperty("user_info", out JsonElement userInfo) && userInfo.ValueKind is JsonValueKind.Object)
+            {
+                capturedMid = GetJsonString(userInfo, "mid", "account_mid_v2") ?? capturedMid;
+            }
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogDebug(ex, "Parse HoYoLAB passport response.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Capture HoYoLAB refresh credential.");
+        }
+    }
+
+
+    private static string? GetJsonString(JsonElement element, params string[] names)
+    {
+        foreach (string name in names)
+        {
+            if (element.TryGetProperty(name, out JsonElement value)
+                && value.ValueKind is JsonValueKind.String
+                && !string.IsNullOrWhiteSpace(value.GetString()))
+            {
+                return value.GetString();
+            }
+        }
+        return null;
     }
 
 
@@ -233,8 +358,8 @@ public sealed partial class LoginPage : PageBase
         {
             Button_Finish.IsEnabled = false;
             var manager = webview.CoreWebView2.CookieManager;
-            var cookies = await manager.GetCookiesAsync(GetGameBizUrl());
-            var cookieString = string.Join(";", cookies.Select(x => $"{x.Name}={x.Value}"));
+            var cookies = await GetLoginCookiesAsync(manager);
+            var cookieString = string.Join(";", cookies.Select(x => $"{x.Key}={x.Value}"));
             var user = await _gameRecordService.AddRecordUserAsync(cookieString);
             var roles = await _gameRecordService.AddGameRolesAsync(cookieString);
             WeakReferenceMessenger.Default.Send(new GameRecordRoleChangedMessage(roles.FirstOrDefault(x => x.GameBiz == CurrentGameBiz.ToString())));

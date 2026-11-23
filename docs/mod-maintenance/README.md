@@ -1,21 +1,22 @@
 # Starward fix mod — maintenance snapshot
 
-This document describes the verified custom modification set currently ported to **Starward 0.18.1**.
+This document describes the verified custom modification set currently ported to **Starward 0.18.2**.
 
 ## Current canonical baseline
 
 - Upstream repository: `Scighost/Starward`
-- Upstream version: `0.18.1`
-- Upstream commit: `346e924d25ccaa0df9e53a71492814a96b418c49`
-- Verified port commit: `e05eb80e6c08b54dcc15c11174657307f2130dc3`
-- Main merge commit: `a654db1f9581594ab47feecd93b3482e9f5271cd`
-- Canonical maintenance branch: `maintenance/starward-mod`
+- Upstream version: `0.18.2`
+- Upstream commit: `ac7c9c495ede338df7d8eb03f098dc901caa74a9`
+- Verified port commit: `c4b8e367f0e24d28d9226782d974e4c044bbefa5`
+- Testing pull request: `#13`
+- Canonical maintenance branch: `agent/starward-testing`
+- Version snapshot branch: `mod/0.18.2`
 
 The authoritative mod definition for future upgrades is the semantic difference between the exact upstream baseline above and the canonical maintenance snapshot. Do not replay the historical 0.18.0 development commit sequence.
 
 ## Verified build status
 
-GitHub Actions run `31258462389` passed all build targets:
+GitHub Actions run `33355533420` passed all build targets:
 
 - Debug x64 — passed
 - Release x64 — passed
@@ -101,7 +102,7 @@ Primary files:
 
 Custom auto-refresh UI text is implemented through `HoYoLabAutoRefreshText.cs`.
 
-For Starward 0.18.1 the mod deliberately does **not** overwrite upstream `Lang*.resx` files. The facade first reads Starward resources when available and otherwise uses built-in fallbacks. Russian and English fallbacks are complete.
+For Starward 0.18.2 the mod deliberately does **not** overwrite upstream `Lang*.resx` files. The facade first reads Starward resources when available and otherwise uses built-in fallbacks. Russian and English fallbacks are complete.
 
 This avoids conflicts with Crowdin updates and preserves new upstream translations such as Deadly Assault Trial/Adversity mode strings.
 
@@ -158,13 +159,24 @@ Preserve the non-overlapping five-star statistics row:
 
 Long localized strings must wrap instead of clipping.
 
-## Starward 0.18.1 compatibility decisions
+## Starward 0.18.2 compatibility decisions
 
-The 0.18.1 port explicitly keeps upstream changes instead of restoring old 0.18.0 files.
+The 0.18.2 port explicitly keeps upstream changes instead of restoring old files.
+
+### Play time statistics
+
+Preserved upstream 0.18.2 functionality:
+
+- detailed playtime statistics and charts
+- merged official/Bilibili server records
+- elapsed game time on the launch button
+- the new `PlayTimeRecordService`, `PlayTimeStatsService`, statistics dialog and chart controls
+
+The mod's `LocalizedTimeFormatter` is layered on the new playtime button instead of restoring the removed 0.18.1 implementation.
 
 ### Deadly Assault
 
-Preserved upstream 0.18.1 adversity/hard-mode support:
+Preserved the upstream adversity/hard-mode support introduced before 0.18.2:
 
 - `HasHard`
 - `HardTotalScore`
@@ -178,12 +190,12 @@ The mod's role-safe `GameRecordService` API-client selection is layered on top o
 
 The merged page keeps both:
 
-- upstream 0.18.1 `RankBackground(...)` / rank-background images
+- upstream 0.18.2 layout fix and `RankBackground(...)` / rank-background images
 - mod `LocalizedTimeFormatter.FormatMinutesSeconds(...)` timing output
 
 ### Localization
 
-All official 0.18.1 Crowdin `.resx` files are kept unchanged. Custom text/time-unit fallbacks live in code to reduce future merge conflicts.
+All official 0.18.2 Crowdin `.resx` files are kept unchanged. Custom text/time-unit fallbacks live in code to reduce future merge conflicts.
 
 ## Future upstream upgrade procedure
 

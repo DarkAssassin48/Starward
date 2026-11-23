@@ -10,6 +10,8 @@ public abstract class LauncherId
     public const string ChinaOfficial = "jGHBHlcOq1";
 
     public const string GlobalOfficial = "VYTpXlbWo8";
+    public const string NexusAnimaStandalone = "JMNdqmbl9I";
+    public const string NexusAnimaStandaloneGameId = "3qXq1I0N6o";
 
     public const string BilibiliGenshin = "umfgRO5gh5";
 
@@ -52,7 +54,10 @@ public abstract class LauncherId
     }
 
 
-    public static string? FromGameId(GameId gameId) => FromGameBiz(gameId.GameBiz);
+    // The standalone and preregistration entries share a GameBiz but have different IDs.
+    public static string? FromGameId(GameId gameId) => gameId.Id == NexusAnimaStandaloneGameId
+        ? NexusAnimaStandalone
+        : FromGameBiz(gameId.GameBiz);
 
 
     public static List<(GameBiz GameBiz, string LauncherId)> GetBilibiliLaunchers()

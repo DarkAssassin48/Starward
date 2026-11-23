@@ -212,8 +212,14 @@ internal partial class GamePackageService
         if (context.GameSophonChunkBuild is null)
         {
             context.GamePackage = await GetGamePackageAsync(gameId, cancellationToken);
-            context.LatestGameVersion = context.GamePackage?.Main.Major?.Version;
-            context.PredownloadVersion = context.GamePackage?.PreDownload.Major?.Version;
+            var major = context.GamePackage?.Main?.Major;
+            context.LatestGameVersion = major?.Version;
+            context.PredownloadVersion = context.GamePackage?.PreDownload?.Major?.Version;
+            if (major is null || (context.Operation is GameInstallOperation.Install && major.GamePackages is not { Count: > 0 }))
+            {
+                // A package record without full game archives cannot back an install.
+                context.GamePackage = null;
+            }
         }
         await PrepareGameInstallContextFilesAsync(context, null, cancellationToken);
     }

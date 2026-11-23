@@ -92,16 +92,9 @@
                 <NavigationViewItemSeparator />
 
                 <!--  HoYoLAB Toolbox auto refresh  -->
-                <NavigationViewItem MinHeight="40"
+                <NavigationViewItem Content="{x:Bind lang:HoYoLabAutoRefreshText.SettingMenuTitle}"
                                     Tag="HoyolabToolboxAutoRefreshSetting"
                                     ToolTipService.ToolTip="{x:Bind lang:HoYoLabAutoRefreshText.SettingPageTitle}">
-                    <NavigationViewItem.Content>
-                        <TextBlock MaxWidth="174"
-                                   MaxLines="2"
-                                   Text="{x:Bind lang:HoYoLabAutoRefreshText.SettingPageTitle}"
-                                   TextTrimming="CharacterEllipsis"
-                                   TextWrapping="WrapWholeWords" />
-                    </NavigationViewItem.Content>
                     <NavigationViewItem.Icon>
                         <FontIcon Glyph="&#xE895;" />
                     </NavigationViewItem.Icon>

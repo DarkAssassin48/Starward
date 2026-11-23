@@ -78,6 +78,29 @@ public class HoYoPlayService
             infos.AddRange(await _client.GetGameInfoAsync(LauncherId.GlobalOfficial, lang, cancellationToken));
             infos.AddRange(await _client.GetGameInfoAsync(LauncherId.ChinaOfficial, lang, cancellationToken));
         }
+        try
+        {
+            var standaloneGames = await _client.GetGameInfoAsync(LauncherId.NexusAnimaStandalone, lang, cancellationToken);
+            var nexus = standaloneGames.FirstOrDefault(x => x.Id == LauncherId.NexusAnimaStandaloneGameId
+                && x.DisplayStatus == GameInfoDisplayStatus.LAUNCHER_GAME_DISPLAY_STATUS_AVAILABLE);
+            if (nexus is not null)
+            {
+                // Keep a single entry for abc_global and preserve its catalog position.
+                int index = infos.FindIndex(x => x.GameBiz == nexus.GameBiz);
+                if (index >= 0)
+                {
+                    infos[index] = nexus;
+                }
+                else
+                {
+                    infos.Add(nexus);
+                }
+            }
+        }
+        catch (Exception ex) when (!cancellationToken.IsCancellationRequested)
+        {
+            _logger.LogWarning(ex, "Could not load the standalone Nexus Anima catalog.");
+        }
         foreach ((GameBiz _, string launcherId) in LauncherId.GetBilibiliLaunchers())
         {
             infos.AddRange(await _client.GetGameInfoAsync(launcherId, lang, cancellationToken));
@@ -173,7 +196,7 @@ public class HoYoPlayService
 
 
 
-    public async Task<GamePackage> GetGamePackageAsync(GameId gameId, CancellationToken cancellationToken = default)
+    public async Task<GamePackage?> GetGamePackageAsync(GameId gameId, CancellationToken cancellationToken = default)
     {
         if (!_memoryCache.TryGetValue($"{nameof(GamePackage)}_{gameId.Id}", out GamePackage? package))
         {
@@ -185,7 +208,7 @@ public class HoYoPlayService
             }
             package = list.FirstOrDefault(x => x.GameId == gameId);
         }
-        return package!;
+        return package;
     }
 
 

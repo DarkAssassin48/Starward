@@ -10,7 +10,20 @@ on:
 
 jobs:
 
+  regression-tests:
+    runs-on: windows-2025-vs2026
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v5
+    - name: Install .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        global-json-file: global.json
+    - name: Run regression checks
+      run: dotnet run --project tests/Starward.RegressionTests -c Release
+
   build:
+    needs: regression-tests
     runs-on: windows-2025-vs2026
     strategy:
       matrix:

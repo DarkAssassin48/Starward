@@ -24,16 +24,16 @@ internal partial class GameLauncherService
 
     private readonly HoYoPlayService _hoYoPlayService;
 
-    private readonly PlayTimeService _playTimeService;
+    private readonly PlayTimeRecordService _playTimeRecorderService;
 
     private readonly GameAuthLoginService _gameAuthLoginService;
 
 
-    public GameLauncherService(ILogger<GameLauncherService> logger, HoYoPlayService hoYoPlayService, PlayTimeService playTimeService, GameAuthLoginService gameAuthLoginService)
+    public GameLauncherService(ILogger<GameLauncherService> logger, HoYoPlayService hoYoPlayService, PlayTimeRecordService playTimeRecorderService, GameAuthLoginService gameAuthLoginService)
     {
         _logger = logger;
         _hoYoPlayService = hoYoPlayService;
-        _playTimeService = playTimeService;
+        _playTimeRecorderService = playTimeRecorderService;
         _gameAuthLoginService = gameAuthLoginService;
     }
 
@@ -191,9 +191,9 @@ internal partial class GameLauncherService
         }
         else
         {
-            GamePackage package = await _hoYoPlayService.GetGamePackageAsync(gameId);
-            _ = Version.TryParse(package.Main.Major?.Version, out Version? latestVersion);
-            _ = Version.TryParse(package.PreDownload.Major?.Version, out Version? predownloadVersion);
+            GamePackage? package = await _hoYoPlayService.GetGamePackageAsync(gameId);
+            _ = Version.TryParse(package?.Main?.Major?.Version, out Version? latestVersion);
+            _ = Version.TryParse(package?.PreDownload?.Major?.Version, out Version? predownloadVersion);
             return (latestVersion, predownloadVersion);
         }
     }
@@ -399,11 +399,11 @@ internal partial class GameLauncherService
             {
                 if (thirdPartyTool || AppConfig.StartGameWithCMD)
                 {
-                    return await _playTimeService.StartProcessToLogAsync(gameId);
+                    return await _playTimeRecorderService.StartProcessToLogAsync(gameId);
                 }
                 else
                 {
-                    await _playTimeService.StartProcessToLogAsync(gameId, process.Id);
+                    await _playTimeRecorderService.StartProcessToLogAsync(gameId, process.Id);
                     return process;
                 }
             }

@@ -18,11 +18,17 @@ using Starward.Core.GameRecord.ZZZ.InterKnotReport;
 using Starward.Core.GameRecord.ZZZ.ShiyuDefense;
 using Starward.Core.GameRecord.ZZZ.ThresholdSimulation;
 using Starward.Core.GameRecord.ZZZ.UpgradeGuide;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Starward.Core.GameRecord;
 
 public class HoyolabClient : GameRecordClient
 {
+
+    private const string TokenRefreshSalt = "IZPgfb0dRPtBeLuFkdDznSZ6f4wWt6y2";
+
+    private const string TokenRefreshAppId = "c9oqaq3s3gu8";
 
 
     public override string UAContent => $"Mozilla/5.0 (Linux; Android 13; Pixel 5 Build/TQ3A.230901.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/118.0.0.0 Mobile Safari/537.36 miHoYoBBSOversea/{AppVersion}";
@@ -52,6 +58,44 @@ public class HoyolabClient : GameRecordClient
         request.Headers.Add(x_rpc_language, Language);
         request.Headers.Add("x-rpc-lang", Language);
         return base.CommonSendAsync<T>(request, cancellationToken);
+    }
+
+
+
+
+    /// <summary>
+    /// Exchanges a long-lived HoYoLAB SToken for fresh v2 login and cookie tokens.
+    /// </summary>
+    public async Task<HoyolabTokenRefreshResult> RefreshTokenV2Async(string stokenV2, string mid, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(stokenV2);
+        ArgumentException.ThrowIfNullOrWhiteSpace(mid);
+
+        const string url = "https://sg-public-api.hoyoverse.com/account/ma-passport/token/getBySToken";
+        var request = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = new StringContent("{\"dst_token_types\":[2,4]}", Encoding.UTF8, Application_Json),
+        };
+        request.Headers.Add(Cookie, $"stoken_v2={stokenV2}; mid={mid}");
+        request.Headers.Add(DS, CreateTokenRefreshSecret());
+        request.Headers.Add("x-rpc-app_id", TokenRefreshAppId);
+        return await CommonSendAsync<HoyolabTokenRefreshResult>(request, cancellationToken);
+    }
+
+
+    private static string CreateTokenRefreshSecret()
+    {
+        const string chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        int timestamp = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        string random = string.Create(6, chars, static (span, source) =>
+        {
+            for (int i = 0; i < span.Length; i++)
+            {
+                span[i] = source[RandomNumberGenerator.GetInt32(source.Length)];
+            }
+        });
+        byte[] hash = MD5.HashData(Encoding.UTF8.GetBytes($"salt={TokenRefreshSalt}&t={timestamp}&r={random}"));
+        return $"{timestamp},{random},{Convert.ToHexString(hash).ToLowerInvariant()}";
     }
 
 

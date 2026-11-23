@@ -977,6 +977,8 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
     /// </summary>
     public List<PackageGroup> LatestPackageGroups { get; set => SetProperty(ref field, value); }
 
+    public Visibility NoArchivePackagesVisibility { get; set => SetProperty(ref field, value); } = Visibility.Collapsed;
+
     /// <summary>
     /// 预下载版本
     /// </summary>
@@ -995,7 +997,16 @@ public sealed partial class GameLauncherSettingDialog : ContentDialog
         try
         {
             var gamePackage = await _hoyoPlayService.GetGamePackageAsync(CurrentGameId);
-            LatestVersion = gamePackage.Main.Major!.Version;
+            if (gamePackage?.Main?.Major is not GamePackageResource major)
+            {
+                NoArchivePackagesVisibility = Visibility.Visible;
+                var branch = await _hoyoPlayService.GetGameBranchAsync(CurrentGameId);
+                LatestVersion = branch?.Main?.Tag ?? "";
+                PreInstallVersion = branch?.PreDownload?.Tag ?? "";
+                return;
+            }
+
+            LatestVersion = major.Version;
             var list = GetGameResourcePackageGroups(gamePackage.Main);
             var sdk = await _hoyoPlayService.GetGameChannelSDKAsync(CurrentGameId);
             if (sdk is not null)

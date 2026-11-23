@@ -1,6 +1,6 @@
-# Starward 0.18.1 fix mod
+# Starward 0.18.2 fix mod
 
 - Russian release notes: `RELEASE_NOTES_RU.md`
 - English release notes: `RELEASE_NOTES_EN.md`
 
-Verified against official Starward 0.18.1 (`346e924d25ccaa0df9e53a71492814a96b418c49`).
+Verified against official Starward 0.18.2 (`ac7c9c495ede338df7d8eb03f098dc901caa74a9`).
