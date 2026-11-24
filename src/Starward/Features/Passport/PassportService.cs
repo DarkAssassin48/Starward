@@ -125,24 +125,12 @@ internal class PassportService
     }
 
 
-    public async Task<string> GetWebCookiesAsync(PassportUserInfo info, AndroidDeviceInfo? deviceInfo, CancellationToken cancellation = default)
-    {
-        var (ltokenValue, cookieTokenValue) = await _passportClient.ExchangeWebTokensAsync(info, deviceInfo, cancellation);
-        return $"ltoken={ltokenValue};ltuid={info.Aid};account_id={info.Aid};cookie_token={cookieTokenValue};account_mid_v2={info.Mid};account_id_v2={info.Aid};cookie_token_v2={cookieTokenValue};ltoken_v2={ltokenValue};ltmid_v2={info.Mid};ltuid_v2={info.Aid}";
-    }
+    public Task<string> GetWebCookiesAsync(PassportUserInfo info, AndroidDeviceInfo? deviceInfo, CancellationToken cancellation = default)
+        => _passportClient.GetGameRecordCookiesAsync(info, deviceInfo, cancellation);
 
 
-    public async Task<List<GameRecordRole>> UpdateGameRolesAsync(PassportUserInfo info, AndroidDeviceInfo? deviceInfo, CancellationToken cancellation = default)
-    {
-        var roles = await _passportClient.GetUserGameRolesAsync(info, deviceInfo, cancellation);
-        string cookie = await GetWebCookiesAsync(info, deviceInfo, cancellation);
-        foreach (var role in roles)
-        {
-            role.Cookie = cookie;
-            role.Aid = info.Aid;
-        }
-        return roles;
-    }
+    public Task<List<GameRecordRole>> UpdateGameRolesAsync(PassportUserInfo info, AndroidDeviceInfo? deviceInfo, CancellationToken cancellation = default)
+        => _passportClient.GetAuthenticatedGameRolesAsync(info, deviceInfo, cancellation);
 
 
     public static List<PassportUserInfoModel> GetAllPassportUserInfos()
@@ -200,10 +188,10 @@ internal class PassportService
 
 
 
-    public static PassportUserInfoModel? GetPassportUserInfo(long aid)
+    public static PassportUserInfoModel? GetPassportUserInfo(ServerRegion region, long aid)
     {
         using var dapper = DatabaseService.CreateConnection();
-        var info = dapper.QueryFirstOrDefault<EncryptedPassportUserInfo>("SELECT * FROM PassportUserInfo WHERE Aid = @aid LIMIT 1;", new { aid });
+        var info = dapper.QueryFirstOrDefault<EncryptedPassportUserInfo>("SELECT * FROM PassportUserInfo WHERE Region = @region AND Aid = @aid;", new { region, aid });
         if (info is null)
         {
             return null;

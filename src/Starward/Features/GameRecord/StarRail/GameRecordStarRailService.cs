@@ -461,7 +461,7 @@ internal class GameRecordStarRailService : GameRecordServiceBase
                 role.Cookie = currentCookie;
                 return true;
             }
-            var passport = PassportService.GetPassportUserInfo(role.Aid);
+            var passport = PassportService.GetPassportUserInfo(ServerRegion.HoYoverse, role.Aid);
             if (passport is null || !passport.IsGlobalServer || passport.ErrorType is not PassportErrorType.Success
                 || string.IsNullOrWhiteSpace(passport.Stoken))
             {

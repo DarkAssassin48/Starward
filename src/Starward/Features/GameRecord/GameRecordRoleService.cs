@@ -87,16 +87,16 @@ internal class GameRecordRoleService : GameRecordServiceBase
 
     private async Task UpdateGameRoleInfoAsync(GameRecordRole role, CancellationToken cancellationToken)
     {
-        var passport = PassportService.GetPassportUserInfo(role.Aid);
+        var passport = PassportService.GetPassportUserInfo(GameBizToServerRegion(role.GameBiz), role.Aid);
         if (passport is null || passport.ErrorType is not PassportErrorType.Success || string.IsNullOrWhiteSpace(passport.Stoken))
         {
             return;
         }
         var roles = await UpdateGameRolesByPassportAsync(passport, cancellationToken);
-        role = roles.FirstOrDefault(x => x.Uid == role.Uid)!;
-        if (role is not null)
+        var renewedRole = roles.FirstOrDefault(x => x.Uid == role.Uid && x.GameBiz == role.GameBiz);
+        if (renewedRole is not null)
         {
-            var list = await GetGameRolesAsync(role.GameBiz, role.Cookie!, cancellationToken).ConfigureAwait(false);
+            var list = await GetGameRolesAsync(renewedRole.GameBiz, renewedRole.Cookie!, cancellationToken).ConfigureAwait(false);
             AddGameRoles(list);
         }
     }

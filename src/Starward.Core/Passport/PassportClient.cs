@@ -286,7 +286,7 @@ public class PassportClient
         switch (userInfo.Region)
         {
             case ServerRegion.HoYoverse:
-                if (string.IsNullOrWhiteSpace(userInfo.Stoken) || string.IsNullOrWhiteSpace(userInfo.Mid))
+                if (userInfo.Aid <= 0 || string.IsNullOrWhiteSpace(userInfo.Stoken) || string.IsNullOrWhiteSpace(userInfo.Mid))
                 {
                     throw new miHoYoApiException(-100, "HoYoverse Pass session is incomplete.");
                 }
@@ -295,7 +295,8 @@ public class PassportClient
                 {
                     request.Content = JsonContent.Create(new GlobalWebTokenRequest(), PassportJsonContext.Default.GlobalWebTokenRequest);
                     request.Headers.Add("x-rpc-app_id", "c9oqaq3s3gu8");
-                    request.Headers.Add("Cookie", $"stoken={userInfo.Stoken}; mid={userInfo.Mid}");
+                    request.Headers.Add("DS", DynamicSecret.CreateGlobalWebTokenDS());
+                    request.Headers.Add("Cookie", FormattableString.Invariant($"stoken={userInfo.Stoken}; ltuid_v2={userInfo.Aid}; ltmid_v2={userInfo.Mid}; account_id_v2={userInfo.Aid}; account_mid_v2={userInfo.Mid}; mid={userInfo.Mid}"));
                     var result = await SendAsync<GlobalWebTokenResponse>(request, cancellation).ConfigureAwait(false);
                     ltoken = result?.Tokens?.FirstOrDefault(x => x is { TokenType: TokenType.LToken })?.Token;
                     cookieToken = result?.Tokens?.FirstOrDefault(x => x is { TokenType: TokenType.CookieToken })?.Token;
@@ -313,6 +314,26 @@ public class PassportClient
             throw new miHoYoApiException(-1, "Passport did not return both HoYoLAB web tokens.");
         }
         return (ltoken, cookieToken);
+    }
+
+    public async Task<string> GetGameRecordCookiesAsync(PassportUserInfo userInfo, AndroidDeviceInfo? androidDevice, CancellationToken cancellation = default)
+    {
+        var (ltoken, cookieToken) = await ExchangeWebTokensAsync(userInfo, androidDevice, cancellation).ConfigureAwait(false);
+        return FormattableString.Invariant($"ltoken={ltoken};ltuid={userInfo.Aid};account_id={userInfo.Aid};cookie_token={cookieToken};account_mid_v2={userInfo.Mid};account_id_v2={userInfo.Aid};cookie_token_v2={cookieToken};ltoken_v2={ltoken};ltmid_v2={userInfo.Mid};ltuid_v2={userInfo.Aid}");
+    }
+
+    public async Task<List<GameRecordRole>> GetAuthenticatedGameRolesAsync(PassportUserInfo userInfo, AndroidDeviceInfo? androidDevice, CancellationToken cancellation = default)
+    {
+        var roles = await GetUserGameRolesAsync(userInfo, androidDevice, cancellation).ConfigureAwait(false);
+        if (roles.Count != 0)
+        {
+            var cookie = await GetGameRecordCookiesAsync(userInfo, androidDevice, cancellation).ConfigureAwait(false);
+            foreach (var role in roles)
+            {
+                role.Cookie = cookie;
+            }
+        }
+        return roles;
     }
 
 
