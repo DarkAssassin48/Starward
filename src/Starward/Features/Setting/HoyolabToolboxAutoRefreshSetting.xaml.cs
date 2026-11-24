@@ -4,7 +4,6 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Starward.Core;
 using Starward.Features.GameRecord;
-using Starward.Frameworks;
 using Starward.Helpers;
 using Starward.Language;
 using System;
