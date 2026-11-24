@@ -15,12 +15,9 @@ using System.Threading.Tasks;
 
 namespace Starward;
 
-#if DISABLE_XAML_GENERATED_MAIN
-
-/// <summary>
-/// Program class
-/// </summary>
-public static class Program
+// WinUI's generated entry point is named Program. Keep this distinct so the
+// compiler always selects the entry point that initializes Starward.
+internal static class StarwardStartup
 {
 
 
@@ -133,7 +130,5 @@ public static class Program
         sw.Write(sb);
     }
 }
-
-#endif
 
 
