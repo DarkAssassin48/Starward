@@ -45,6 +45,10 @@ internal class PackageRepairStep : PackageStepBase
         }
         _urlPrefix = _package.Main.Major.ResListUrl;
         _pkgItems = await DownloadAndParsePkgVersionAsync(_context.AudioLanguage, cancellation).ConfigureAwait(false);
+        if (_pkgItems.Count == 0)
+        {
+            throw new InvalidDataException($"The official launcher returned no files to verify for {_context.GameId.GameBiz}.");
+        }
     }
 
 

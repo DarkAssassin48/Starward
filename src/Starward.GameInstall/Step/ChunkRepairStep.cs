@@ -35,6 +35,10 @@ internal class ChunkRepairStep : ChunkStepBase
         }
         _branch ??= (await _hoYoPlayService.GetGameBranchAsync(_context.GameId, cancellation).ConfigureAwait(false)).EnsureNotNull(_context.GameId);
         _chunkItems ??= await _gameResourceService.GetSophonChunkItemsAsync(_context.GameId, _branch.Main, _context.InstallPath, _context.CategoryScenario, _context.AudioLanguage, null, cancellation).ConfigureAwait(false);
+        if (_chunkItems.Count == 0)
+        {
+            throw new InvalidDataException($"The official launcher returned no files to verify for {_context.GameId.GameBiz}.");
+        }
     }
 
 
