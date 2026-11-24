@@ -269,6 +269,15 @@ internal class GameRecordStarRailService : GameRecordServiceBase
         {
             return info;
         }
+
+        string mechanismTitle = HoYoLabMechanismBuffLabels.GetForLanguage(CultureInfo.CurrentUICulture.Name);
+        foreach (var floor in info.AllFloorDetail ?? [])
+        {
+            SetMechanismTitle(floor.Node1, mechanismTitle);
+            SetMechanismTitle(floor.Node2, mechanismTitle);
+            SetMechanismTitle(floor.Node3, mechanismTitle);
+        }
+
         var obj = new
         {
             info.Uid,
@@ -290,6 +299,15 @@ internal class GameRecordStarRailService : GameRecordServiceBase
         return info;
     }
 
+
+
+    private static void SetMechanismTitle(PureFictionNode? node, string title)
+    {
+        if (node?.Buff is not null && !string.IsNullOrWhiteSpace(node.Buff.SimpleDesc))
+        {
+            node.Buff.MechanismName = title;
+        }
+    }
 
 
     public List<PureFictionInfo> GetPureFictionInfoList(GameRecordRole role)
