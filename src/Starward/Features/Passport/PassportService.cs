@@ -127,10 +127,7 @@ internal class PassportService
 
     public async Task<string> GetWebCookiesAsync(PassportUserInfo info, AndroidDeviceInfo? deviceInfo, CancellationToken cancellation = default)
     {
-        var ltoken = await _passportClient.ExchangeTokenAsync(info, TokenType.LToken, deviceInfo, cancellation);
-        var cookieToken = await _passportClient.ExchangeTokenAsync(info, TokenType.CookieToken, deviceInfo, cancellation);
-        string ltokenValue = ltoken.Token?.Token ?? throw new miHoYoApiException(-1, "Can not get ltoken.");
-        string cookieTokenValue = cookieToken.Token?.Token ?? throw new miHoYoApiException(-1, "Can not get cookie_token.");
+        var (ltokenValue, cookieTokenValue) = await _passportClient.ExchangeWebTokensAsync(info, deviceInfo, cancellation);
         return $"ltoken={ltokenValue};ltuid={info.Aid};account_id={info.Aid};cookie_token={cookieTokenValue};account_mid_v2={info.Mid};account_id_v2={info.Aid};cookie_token_v2={cookieTokenValue};ltoken_v2={ltokenValue};ltmid_v2={info.Mid};ltuid_v2={info.Aid}";
     }
 

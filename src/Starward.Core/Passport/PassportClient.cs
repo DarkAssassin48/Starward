@@ -12,7 +12,12 @@ public class PassportClient
 
     public PassportClient(HttpClient? httpClient = null)
     {
-        _httpClient = httpClient ?? new(new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All }) { DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher };
+        // Passport requests carry session credentials in headers or in the body.
+        _httpClient = httpClient ?? new(new HttpClientHandler
+        {
+            AutomaticDecompression = DecompressionMethods.All,
+            AllowAutoRedirect = false,
+        }) { DefaultVersionPolicy = HttpVersionPolicy.RequestVersionOrHigher };
     }
 
 
@@ -243,17 +248,11 @@ public class PassportClient
     /// <param name="cancellation"></param>
     /// <returns></returns>
     /// <exception cref="NotSupportedException"></exception>
-    public async Task<ExchangeTokenResponse> ExchangeTokenAsync(PassportUserInfo userInfo, TokenType destToken, AndroidDeviceInfo? androidDevice, CancellationToken cancellation = default)
+    private async Task<ExchangeTokenResponse> ExchangeChinaTokenAsync(PassportUserInfo userInfo, TokenType destToken, AndroidDeviceInfo? androidDevice, CancellationToken cancellation)
     {
-        string url = userInfo.Region switch
-        {
-            ServerRegion.HoYoverse => $"https://passport-api-sg.hoyoverse.com/account/ma-cn-session/app/exchange",
-            ServerRegion.miHoYo => $"https://passport-api.mihoyo.com/account/ma-cn-session/app/exchange",
-            _ => throw new NotSupportedException($"Server region '{userInfo.Region}' is not supported.")
-        };
         var request = ExchangeTokenRequest.FromStoken(userInfo.Stoken, userInfo.Mid);
         request.DestTokenType = destToken;
-        var message = new HttpRequestMessage(HttpMethod.Post, url)
+        using var message = new HttpRequestMessage(HttpMethod.Post, "https://passport-api.mihoyo.com/account/ma-cn-session/app/exchange")
         {
             Content = JsonContent.Create(request, PassportJsonContext.Default.ExchangeTokenRequest)
         };
@@ -278,6 +277,42 @@ public class PassportClient
             message.Headers.Add("x-rpc-account_version", userInfo.IsGlobalServer ? GameRecordClientBase.HoyolabSdkVersion : GameRecordClientBase.HyperionSdkVersion);
         }
         return await SendAsync<ExchangeTokenResponse>(message, cancellation);
+    }
+
+    public async Task<(string LToken, string CookieToken)> ExchangeWebTokensAsync(PassportUserInfo userInfo, AndroidDeviceInfo? androidDevice, CancellationToken cancellation = default)
+    {
+        string? ltoken;
+        string? cookieToken;
+        switch (userInfo.Region)
+        {
+            case ServerRegion.HoYoverse:
+                if (string.IsNullOrWhiteSpace(userInfo.Stoken) || string.IsNullOrWhiteSpace(userInfo.Mid))
+                {
+                    throw new miHoYoApiException(-100, "HoYoverse Pass session is incomplete.");
+                }
+                // Overseas Passport issues both web tokens through its own token endpoint.
+                using (var request = new HttpRequestMessage(HttpMethod.Post, "https://sg-public-api.hoyoverse.com/account/ma-passport/token/getBySToken"))
+                {
+                    request.Content = JsonContent.Create(new GlobalWebTokenRequest(), PassportJsonContext.Default.GlobalWebTokenRequest);
+                    request.Headers.Add("x-rpc-app_id", "c9oqaq3s3gu8");
+                    request.Headers.Add("Cookie", $"stoken={userInfo.Stoken}; mid={userInfo.Mid}");
+                    var result = await SendAsync<GlobalWebTokenResponse>(request, cancellation).ConfigureAwait(false);
+                    ltoken = result?.Tokens?.FirstOrDefault(x => x is { TokenType: TokenType.LToken })?.Token;
+                    cookieToken = result?.Tokens?.FirstOrDefault(x => x is { TokenType: TokenType.CookieToken })?.Token;
+                }
+                break;
+            case ServerRegion.miHoYo:
+                ltoken = (await ExchangeChinaTokenAsync(userInfo, TokenType.LToken, androidDevice, cancellation).ConfigureAwait(false))?.Token?.Token;
+                cookieToken = (await ExchangeChinaTokenAsync(userInfo, TokenType.CookieToken, androidDevice, cancellation).ConfigureAwait(false))?.Token?.Token;
+                break;
+            default:
+                throw new NotSupportedException($"Server region '{userInfo.Region}' is not supported.");
+        }
+        if (string.IsNullOrWhiteSpace(ltoken) || string.IsNullOrWhiteSpace(cookieToken))
+        {
+            throw new miHoYoApiException(-1, "Passport did not return both HoYoLAB web tokens.");
+        }
+        return (ltoken, cookieToken);
     }
 
 

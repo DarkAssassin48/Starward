@@ -468,8 +468,7 @@ internal class GameRecordStarRailService : GameRecordServiceBase
                 _logger.LogInformation("HoYoLAB calendar session renewal requires a valid Passport login.");
                 return false;
             }
-            var device = await GetDeviceInfoAsync(passport.Region, cancellationToken);
-            string cookie = await _passportService.GetWebCookiesAsync(passport, device, cancellationToken);
+            string cookie = await _passportService.GetWebCookiesAsync(passport, deviceInfo: null, cancellation: cancellationToken);
             int updated = connection.Execute("""
                 UPDATE GameRecordRole SET Cookie = @cookie
                 WHERE Aid = @Aid AND GameBiz LIKE '%\_global' ESCAPE '\' AND Cookie = @currentCookie;
