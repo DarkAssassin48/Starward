@@ -11,8 +11,11 @@ internal static class CalendarTime
     /// daylight-saving transition skips or repeats midnight.
     /// </summary>
     public static DateTimeOffset GetStartOfDay(DateTime date, TimeZoneInfo timeZone)
+        => GetLocalBoundary(date.Date, timeZone);
+
+    public static DateTimeOffset GetLocalBoundary(DateTime date, TimeZoneInfo timeZone)
     {
-        date = DateTime.SpecifyKind(date.Date, DateTimeKind.Unspecified);
+        date = DateTime.SpecifyKind(date, DateTimeKind.Unspecified);
         while (timeZone.IsInvalidTime(date))
         {
             date = date.AddMinutes(1);

@@ -1,5 +1,24 @@
 # Starward fix mod — maintenance snapshot
 
+## Starward 0.19.0 port
+
+The current baseline is [Starward 0.19.0](https://github.com/Scighost/Starward/releases/tag/0.19.0)
+(`747ed10b8906e76d650639101c988a2edca9ba42`). Use the diff between this tag and the
+current testing branch when preparing the next port. The 0.18.2 snapshot below
+and the associated manifest describe the previous port.
+
+- Nexus Anima uses a built-in standalone HoYoPlay channel. Select that channel
+  and locate the directory with `NexusAnima.exe` after the 0.19.0 channel migration.
+- HoYoLAB scheduling uses the new per-game services. Star Rail calendar requests
+  retry once after renewal through a saved Passport session. Upstream 0.19.0
+  lists HTTP 404 on global Battle Records sign-in as a known issue.
+- The playtime calendar retains year selection, future placeholders, localized
+  duration units and local-date aggregation. It also respects the new day offset.
+- Preserve the Star Rail layout, gacha layout and Genshin Self Query changes.
+  Run the regression project on .NET 11 and the full Windows CI matrix.
+
+## Starward 0.18.2 snapshot
+
 This document describes the verified custom modification set currently ported to **Starward 0.18.2**.
 
 ## Current canonical baseline

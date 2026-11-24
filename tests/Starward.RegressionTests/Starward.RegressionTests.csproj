@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -9,12 +9,13 @@
     <ProjectReference Include="../../src/Starward.Core/Starward.Core.csproj" />
     <ProjectReference Include="../../src/Starward.Language/Starward.Language.csproj" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="11.0.0" />
   </ItemGroup>
   <!-- Exercise production logic without starting WinUI or accessing user data. -->
   <ItemGroup>
     <Compile Include="../../src/Starward/Helpers/CalendarTime.cs" Link="Production/CalendarTime.cs" />
     <Compile Include="../../src/Starward/Features/PlayTime/PlayTimeDailyAggregation.cs" Link="Production/PlayTimeDailyAggregation.cs" />
     <Compile Include="../../src/Starward/Features/GameRecord/GameRecordAutoRefresh*.cs" Link="Production/%(Filename)%(Extension)" />
+    <Compile Include="../../src/Starward/Features/GameRecord/IGameRecordRefreshSource.cs" Link="Production/IGameRecordRefreshSource.cs" />
   </ItemGroup>
 </Project>

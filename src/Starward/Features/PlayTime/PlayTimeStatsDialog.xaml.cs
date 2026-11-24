@@ -49,6 +49,13 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
     {
         try
         {
+            int dayStartHour = AppConfig.PlayTimeDayStartHour;
+            if (dayStartHour > 23 || dayStartHour < -23)
+            {
+                dayStartHour = 0;
+            }
+            ComboBox_DayStartsAt.SelectedIndex = dayStartHour + 23;
+            ComboBox_DayStartsAt.SelectionChanged += ComboBox_DayStartsAt_SelectionChanged;
             _playTimeStatsService.ConvertItemToStats();
             LoadPlayTimeStats();
         }
@@ -60,10 +67,22 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
     }
 
 
+    private void ComboBox_DayStartsAt_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        AppConfig.PlayTimeDayStartHour = ComboBox_DayStartsAt.SelectedIndex - 23;
+        LoadPlayTimeStats();
+    }
+
+
     private void PlayTimeStatsDialog_Unloaded(object sender, RoutedEventArgs e)
     {
         this.Loaded -= PlayTimeStatsDialog_Loaded;
         this.Unloaded -= PlayTimeStatsDialog_Unloaded;
+        StatCards?.Clear();
+        ComboBox_DayStartsAt.SelectionChanged -= ComboBox_DayStartsAt_SelectionChanged;
+        ComboBox_DayStartsAt.Items.Clear();
+        PlayTimeBarChart.Items = null;
+        PlayTimeHeatmap.Days = null;
         _playTimeLoaded = false;
     }
 
@@ -142,7 +161,7 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
     /// <summary>
     /// 统计卡片数据项
     /// </summary>
-    public IReadOnlyList<StatCardItem> StatCards { get; set => SetProperty(ref field, value); }
+    public List<StatCardItem> StatCards { get; set => SetProperty(ref field, value); }
 
 
     /// <summary>
@@ -203,7 +222,7 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
                     lastSpan = span;
                 }
 
-                PlayTimeDailyAggregation.AddSession(timePerDay, session.StartTime, session.EndTime, TimeZoneInfo.Local);
+                PlayTimeDailyAggregation.AddSession(timePerDay, session.StartTime, session.EndTime, TimeZoneInfo.Local, AppConfig.PlayTimeDayStartHour);
             }
 
             _playTimePerDay = timePerDay;
@@ -339,7 +358,7 @@ public sealed partial class PlayTimeStatsDialog : ContentDialog
         }
 
 
-        if (Lang.PlayTimeStatsDialog_AverageDailyPlaytime.Length>22)
+        if (Lang.PlayTimeStatsDialog_AverageDailyPlaytime.Length > 22)
         {
             UniformGridLayout_StatCards.MinItemHeight = 98;
             Grid_BarChartSwitcher.Margin = new Thickness(4, 16, 4, 0);

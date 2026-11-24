@@ -49,6 +49,26 @@ internal static class CalendarTests
             "2026-02-28T23:30:00-05:00", "2026-03-01T01:30:00-04:00", ("2026-02-28", 30), ("2026-03-01", 30));
         yield return Session("Repeated midnight belongs to the new date", MidnightDst,
             "2026-10-31T23:30:00-04:00", "2026-11-01T01:30:00-05:00", ("2026-10-31", 30), ("2026-11-01", 150));
+        yield return ("Configured day offset moves the split into local morning", () =>
+        {
+            var days = new Dictionary<DateOnly, long>();
+            var start = DateTimeOffset.Parse("2026-09-01T03:30:00+03:00");
+            var end = start.AddHours(1);
+            PlayTimeDailyAggregation.AddSession(days, start.ToUnixTimeMilliseconds(), end.ToUnixTimeMilliseconds(), Moscow, -4);
+            Check.Equal(1_800_000L, days[new DateOnly(2026, 8, 31)]);
+            Check.Equal(1_800_000L, days[new DateOnly(2026, 9, 1)]);
+            return Task.CompletedTask;
+        });
+        yield return ("Repeated local hour does not move time before the configured boundary", () =>
+        {
+            var days = new Dictionary<DateOnly, long>();
+            var start = DateTimeOffset.Parse("2026-11-01T00:30:00-04:00");
+            var end = DateTimeOffset.Parse("2026-11-01T01:30:00-05:00");
+            PlayTimeDailyAggregation.AddSession(days, start.ToUnixTimeMilliseconds(), end.ToUnixTimeMilliseconds(), Eastern, -1);
+            Check.Equal(1_800_000L, days[new DateOnly(2026, 10, 31)]);
+            Check.Equal(5_400_000L, days[new DateOnly(2026, 11, 1)]);
+            return Task.CompletedTask;
+        });
         yield return ("Millisecond precision and multiple sessions", () =>
         {
             var days = new Dictionary<DateOnly, long>();
