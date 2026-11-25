@@ -1,11 +1,29 @@
 # Starward fix mod — maintenance snapshot
 
+## Starward 0.19.1 port
+
+Use the diff from [Starward 0.19.1](https://github.com/Scighost/Starward/releases/tag/0.19.1)
+(`8282cdf9ca971c86eb75f0145a8338dbb5ebe788`) to `agent/starward-testing` as the current mod definition.
+Review through PR #14. The entries below describe previous ports.
+
+- Use the unmodified upstream Passport implementation. The HSR calendar keeps
+  its existing retry through the shared Passport service. The 0.19.0 token
+  experiments (`35e47a46`, `0eec71d8`) are preserved in Git history only.
+- Keep upstream's Honkai Impact 3rd pre-download and playtime recorder fixes.
+  The playtime calendar retains the fork's local-time aggregation and year picker.
+- Keep the upstream Challenge Peak visibility fix alongside the fork's wrapping
+  and adaptive card heights.
+- When migrating a database from before schema 22, copy the existing HoYoLAB
+  schedule keys into the new settings table. This does not recover settings that
+  were already dropped by an earlier migration.
+- Run the regression project and the full Windows CI matrix. Validate live
+  HoYoLAB sign-in separately with a user account.
+
 ## Starward 0.19.0 port
 
-The current baseline is [Starward 0.19.0](https://github.com/Scighost/Starward/releases/tag/0.19.0)
-(`747ed10b8906e76d650639101c988a2edca9ba42`). Use the diff between this tag and the
-current testing branch when preparing the next port. The 0.18.2 snapshot below
-and the associated manifest describe the previous port.
+The previous baseline was [Starward 0.19.0](https://github.com/Scighost/Starward/releases/tag/0.19.0)
+(`747ed10b8906e76d650639101c988a2edca9ba42`). The 0.18.2 snapshot below
+and the historical manifest entries describe the earlier port.
 
 - Nexus Anima uses a built-in standalone HoYoPlay channel. Select that channel
   and locate the directory with `NexusAnima.exe` after the 0.19.0 channel migration.

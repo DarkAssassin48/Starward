@@ -1,4 +1,11 @@
-# Starward 0.18.2 fix mod
+# Starward 0.19.1 fix mod
+
+- Based on [upstream Starward 0.19.1](https://github.com/Scighost/Starward/releases/tag/0.19.1), including its fixes for international sign-in, Honkai Impact 3rd pre-download, and playtime tracking.
+- Uses only the upstream HoYoverse Pass implementation. The experimental hotfix remains in Git history and is not built.
+- Retains Nexus Anima, HoYoLAB auto-refresh, the yearly playtime calendar, localized durations, HSR and gacha layout fixes, and Genshin spending-history URL compatibility.
+- Preserves existing HoYoLAB auto-refresh settings and timestamps when migrating an older database. It does not recover settings lost in an earlier migration.
+
+## Archive: Starward 0.18.2 fix mod
 
 Based on the official **Starward 0.18.2** release.
 

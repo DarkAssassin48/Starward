@@ -1158,7 +1158,7 @@ internal static class DatabaseService
         INSERT OR REPLACE INTO Setting_dg_tmp (Key, GameId, Value)
         SELECT Key, '', Value
         FROM Setting
-        WHERE Key GLOB '[A-Z]*';
+        WHERE Key GLOB '[A-Z]*' OR Key GLOB 'game_record_auto_refresh_*';
 
         DROP TABLE GameBizSplit_tmp;
         DROP TABLE KeyRename_tmp;

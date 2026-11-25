@@ -1,6 +1,7 @@
-# Starward 0.18.2 fix mod
+# Starward 0.19.1 fix mod
 
 - Russian release notes: `RELEASE_NOTES_RU.md`
 - English release notes: `RELEASE_NOTES_EN.md`
 
-Verified against official Starward 0.18.2 (`ac7c9c495ede338df7d8eb03f098dc901caa74a9`).
+Based on [Starward 0.19.1](https://github.com/Scighost/Starward/releases/tag/0.19.1)
+(`8282cdf9ca971c86eb75f0145a8338dbb5ebe788`).

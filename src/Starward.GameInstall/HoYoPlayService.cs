@@ -462,14 +462,14 @@ public class HoYoPlayService
         IHoYoPlayClient client = GetClient(gameId);
         if (client.LauncherConfig.IsBeta)
         {
-            return await _cache.GetOrSetAsync($"{nameof(GameSophonChunkBuild)}_{gameBranchPackage.PackageId}_{version}_{client.PassportUserInfo?.Aid}", async token =>
+            return await _cache.GetOrSetAsync($"{nameof(GameSophonChunkBuild)}_{gameBranchPackage.PackageId}_{gameBranchPackage.Branch}_{version}_{client.PassportUserInfo?.Aid}", async token =>
             {
                 return await client.GetGameSophonChunkBuildAsync(gameBranchPackage, version, token).ConfigureAwait(false);
             }, _skipL2CacheOptions, tags: _tags, token: cancellation).ConfigureAwait(false);
         }
         else
         {
-            return await _cache.GetOrSetAsync($"{nameof(GameSophonChunkBuild)}_{gameBranchPackage.PackageId}_{version}", async token =>
+            return await _cache.GetOrSetAsync($"{nameof(GameSophonChunkBuild)}_{gameBranchPackage.PackageId}_{gameBranchPackage.Branch}_{version}", async token =>
             {
                 return await client.GetGameSophonChunkBuildAsync(gameBranchPackage, version, token).ConfigureAwait(false);
             }, tags: _tags, token: cancellation).ConfigureAwait(false);
@@ -483,7 +483,7 @@ public class HoYoPlayService
     public async Task<GameSophonPatchBuild?> GetGameSophonPatchBuildAsync(GameId gameId, GameBranchPackage gameBranchPackage, CancellationToken cancellation = default)
     {
         IHoYoPlayClient client = GetClient(gameId);
-        return await _cache.GetOrSetAsync($"{nameof(GameSophonPatchBuild)}_{gameBranchPackage.PackageId}", async token =>
+        return await _cache.GetOrSetAsync($"{nameof(GameSophonPatchBuild)}_{gameBranchPackage.PackageId}_{gameBranchPackage.Branch}", async token =>
         {
             return await client.GetGameSophonPatchBuildAsync(gameBranchPackage, token).ConfigureAwait(false);
         }, tags: _tags, token: cancellation).ConfigureAwait(false);
