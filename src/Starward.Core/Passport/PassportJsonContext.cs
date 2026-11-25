@@ -19,8 +19,6 @@ namespace Starward.Core.Passport;
 [JsonSerializable(typeof(GetCrossTokenUrlBySTokenRequest))]
 [JsonSerializable(typeof(ExchangeTokenRequest))]
 [JsonSerializable(typeof(miHoYoApiWrapper<ExchangeTokenResponse>))]
-[JsonSerializable(typeof(GlobalWebTokenRequest))]
-[JsonSerializable(typeof(miHoYoApiWrapper<GlobalWebTokenResponse>))]
 internal partial class PassportJsonContext : JsonSerializerContext
 {
 

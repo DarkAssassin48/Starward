@@ -120,9 +120,6 @@ public static class DynamicSecret
     }
 
 
-    public static string CreateGlobalWebTokenDS() => CreateDS1(PassportSalt_OS);
-
-
     public static string CreatePassportDS<T>(ServerRegion region, T body)
     {
         string salt = region switch

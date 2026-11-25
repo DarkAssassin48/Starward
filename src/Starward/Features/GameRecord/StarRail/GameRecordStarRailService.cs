@@ -461,14 +461,15 @@ internal class GameRecordStarRailService : GameRecordServiceBase
                 role.Cookie = currentCookie;
                 return true;
             }
-            var passport = PassportService.GetPassportUserInfo(ServerRegion.HoYoverse, role.Aid);
+            var passport = PassportService.GetPassportUserInfo(role.Aid);
             if (passport is null || !passport.IsGlobalServer || passport.ErrorType is not PassportErrorType.Success
                 || string.IsNullOrWhiteSpace(passport.Stoken))
             {
                 _logger.LogInformation("HoYoLAB calendar session renewal requires a valid Passport login.");
                 return false;
             }
-            string cookie = await _passportService.GetWebCookiesAsync(passport, deviceInfo: null, cancellation: cancellationToken);
+            var device = await GetDeviceInfoAsync(passport.Region, cancellationToken);
+            string cookie = await _passportService.GetWebCookiesAsync(passport, device, cancellationToken);
             int updated = connection.Execute("""
                 UPDATE GameRecordRole SET Cookie = @cookie
                 WHERE Aid = @Aid AND GameBiz LIKE '%\_global' ESCAPE '\' AND Cookie = @currentCookie;

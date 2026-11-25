@@ -2,18 +2,6 @@
 
 namespace Starward.Core.Passport;
 
-internal sealed class GlobalWebTokenRequest
-{
-    [JsonPropertyName("dst_token_types")]
-    public TokenType[] DestinationTokenTypes { get; init; } = [TokenType.LToken, TokenType.CookieToken];
-}
-
-internal sealed class GlobalWebTokenResponse
-{
-    [JsonPropertyName("tokens")]
-    public List<PassportToken>? Tokens { get; init; }
-}
-
 public class ExchangeTokenRequest
 {
     [JsonPropertyName("dst_token_type")]

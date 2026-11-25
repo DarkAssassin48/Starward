@@ -375,13 +375,12 @@ public sealed partial class GameRecordPage : PageBase
             {
                 return;
             }
-            var region = CurrentGameBiz.IsGlobalServer() ? ServerRegion.HoYoverse : ServerRegion.miHoYo;
             var aids = GameRoleList.Select(x => x.Aid).Distinct().ToList();
             await Parallel.ForEachAsync(aids, UnloadCancellationToken, async (aid, token) =>
             {
                 try
                 {
-                    var passport = PassportService.GetPassportUserInfo(region, aid);
+                    var passport = PassportService.GetPassportUserInfo(aid);
                     if (passport is null || passport.ErrorType is not PassportErrorType.Success)
                     {
                         return;
