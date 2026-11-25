@@ -2329,6 +2329,12 @@ namespace Starward.Language {
                 return ResourceManager.GetString("GachaLogPage_ImportFrom0", resourceCulture);
             }
         }
+
+        public static string GachaLogPage_InvalidLegacyImport {
+            get {
+                return ResourceManager.GetString("GachaLogPage_InvalidLegacyImport", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   查找类似 Input URL 的本地化字符串。

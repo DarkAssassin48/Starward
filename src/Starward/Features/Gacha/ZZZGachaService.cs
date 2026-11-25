@@ -385,29 +385,10 @@ internal class ZZZGachaService : GachaLogService
 
     public override long ImportGachaLog(string file)
     {
-        var str = File.ReadAllText(file);
-        var obj = JsonSerializer.Deserialize<UIGF3File<ZZZGachaItem>>(str);
-        if (obj != null)
-        {
-            string lang = obj.Info.Lang ?? "";
-            long uid = obj.Info.Uid;
-            foreach (var item in obj.List)
-            {
-                if (item.Lang is null)
-                {
-                    item.Lang = lang;
-                }
-                if (item.Uid == 0)
-                {
-                    item.Uid = uid;
-                }
-            }
-            var count = InsertGachaLogItems(obj.List.ToList<GachaLogItem>());
-            // 成功导入调频记录 {count} 条
-            InAppToast.MainWindow?.Success($"Uid {obj.Info.Uid}", string.Format(Lang.ZZZGachaService_ImportSignalSearchRecordsSuccessfully, count), 5000);
-            return obj.Info.Uid;
-        }
-        return 0;
+        var archive = UIGF3File<ZZZGachaItem>.ParseForImport(File.ReadAllText(file));
+        var count = InsertGachaLogItems(archive.List.ToList<GachaLogItem>());
+        InAppToast.MainWindow?.Success($"Uid {archive.Info.Uid}", string.Format(Lang.ZZZGachaService_ImportSignalSearchRecordsSuccessfully, count), 5000);
+        return archive.Info.Uid;
     }
 
 

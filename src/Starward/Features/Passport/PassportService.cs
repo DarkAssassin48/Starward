@@ -214,10 +214,10 @@ internal class PassportService
 
 
 
-    public static PassportUserInfoModel? GetPassportUserInfo(long aid)
+    public static PassportUserInfoModel? GetPassportUserInfo(ServerRegion region, long aid)
     {
         using var dapper = DatabaseService.CreateConnection();
-        var info = dapper.QueryFirstOrDefault<EncryptedPassportUserInfo>("SELECT * FROM PassportUserInfo WHERE Aid = @aid LIMIT 1;", new { aid });
+        var info = dapper.QueryFirstOrDefault<EncryptedPassportUserInfo>("SELECT * FROM PassportUserInfo WHERE Region = @region AND Aid = @aid;", new { region, aid });
         if (info is null)
         {
             return null;

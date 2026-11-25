@@ -17,5 +17,6 @@
     <Compile Include="../../src/Starward/Features/PlayTime/PlayTimeDailyAggregation.cs" Link="Production/PlayTimeDailyAggregation.cs" />
     <Compile Include="../../src/Starward/Features/GameRecord/GameRecordAutoRefresh*.cs" Link="Production/%(Filename)%(Extension)" />
     <Compile Include="../../src/Starward/Features/GameRecord/IGameRecordRefreshSource.cs" Link="Production/IGameRecordRefreshSource.cs" />
+    <Compile Include="../../src/Starward/Features/Gacha/UIGF/UIGF3File.cs" Link="Production/UIGF3File.cs" />
   </ItemGroup>
 </Project>

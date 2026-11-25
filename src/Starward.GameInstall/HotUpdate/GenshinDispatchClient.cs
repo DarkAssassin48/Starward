@@ -1,5 +1,6 @@
 ﻿using Starward.Core;
 using System.Globalization;
+using System.Net;
 using System.Security.Cryptography;
 
 namespace Starward.GameInstall.HotUpdate;
@@ -28,10 +29,19 @@ public class GenshinDispatchClient
     {
         language = LanguageUtil.FilterLanguage(language);
         string url = $"https://starward-static.scighost.com/game-assets/genshin/cutscene/cutscene.{language}.json";
-        var result = await _httpClient.GetFromJsonAsync(url, GenshinHotUpdateJsonContext.Default.CutsceneCollection, cancellation);
-        if (result is null)
+        // The public manifest can fail during HTTP/2 transport while HTTP/1.1 works.
+        // Limit the protocol override to this manifest, not the shared client.
+        using var request = new HttpRequestMessage(HttpMethod.Get, url)
         {
-            throw new NullReferenceException("Genshin cutscene has not json content.");
+            Version = HttpVersion.Version11,
+            VersionPolicy = HttpVersionPolicy.RequestVersionExact,
+        };
+        using var response = await _httpClient.SendAsync(request, cancellation);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync(GenshinHotUpdateJsonContext.Default.CutsceneCollection, cancellation);
+        if (result?.Dispatch is not { Count: > 0 })
+        {
+            throw new InvalidDataException("The Genshin cutscene manifest has no dispatch information.");
         }
         return result;
     }

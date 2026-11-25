@@ -77,8 +77,12 @@ public class BackgroundService
     /// </summary>
     /// <param name="gameId"></param>
     /// <returns></returns>
-    public static string? GetLastAppBackgroundFile(GameId gameId)
+    public static string? GetLastAppBackgroundFile(GameId? gameId)
     {
+        if (gameId is null)
+        {
+            return null;
+        }
         string? name = AppConfig.GetBg(gameId);
         if (string.IsNullOrWhiteSpace(name))
         {

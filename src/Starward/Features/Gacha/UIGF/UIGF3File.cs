@@ -1,5 +1,7 @@
 using Starward.Core.Gacha;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Starward.Features.Gacha.UIGF;
@@ -13,6 +15,26 @@ public class UIGF3File<T> where T : GachaLogItem
 
     [JsonPropertyName("list")]
     public List<T> List { get; set; }
+
+
+    internal static UIGF3File<T> ParseForImport(string json)
+    {
+        var archive = JsonSerializer.Deserialize<UIGF3File<T>>(json);
+        if (archive?.Info is not { Uid: > 0 } info || archive.List is not { Count: > 0 } list ||
+            list.Exists(static item => item is null))
+        {
+            throw new InvalidDataException("A legacy gacha archive must have an account UID and a non-empty list of records.");
+        }
+        foreach (var item in list)
+        {
+            item.Lang ??= info.Lang ?? "";
+            if (item.Uid == 0)
+            {
+                item.Uid = info.Uid;
+            }
+        }
+        return archive;
+    }
 
 }
 

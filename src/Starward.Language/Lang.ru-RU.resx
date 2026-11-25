@@ -346,6 +346,9 @@
   <data name="GachaLogPage_ImportFrom0" xml:space="preserve">
     <value>Импорт из {0}</value>
   </data>
+  <data name="GachaLogPage_InvalidLegacyImport" xml:space="preserve">
+    <value>Файл не соответствует формату {0} или не содержит записей. Для файлов UIGF 4.x используйте «Импорт / Экспорт».</value>
+  </data>
   <data name="GachaLogPage_UIGF30DoesNotSupportMiliastraWonderlandOde" xml:space="preserve">
     <value>UIGF v3.0 не поддерживает Оды Астрального Предела</value>
   </data>

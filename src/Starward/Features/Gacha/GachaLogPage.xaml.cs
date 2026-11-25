@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Text.Json;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -1088,6 +1089,11 @@ public sealed partial class GachaLogPage : PageBase
                     SelectUid = uid;
                 }
             }
+        }
+        catch (Exception ex) when (ex is JsonException or InvalidDataException)
+        {
+            _logger.LogWarning(ex, "Invalid or incompatible legacy gacha archive");
+            InAppToast.MainWindow?.Warning(null, string.Format(Lang.GachaLogPage_InvalidLegacyImport, LegacyFormatName), 8000);
         }
         catch (Exception ex)
         {
