@@ -29,6 +29,34 @@ public class GenshinDispatchClient
     {
         language = LanguageUtil.FilterLanguage(language);
         string url = $"https://starward-static.scighost.com/game-assets/genshin/cutscene/cutscene.{language}.json";
+        for (int attempt = 0; ; attempt++)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellation);
+            timeout.CancelAfter(TimeSpan.FromSeconds(10));
+            try
+            {
+                return await DownloadCutsceneCollectionAsync(url, timeout.Token);
+            }
+            catch (OperationCanceledException ex) when (!cancellation.IsCancellationRequested && timeout.IsCancellationRequested)
+            {
+                if (attempt != 0)
+                {
+                    throw new TimeoutException("The Genshin cutscene manifest did not finish downloading in time.", ex);
+                }
+            }
+            catch (HttpRequestException ex) when (attempt == 0 && !cancellation.IsCancellationRequested &&
+                (ex.StatusCode is null or HttpStatusCode.RequestTimeout || (int)ex.StatusCode >= 500))
+            {
+                // The manifest is a public GET; retry a transient disconnect once.
+            }
+            await Task.Delay(TimeSpan.FromMilliseconds(300), cancellation);
+        }
+    }
+
+
+    private async Task<CutsceneCollection> DownloadCutsceneCollectionAsync(string url, CancellationToken cancellation)
+    {
         // The public manifest can fail during HTTP/2 transport while HTTP/1.1 works.
         // Limit the protocol override to this manifest, not the shared client.
         using var request = new HttpRequestMessage(HttpMethod.Get, url)
