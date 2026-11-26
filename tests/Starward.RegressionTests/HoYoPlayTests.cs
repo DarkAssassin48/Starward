@@ -1,4 +1,5 @@
 using Starward.Core.HoYoPlay;
+using Starward.Core;
 using System.Net;
 using System.Text;
 
@@ -24,17 +25,21 @@ internal static class HoYoPlayTests
     {
         using var handler = new NexusCatalogHandler();
         using var http = new HttpClient(handler);
-        var client = new HoYoPlayClient(http);
         var gameId = NexusRelease();
         string launcherId = LauncherId.FromGameId(gameId)!;
+        var client = new HoYoPlayClient(http)
+        {
+            LauncherConfig = new LauncherConfig(launcherId, 1, 1, ServerRegion.HoYoverse),
+            Language = "ru-RU",
+        };
 
-        var games = await client.GetGameInfoAsync(launcherId, "ru-RU");
+        var games = await client.GetGameInfoAsync();
         Check.Equal(gameId.Id, games.Single().Id);
-        var config = await client.GetGameConfigAsync(launcherId, "ru-RU", gameId);
-        Check.Equal(DownloadMode.DOWNLOAD_MODE_CHUNK, config!.DefaultDownloadMode);
-        var branch = await client.GetGameBranchAsync(launcherId, "ru-RU", gameId);
-        Check.Equal("0.75.0", branch!.Main.Tag);
-        Check.Equal<GamePackage?>(null, await client.GetGamePackageAsync(launcherId, "ru-RU", gameId));
+        var config = (await client.GetGameConfigAsync([gameId])).Single();
+        Check.Equal(DownloadMode.DOWNLOAD_MODE_CHUNK, config.DefaultDownloadMode);
+        var branch = (await client.GetGameBranchAsync([gameId])).Single();
+        Check.Equal("0.75.0", branch.Main.Tag);
+        Check.Equal(0, (await client.GetGamePackageAsync([gameId])).Count);
     }
 
     private sealed class NexusCatalogHandler : HttpMessageHandler

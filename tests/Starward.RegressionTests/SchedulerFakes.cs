@@ -1,8 +1,5 @@
 using Starward.Core;
 using Starward.Core.GameRecord;
-using Starward.Core.GameRecord.Genshin.TravelersDiary;
-using Starward.Core.GameRecord.StarRail.TrailblazeCalendar;
-using Starward.Core.GameRecord.ZZZ.InterKnotReport;
 using Starward.Features.GameRecord;
 using System.Collections.Concurrent;
 
@@ -34,11 +31,10 @@ namespace Starward
 
 namespace Starward.Features.GameRecord
 {
-    internal sealed class GameRecordService
+    internal sealed class GameRecordService : IGameRecordRefreshSource
     {
         private readonly ConcurrentDictionary<long, GameRecordRole> _roles = new();
         public event EventHandler? GameRolesChanged;
-        public string Language { get; set; } = "en-US";
         public Action? RolesRead { get; set; }
         public Action<string>? OperationStarted { get; set; }
         public string? FailOperation { get; set; }
@@ -65,29 +61,13 @@ namespace Starward.Features.GameRecord
                 : Task.CompletedTask;
         }
 
-        public Task UpdateHyperionDeviceFpAsync(CancellationToken cancellationToken) => Run("Device", cancellationToken);
-        public Task RefreshSpiralAbyssInfoAsync(GameRecordRole role, int schedule, CancellationToken token) => Run("Abyss" + schedule, token);
-        public Task RefreshImaginariumTheaterInfoAsync(GameRecordRole role, CancellationToken token) => Run("Theater", token);
-        public Task RefreshStygianOnslaughtInfosAsync(GameRecordRole role, CancellationToken token) => Run("Onslaught", token);
-        public async Task<TravelersDiarySummary> GetTravelersDiarySummaryAsync(GameRecordRole role, int month = 0)
+        public IEnumerable<(string Name, Func<Task> Run)> GetOperations(GameBiz game, GameRecordRole role, CancellationToken token)
         {
-            await Run("Diary");
-            return new TravelersDiarySummary { OptionalMonth = [], DataMonth = 0 };
+            foreach (string name in new[] { "Abyss1", "Abyss2", "Theater", "Onslaught", "Diary" })
+            {
+                yield return (name, () => Run(name, token));
+            }
         }
-        public Task GetTravelersDiaryDetailAsync(GameRecordRole role, int month, int type) => Run("DiaryDetail");
-        public Task<TrailblazeCalendarSummary> GetTrailblazeCalendarSummaryAsync(GameRecordRole role, string month = "") =>
-            Task.FromResult(new TrailblazeCalendarSummary { OptionalMonth = [], DataMonth = "" });
-        public Task GetTrailblazeCalendarDetailAsync(GameRecordRole role, string month, int type) => Run("CalendarDetail");
-        public Task GetSimulatedUniverseInfoAsync(GameRecordRole role, bool detail) => Run("Universe");
-        public Task RefreshForgottenHallInfoAsync(GameRecordRole role, int schedule, CancellationToken token) => Run("Hall", token);
-        public Task RefreshPureFictionInfoAsync(GameRecordRole role, int schedule, CancellationToken token) => Run("Fiction", token);
-        public Task RefreshApocalypticShadowInfoAsync(GameRecordRole role, int schedule, CancellationToken token) => Run("Shadow", token);
-        public Task RefreshStarRailChallengePeakDataAsync(GameRecordRole role, CancellationToken token) => Run("Peak", token);
-        public Task<InterKnotReportSummary> GetInterKnotReportSummaryAsync(GameRecordRole role, string month = "") =>
-            Task.FromResult(new InterKnotReportSummary { OptionalMonth = [], DataMonth = "" });
-        public Task GetInterKnotReportDetailAsync(GameRecordRole role, string month, string type) => Run("ReportDetail");
-        public Task RefreshShiyuDefenseInfoAsync(GameRecordRole role, int schedule, CancellationToken token) => Run("Shiyu", token);
-        public Task RefreshDeadlyAssaultInfoAsync(GameRecordRole role, int schedule, CancellationToken token) => Run("Assault", token);
     }
 }
 

@@ -1,22 +1,20 @@
-using Microsoft.Extensions.Configuration;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
 using Microsoft.Windows.AppLifecycle;
-using Starward.Core;
-using Starward.Core.HoYoPlay;
-using Starward.Features.GameLauncher;
+using Starward.Features.Database;
 using Starward.Features.GamepadControl;
 using Starward.Features.GameRecord;
-using Starward.Features.UrlProtocol;
+using Starward.Features.Passport;
 using Starward.Features.ViewHost;
-using Starward.RPC;
 using System;
 using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Timers;
+using Vanara.PInvoke;
+using Windows.ApplicationModel.Activation;
 
 
 namespace Starward;
@@ -38,6 +36,7 @@ public partial class App : Application
         _uiDispatcherQueue = DispatcherQueue.GetForCurrentThread();
         UnhandledException += App_UnhandledException;
         _gcTimer.Elapsed += (_, _) => GC.Collect();
+        _gcTimer.Start();
     }
 
 
@@ -70,28 +69,29 @@ public partial class App : Application
     {
         string[] args = Environment.GetCommandLineArgs().Skip(1).ToArray();
 
-        if (args.Length > 0 && args[0].ToLower().StartsWith("starward://test/"))
+
+        if (AppConfig.UserDataFolder is null)
         {
-            new TestUrlProtocolWindow().Activate();
-            return;
+            if (await new WelcomeWindow().WaitAsync())
+            {
+                AppConfig.LoadConfiguration();
+            }
+            else
+            {
+                Environment.Exit(0);
+            }
         }
 
-        await AppConfig.CheckEnviromentAsync();
-
-        if (args.Length > 0 && await HandleStartupAsync(args))
+        instance = AppInstance.FindOrRegisterForKey("Starward.Main");
+        if (!instance.IsCurrent)
         {
-            return;
-        }
-
-        instance = AppInstance.GetCurrent();
-        instance.Activated += AppInstance_Activated;
-
-        var main = AppInstance.FindOrRegisterForKey("main");
-        if (!main.IsCurrent)
-        {
-            await main.RedirectActivationToAsync(instance.GetActivatedEventArgs());
+            await instance.RedirectActivationToAsync(instance.GetActivatedEventArgs());
             Environment.Exit(0);
         }
+        instance = AppInstance.GetCurrent();
+        instance.Activated += AppInstance_Activated;
+        AppConfig.GetService<GameRecordAutoRefreshService>().Start();
+
         if (Environment.GetCommandLineArgs().Contains("--hide"))
         {
             m_SystemTrayWindow = new SystemTrayWindow();
@@ -101,52 +101,8 @@ public partial class App : Application
             m_MainWindow = new MainWindow();
             m_MainWindow.Activate();
         }
-
-        AppConfig.GetService<GameRecordAutoRefreshService>().Start();
     }
 
-
-    private async Task<bool> HandleStartupAsync(string[] args)
-    {
-        IConfiguration config = new ConfigurationBuilder().AddCommandLine(args).Build();
-        if (args[0].ToLower() is "rpc")
-        {
-            RpcRunner.Run(args);
-            Environment.Exit(0);
-        }
-        if (args[0].ToLower() is "playtime")
-        {
-            int pid = config.GetValue<int>("pid");
-            GameBiz biz = (GameBiz)config.GetValue<string>("biz");
-            if (pid > 0)
-            {
-                var playtime = AppConfig.GetService<Features.PlayTime.PlayTimeRecordService>();
-                await playtime.LogPlayTimeAsync(biz, pid);
-            }
-            Environment.Exit(0);
-        }
-
-        if (args[0].ToLower() is "startgame")
-        {
-            GameBiz biz = (GameBiz)config.GetValue<string>("biz");
-            GameId? gameId = GameId.FromGameBiz(biz);
-            if (gameId is not null)
-            {
-                await AppConfig.GetService<GameLauncherService>().StartGameAsync(gameId);
-            }
-            Environment.Exit(0);
-        }
-
-        if (args[0].ToLower().StartsWith("starward://"))
-        {
-            if (await UrlProtocolService.HandleUrlProtocolAsync(args[0]))
-            {
-                Environment.Exit(0);
-            }
-        }
-
-        return false;
-    }
 
 
 
@@ -175,7 +131,23 @@ public partial class App : Application
 
     private void AppInstance_Activated(object? sender, AppActivationArguments e)
     {
-        _uiDispatcherQueue.TryEnqueue(EnsureMainWindow);
+        try
+        {
+            _uiDispatcherQueue.TryEnqueue(EnsureMainWindow);
+            if (e.Data is ILaunchActivatedEventArgs { Arguments: string arguments })
+            {
+                string?[] args = Shell32.CommandLineToArgvW(arguments);
+                if (args.Length > 1)
+                {
+                    string? url = args[1];
+                    if (url?.StartsWith("starward-hyp-login://") ?? false)
+                    {
+                        WeakReferenceMessenger.Default.Send(new HypThirdPartyLoginMessage(url));
+                    }
+                }
+            }
+        }
+        catch { }
     }
 
 
@@ -194,12 +166,24 @@ public partial class App : Application
 
 
 
-    public new void Exit()
+    public async void Exit(bool quickExit = false)
     {
         AppConfig.GetService<GameRecordAutoRefreshService>().Stop();
-        GamepadController.RestoreGamepadGuideButtonForGameBar();
         m_MainWindow?.Close();
         m_SystemTrayWindow?.Close();
+        GamepadController.RestoreGamepadGuideButtonForGameBar();
+        if (!quickExit)
+        {
+            try
+            {
+                var timer = new Timer(30_000);
+                timer.Elapsed += (_, _) => Environment.Exit(0);
+                timer.Start();
+                AppInstance.GetCurrent().UnregisterKey();
+                DatabaseService.AutoBackupToAppDataLocal();
+            }
+            catch { }
+        }
         Application.Current.Exit();
     }
 

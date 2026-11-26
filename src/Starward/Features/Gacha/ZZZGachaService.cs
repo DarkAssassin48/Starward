@@ -1,4 +1,4 @@
-using Dapper;
+﻿using Dapper;
 using Microsoft.Extensions.Logging;
 using MiniExcelLibs;
 using Starward.Core;
@@ -10,7 +10,7 @@ using Starward.Core.GameRecord;
 using Starward.Core.GameRecord.ZZZ.GachaRecord;
 using Starward.Features.Database;
 using Starward.Features.Gacha.UIGF;
-using Starward.Features.GameRecord;
+using Starward.Features.GameRecord.ZZZ;
 using Starward.Helpers;
 using System;
 using System.Collections.Generic;
@@ -32,11 +32,11 @@ internal class ZZZGachaService : GachaLogService
     protected override string GachaTableName { get; } = "ZZZGachaItem";
 
 
-    private readonly GameRecordService _gameRecordService;
+    private readonly GameRecordZZZService _gameRecordService;
 
 
 
-    public ZZZGachaService(ILogger<ZZZGachaService> logger, ZZZGachaClient client, GameRecordService gameRecordService) : base(logger, client)
+    public ZZZGachaService(ILogger<ZZZGachaService> logger, ZZZGachaClient client, GameRecordZZZService gameRecordService) : base(logger, client)
     {
         _gameRecordService = gameRecordService;
     }
@@ -385,29 +385,10 @@ internal class ZZZGachaService : GachaLogService
 
     public override long ImportGachaLog(string file)
     {
-        var str = File.ReadAllText(file);
-        var obj = JsonSerializer.Deserialize<UIGF3File<ZZZGachaItem>>(str);
-        if (obj != null)
-        {
-            string lang = obj.Info.Lang ?? "";
-            long uid = obj.Info.Uid;
-            foreach (var item in obj.List)
-            {
-                if (item.Lang is null)
-                {
-                    item.Lang = lang;
-                }
-                if (item.Uid == 0)
-                {
-                    item.Uid = uid;
-                }
-            }
-            var count = InsertGachaLogItems(obj.List.ToList<GachaLogItem>());
-            // 成功导入调频记录 {count} 条
-            InAppToast.MainWindow?.Success($"Uid {obj.Info.Uid}", string.Format(Lang.ZZZGachaService_ImportSignalSearchRecordsSuccessfully, count), 5000);
-            return obj.Info.Uid;
-        }
-        return 0;
+        var archive = UIGF3File<ZZZGachaItem>.ParseForImport(File.ReadAllText(file));
+        var count = InsertGachaLogItems(archive.List.ToList<GachaLogItem>());
+        InAppToast.MainWindow?.Success($"Uid {archive.Info.Uid}", string.Format(Lang.ZZZGachaService_ImportSignalSearchRecordsSuccessfully, count), 5000);
+        return archive.Info.Uid;
     }
 
 

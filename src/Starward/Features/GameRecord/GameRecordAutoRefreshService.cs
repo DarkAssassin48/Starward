@@ -31,7 +31,7 @@ internal sealed class GameRecordAutoRefreshService : IDisposable
 
     private readonly ILogger<GameRecordAutoRefreshService> _logger;
 
-    private readonly GameRecordService _gameRecordService;
+    private readonly IGameRecordRefreshSource _gameRecordService;
 
     private readonly SemaphoreSlim _refreshSemaphore = new(1, 1);
 
@@ -44,7 +44,7 @@ internal sealed class GameRecordAutoRefreshService : IDisposable
 
     public GameRecordAutoRefreshService(
         ILogger<GameRecordAutoRefreshService> logger,
-        GameRecordService gameRecordService)
+        IGameRecordRefreshSource gameRecordService)
     {
         _logger = logger;
         _gameRecordService = gameRecordService;
@@ -471,27 +471,6 @@ internal sealed class GameRecordAutoRefreshService : IDisposable
         int successfulOperations = 0;
         int failedOperations = 0;
 
-        _gameRecordService.Language = string.IsNullOrWhiteSpace(AppConfig.Language)
-            ? CultureInfo.CurrentUICulture.Name
-            : AppConfig.Language;
-
-        // Chinese and Bilibili endpoints require the device fingerprint.
-        GameBiz roleGameBiz = new(role.GameBiz);
-        if (!roleGameBiz.IsGlobalServer())
-        {
-            try
-            {
-                await _gameRecordService.UpdateHyperionDeviceFpAsync(cancellationToken: cancellationToken);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(
-                    ex,
-                    "Could not update device fingerprint before refreshing {gameBiz} {uid}.",
-                    role.GameBiz,
-                    role.Uid);
-            }
-        }
 
         async Task RunStepAsync(string operation, Func<Task> action)
         {
@@ -518,82 +497,9 @@ internal sealed class GameRecordAutoRefreshService : IDisposable
             }
         }
 
-        switch (game.Game)
+        foreach (var (name, run) in _gameRecordService.GetOperations(game, role, cancellationToken))
         {
-            case GameBiz.hk4e:
-                await RunStepAsync("SpiralAbyssCurrent", () => _gameRecordService.RefreshSpiralAbyssInfoAsync(role, 1, cancellationToken));
-                await RunStepAsync("SpiralAbyssPrevious", () => _gameRecordService.RefreshSpiralAbyssInfoAsync(role, 2, cancellationToken));
-                await RunStepAsync("ImaginariumTheater", () => _gameRecordService.RefreshImaginariumTheaterInfoAsync(role, cancellationToken));
-                await RunStepAsync("StygianOnslaught", () => _gameRecordService.RefreshStygianOnslaughtInfosAsync(role, cancellationToken));
-                await RunStepAsync("TravelersDiary", async () =>
-                {
-                    var currentSummary = await _gameRecordService.GetTravelersDiarySummaryAsync(role);
-                    var months = new HashSet<int>(currentSummary.OptionalMonth ?? []);
-                    if (currentSummary.DataMonth > 0)
-                    {
-                        months.Add(currentSummary.DataMonth);
-                    }
-
-                    foreach (int month in months.Where(x => x > 0).OrderBy(x => x))
-                    {
-                        await _gameRecordService.GetTravelersDiarySummaryAsync(role, month);
-                        await _gameRecordService.GetTravelersDiaryDetailAsync(role, month, 1);
-                        await _gameRecordService.GetTravelersDiaryDetailAsync(role, month, 2);
-                    }
-                });
-                break;
-
-            case GameBiz.hkrpg:
-                await RunStepAsync("TrailblazeCalendar", async () =>
-                {
-                    var currentSummary = await _gameRecordService.GetTrailblazeCalendarSummaryAsync(role);
-                    var months = new HashSet<string>(currentSummary.OptionalMonth ?? [], StringComparer.Ordinal);
-                    if (!string.IsNullOrWhiteSpace(currentSummary.DataMonth))
-                    {
-                        months.Add(currentSummary.DataMonth);
-                    }
-
-                    foreach (string month in months.Where(x => !string.IsNullOrWhiteSpace(x)).OrderBy(x => x))
-                    {
-                        await _gameRecordService.GetTrailblazeCalendarSummaryAsync(role, month);
-                        await _gameRecordService.GetTrailblazeCalendarDetailAsync(role, month, 1);
-                        await _gameRecordService.GetTrailblazeCalendarDetailAsync(role, month, 2);
-                    }
-                });
-                await RunStepAsync("SimulatedUniverse", () => _gameRecordService.GetSimulatedUniverseInfoAsync(role, detail: true));
-                await RunStepAsync("ForgottenHallCurrent", () => _gameRecordService.RefreshForgottenHallInfoAsync(role, 1, cancellationToken));
-                await RunStepAsync("ForgottenHallPrevious", () => _gameRecordService.RefreshForgottenHallInfoAsync(role, 2, cancellationToken));
-                await RunStepAsync("PureFictionCurrent", () => _gameRecordService.RefreshPureFictionInfoAsync(role, 1, cancellationToken));
-                await RunStepAsync("PureFictionPrevious", () => _gameRecordService.RefreshPureFictionInfoAsync(role, 2, cancellationToken));
-                await RunStepAsync("ApocalypticShadowCurrent", () => _gameRecordService.RefreshApocalypticShadowInfoAsync(role, 1, cancellationToken));
-                await RunStepAsync("ApocalypticShadowPrevious", () => _gameRecordService.RefreshApocalypticShadowInfoAsync(role, 2, cancellationToken));
-                await RunStepAsync("AnomalyArbitration", () => _gameRecordService.RefreshStarRailChallengePeakDataAsync(role, cancellationToken));
-                break;
-
-            case GameBiz.nap:
-                await RunStepAsync("InterKnotMonthlyReport", async () =>
-                {
-                    var currentSummary = await _gameRecordService.GetInterKnotReportSummaryAsync(role);
-                    var months = new HashSet<string>(currentSummary.OptionalMonth ?? [], StringComparer.Ordinal);
-                    if (!string.IsNullOrWhiteSpace(currentSummary.DataMonth))
-                    {
-                        months.Add(currentSummary.DataMonth);
-                    }
-
-                    foreach (string month in months.Where(x => !string.IsNullOrWhiteSpace(x)).OrderBy(x => x))
-                    {
-                        var summary = await _gameRecordService.GetInterKnotReportSummaryAsync(role, month);
-                        foreach (var item in summary.MonthData.List)
-                        {
-                            await _gameRecordService.GetInterKnotReportDetailAsync(role, month, item.DataType);
-                        }
-                    }
-                });
-                await RunStepAsync("ShiyuDefenseCurrent", () => _gameRecordService.RefreshShiyuDefenseInfoAsync(role, 1, cancellationToken));
-                await RunStepAsync("ShiyuDefensePrevious", () => _gameRecordService.RefreshShiyuDefenseInfoAsync(role, 2, cancellationToken));
-                await RunStepAsync("DeadlyAssaultCurrent", () => _gameRecordService.RefreshDeadlyAssaultInfoAsync(role, 1, cancellationToken));
-                await RunStepAsync("DeadlyAssaultPrevious", () => _gameRecordService.RefreshDeadlyAssaultInfoAsync(role, 2, cancellationToken));
-                break;
+            await RunStepAsync(name, run);
         }
 
         return (successfulOperations, failedOperations);

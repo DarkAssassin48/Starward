@@ -2,6 +2,12 @@
   "schema_version": 3,
   "mod_name": "Starward fix mod",
   "release_name": "Starward 0.18.2 fix mod",
+  "current_baseline": {
+    "version": "0.19.2",
+    "commit": "acb272dfc4cad2267f0e3486276633b11b478626",
+    "pull_request": 14,
+    "passport": "upstream"
+  },
   "upstream": {
     "repository": "Scighost/Starward",
     "baseline_version": "0.18.2",
