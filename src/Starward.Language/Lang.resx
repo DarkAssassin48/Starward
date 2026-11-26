@@ -2951,6 +2951,15 @@ You are welcome to submit the exported data to the following repository:</value>
   <data name="HypLoginWindow_UnofficialAPPPleaseBeMindfulOfYourAccountSecurity" xml:space="preserve">
     <value>Unofficial APP. Please be mindful of your account security.</value>
   </data>
+  <data name="DailyNoteButton_ToTemperThyselfAndJourneyFar" xml:space="preserve">
+    <value>To Temper Thyself and Journey Far</value>
+  </data>
+  <data name="DailyNoteButton_PeriodProgress" xml:space="preserve">
+    <value>Period Progress</value>
+  </data>
+  <data name="DailyNoteButton_WeekProgress" xml:space="preserve">
+    <value>Week Progress</value>
+  </data>
   <data name="GameResourcePage_NoArchivePackages" xml:space="preserve">
     <value>No archive packages are available for this version.</value>
   </data>

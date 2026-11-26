@@ -1,10 +1,22 @@
 # Starward fix mod — maintenance snapshot
 
+## Starward 0.19.2 port
+
+The current baseline is Starward 0.19.2 (`acb272dfc4cad2267f0e3486276633b11b478626`).
+Use the diff from this tag to `agent/starward-testing` as the current mod definition.
+
+- Use the official HoYoLAB request changes for the international HSR `-10001` fix.
+  The experimental 0.19.0 Pass exchange stays in history only.
+- Retain the upstream Genshin HDR setting fix and the Pass account display fix.
+- Preserve the upstream Genshin daily-note progress strings and the fork's
+  time, calendar, resource-manager, and legacy import strings.
+- Keep the fork's manifest timeout and retry, legacy import validation,
+  background initialization fix, and region-aware Passport lookup.
+
 ## Starward 0.19.1 port
 
-Use the diff from [Starward 0.19.1](https://github.com/Scighost/Starward/releases/tag/0.19.1)
-(`8282cdf9ca971c86eb75f0145a8338dbb5ebe788`) to `agent/starward-testing` as the current mod definition.
-Review through PR #14. The entries below describe previous ports.
+The previous baseline was Starward 0.19.1 (`8282cdf9ca971c86eb75f0145a8338dbb5ebe788`).
+The following entries describe earlier ports.
 
 - Use the unmodified upstream Passport implementation. The HSR calendar keeps
   its existing retry through the shared Passport service. The 0.19.0 token

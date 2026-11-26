@@ -2946,6 +2946,15 @@ Sie sind herzlich eingeladen, die exportierten Daten an das folgende Repository 
   <data name="HypLoginWindow_UnofficialAPPPleaseBeMindfulOfYourAccountSecurity" xml:space="preserve">
     <value>Inoffizielle App. Bitte achte auf die Sicherheit deines Kontos.</value>
   </data>
+  <data name="DailyNoteButton_ToTemperThyselfAndJourneyFar" xml:space="preserve">
+    <value>Bereit? Die Ferne ruft!</value>
+  </data>
+  <data name="DailyNoteButton_PeriodProgress" xml:space="preserve">
+    <value>Periodenfortschritt</value>
+  </data>
+  <data name="DailyNoteButton_WeekProgress" xml:space="preserve">
+    <value>Wochenfortschritt</value>
+  </data>
   <data name="Common_HourShort" xml:space="preserve">
     <value>Std.</value>
   </data>

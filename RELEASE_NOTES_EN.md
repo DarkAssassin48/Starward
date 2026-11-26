@@ -1,4 +1,9 @@
-# Starward 0.19.1 fix mod
+# Starward 0.19.2 fix mod
+
+- Includes the upstream fixes for international HSR `-10001`, Genshin HDR settings, and the Pass account display when switching games.
+- Preserves the 0.19.1 fork features and fixes for legacy wish imports, startup backgrounds, saved-session selection, and the public Genshin manifest request.
+
+## Archive: Starward 0.19.1 fix mod
 
 - Based on [upstream Starward 0.19.1](https://github.com/Scighost/Starward/releases/tag/0.19.1), including its fixes for international sign-in, Honkai Impact 3rd pre-download, and playtime tracking.
 - Uses only the upstream HoYoverse Pass implementation. The experimental hotfix remains in Git history and is not built.

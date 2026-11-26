@@ -2948,6 +2948,15 @@ Kamu dipersilakan mengirimkan data hasil ekspor ke repositori berikut:</value>
   <data name="HypLoginWindow_UnofficialAPPPleaseBeMindfulOfYourAccountSecurity" xml:space="preserve">
     <value>Aplikasi tidak resmi. Harap perhatikan keamanan akunmu.</value>
   </data>
+  <data name="DailyNoteButton_ToTemperThyselfAndJourneyFar" xml:space="preserve">
+    <value>To Temper Thyself and Journey Far</value>
+  </data>
+  <data name="DailyNoteButton_PeriodProgress" xml:space="preserve">
+    <value>Progres Periode</value>
+  </data>
+  <data name="DailyNoteButton_WeekProgress" xml:space="preserve">
+    <value>Progres Mingguan</value>
+  </data>
   <data name="Common_HourShort" xml:space="preserve"><value>j</value></data>
   <data name="Common_MinuteShort" xml:space="preserve"><value>mnt</value></data>
   <data name="Common_SecondShort" xml:space="preserve"><value>dtk</value></data>
